@@ -2,15 +2,48 @@ const About = () => {
   return (
     <div className="w-full bg-white">
       {/* Hero Section */}
-      <section className="bg-[#011F5B] text-white py-20 px-6">
+      <section className="bg-[#011F5B] text-white py-24 px-6">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            About TimmyLux Furniture & Interior
+          <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
+            TimmyLux Furniture & Interior
           </h1>
-          <p className="text-gray-200 text-lg md:text-xl max-w-3xl mx-auto">
-            Crafting comfort, elegance, and quality for homes, offices, and
-            commercial spaces since day one.
+          <p className="text-gray-200 text-xl md:text-2xl max-w-3xl mx-auto">
+            Professional bespoke furniture & interior solutions — designed and led by our CEO, Timmy Lux.
           </p>
+        </div>
+      </section>
+
+      {/* CEO Message Section */}
+      <section className="py-16 px-6 bg-gray-100">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+          {/* CEO Text */}
+          <div className="order-2 md:order-1">
+            <h2 className="text-3xl font-bold mb-4 text-[#011F5B]">A Message from the CEO</h2>
+            <p className="text-gray-700 mb-4 leading-relaxed">
+              Hi, I’m <strong>Timmy Lux</strong>, founder and CEO of TimmyLux Furniture & Interior. Over the past decade I’ve poured my passion for design and craftsmanship into building a company that creates not just furniture, but lasting experiences. As a designer, maker, and entrepreneur, I believe that every piece we create should tell a story and elevate the spaces where people live, work, and gather.
+            </p>
+            <p className="text-gray-700 mb-4 leading-relaxed">
+              This portfolio is a snapshot of the work we’re proud of—tailor-made projects that reflect our commitment to quality, innovation, and customer satisfaction. Thank you for taking the time to learn more about our journey. I invite you to explore our portfolio and see what we can build together.
+            </p>
+            <a
+              href="/custom-request"
+              className="inline-block mt-4 bg-[#D4AF37] hover:bg-[#b8942a] text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg"
+            >
+              Reach Out to Me
+            </a>
+          </div>
+
+          {/* CEO pic */}
+          <div className="order-1 md:order-2 flex justify-center">
+            <div className="w-80 h-80 relative rounded-full overflow-hidden shadow-lg bg-gray-300">
+              {/* background accent image that covers the lower part */}
+              <img
+                src="src/assets/ceo.png"
+                alt="Background accent"
+                className="w-full h-full object-cover object-bottom"
+              />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -46,6 +79,108 @@ const About = () => {
               alt="Craftsman working on wooden furniture - Daniel Reche on Pexels"
               className="w-full h-full object-cover"
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Portfolio / Resume Section */}
+      <section className="py-16 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 border-b-4 border-[#D4AF37] pb-2">
+            Portfolio & Professional Profile
+          </h2>
+
+          {/* Contact & Summary */}
+          <div className="mb-12 p-6 bg-gray-50 rounded-lg shadow-md">
+            <p className="text-lg font-semibold">YEMITAN TIMOTHY ENIOLA</p>
+            <p className="text-gray-700">📍 Ogun, Nigeria</p>
+            <p className="text-gray-700">📞 +234 8140838535</p>
+            <p className="text-gray-700">📧 timothyyemitan@gmail.com</p>
+            <p className="text-gray-700">
+              🌐 Portfolio: <a href="https://timmyluxfurniture-interiorcreation.vercel.app/" className="text-blue-600 underline">timmyluxfurniture-interiorcreation.vercel.app</a> | Instagram: <a href="https://instagram.com/timmy_lux" className="text-blue-600 underline">@timmy_lux</a>
+            </p>
+          </div>
+
+          <div className="mb-12 p-6 bg-gray-50 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-2">Professional Summary</h3>
+            <p className="text-gray-700 leading-relaxed">
+              Creative and detail-oriented Furniture Maker & Interior Designer with over 8 years of experience designing, crafting, and installing custom furniture and interior solutions for residential and commercial spaces. Skilled in space planning, woodworking, 3D visualization, material selection, and client consultation. Passionate about delivering functional, aesthetically pleasing, and durable designs tailored to client needs.
+            </p>
+          </div>
+
+          {/* Two-column competencies and experience */}
+          <div className="md:flex md:space-x-8">
+            <div className="md:w-1/2 mb-8 md:mb-0 p-6 bg-gray-50 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold mb-2">Core Competencies</h3>
+              <ul className="list-disc list-inside text-gray-700 space-y-1">
+                <li>Custom Furniture Design</li>
+                <li>Interior Space Planning</li>
+                <li>Cabinetry & Joinery</li>
+                <li>3D Rendering & Visualization</li>
+                <li>Material & Finish Selection</li>
+                <li>Project Management</li>
+                <li>Cost Estimation & Budgeting</li>
+                <li>Site Supervision</li>
+                <li>Client Relationship Management</li>
+              </ul>
+            </div>
+            <div className="md:w-1/2 p-6 bg-gray-50 rounded-lg shadow-md">
+              <h3 className="text-xl font-bold mb-2">Professional Experience</h3>
+              <div className="text-gray-700 space-y-4">
+                <div>
+                  <p className="font-semibold">Senior Furniture Maker & Interior Designer</p>
+                  <p>[Timmy-lux Furniture & Interior Creation] – OGUN, Nigeria (Present)</p>
+                  <ul className="list-disc list-inside mt-1 space-y-1">
+                    <li>Designed and fabricated custom furniture pieces including wardrobes, kitchen cabinets, TV consoles, office desks, and luxury bed frames.</li>
+                    <li>Developed interior concepts from initial sketches to final installation.</li>
+                    <li>Produced 2D drawings and 3D models using AutoCAD and SketchUp.</li>
+                    <li>Supervised workshop production and on-site installations.</li>
+                    <li>Managed project budgets and ensured timely delivery.</li>
+                    <li>Collaborated with electricians, painters, and other artisans to complete projects.</li>
+                    <li><strong>Key Achievement:</strong> Successfully delivered over 50+ residential projects with 95% client satisfaction rate.</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold">Furniture Craftsman / Interior Assistant</p>
+                  <p>[Sambright Furniture Company] – OGUN, Nigeria (01/2020 – 10/2023)</p>
+                  <ul className="list-disc list-inside mt-1 space-y-1">
+                    <li>Assisted in furniture production and finishing.</li>
+                    <li>Installed kitchen cabinets and wardrobes.</li>
+                    <li>Measured spaces and prepared cutting lists.</li>
+                    <li>Maintained workshop tools and ensured safety compliance.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Education & Projects */}
+          <div className="mb-12 p-6 bg-gray-50 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-2">Education</h3>
+            <p className="text-gray-700">Diploma / B.Sc. in Software Engineering – Lead City University (Ibadan)</p>
+            <p className="text-gray-700">Technical Certification in Carpentry & Furniture Making – Y-mayok Nig Ent Limited (Owode)</p>
+          </div>
+
+          <div className="mb-12 p-6 bg-gray-50 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-2">Project Highlights</h3>
+            <ul className="list-disc list-inside text-gray-700 space-y-1">
+              <li><strong>Luxury 3-Bedroom Apartment Interior – Abuja</strong> – Designed full interior concept including custom wardrobes, kitchen cabinetry, and TV units. Delivered project within 6 weeks.</li>
+              <li><strong>Modern Office Workspace – Lagos</strong> – Designed and produced workstations and conference tables. Improved space efficiency by 30%.</li>
+            </ul>
+          </div>
+
+          <div className="mb-12 p-6 bg-gray-50 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-2">Certifications</h3>
+            <ul className="list-disc list-inside text-gray-700 space-y-1">
+              <li>Interior Design Certification</li>
+              <li>Health &amp; Safety Training</li>
+              <li>Professional Furniture Maker Certification</li>
+            </ul>
+          </div>
+
+          <div className="p-6 bg-gray-50 rounded-lg shadow-md">
+            <h3 className="text-xl font-bold mb-2">Personal Attributes</h3>
+            <p className="text-gray-700">Strong attention to detail • Excellent communication skills • Creative problem-solving • Ability to work under pressure</p>
           </div>
         </div>
       </section>
@@ -227,9 +362,9 @@ const About = () => {
             Contact TimmyLux Furniture & Interior today and let us bring your
             vision to life with style, comfort, and quality.
           </p>
-          <button className="bg-[#D4AF37] hover:bg-[#b8942a] text-white font-semibold px-10 py-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          <a href="/custom-request" className="inline-block bg-[#D4AF37] hover:bg-[#b8942a] text-white font-semibold px-10 py-4 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
             Get a Free Consultation
-          </button>
+          </a>
         </div>
       </section>
     </div>
