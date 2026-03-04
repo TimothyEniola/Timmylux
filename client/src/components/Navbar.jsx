@@ -5,7 +5,7 @@ import { logout as apiLogout } from "../api/authService";
 import { ShoppingCart, Menu, X, Search, Heart, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useWishlistStore } from "../store/wishlistStore";
-import logo from "../assets/reallogo-removebg-preview.png";
+import logo from "../assets/reallogo.png";
 
 export default function Navbar() {
   const navigate = useNavigate();

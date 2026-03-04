@@ -3,7 +3,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, BarChart3, Package, Plus, ShoppingCart, LogOut, User } from "lucide-react";
 import { useState, useEffect } from "react";
-import logo from "../assets/reallogo-removebg-preview.png";
+import logo from "../assets/reallogo.png";
 
 export default function AdminNavbar() {
   // ❌ REMOVED useAuth
