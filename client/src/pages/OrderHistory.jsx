@@ -1,12 +1,36 @@
 import { useState } from "react";
-// import { useAuth } from "../context/AuthContext";
 import { Package, Truck, CheckCircle, Clock, Eye } from "lucide-react";
 
 export default function OrderHistory() {
-  const { user } = useAuth();
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const orders = user?.orders || [];
+  // Static orders for demo
+  const orders = [
+    {
+      id: "ORD-001",
+      product: "Luxury King Bed Frame",
+      amount: 485000,
+      status: "delivered",
+      date: "2026-01-15",
+      items: 1
+    },
+    {
+      id: "ORD-002",
+      product: "Premium Velvet Sofa",
+      amount: 420000,
+      status: "shipped",
+      date: "2026-01-14",
+      items: 1
+    },
+    {
+      id: "ORD-003",
+      product: "Modern Coffee Table",
+      amount: 125000,
+      status: "processing",
+      date: "2026-01-13",
+      items: 1
+    }
+  ];
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -33,16 +57,6 @@ export default function OrderHistory() {
         return 'text-gray-600 bg-gray-50';
     }
   };
-
-  if (!user) {
-    return (
-      <div className="container-custom py-8">
-        <div className="text-center">
-          <p className="text-gray-500">Please sign in to view your order history.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container-custom py-8">

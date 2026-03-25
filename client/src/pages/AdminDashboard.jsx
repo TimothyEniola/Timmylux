@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
   BarChart,
@@ -27,14 +27,6 @@ import {
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
-
-  // Check if user is admin
-  useEffect(() => {
-    if (!isAdmin()) {
-      navigate("/signin");
-    }
-  }, [isAdmin, navigate]);
 
   const [orders] = useState([
     {

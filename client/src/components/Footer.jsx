@@ -31,15 +31,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/cart"
-                  className="text-gray-300 hover:text-[#D4AF37] transition-colors">
+                <span className="text-gray-300 hover:text-[#D4AF37] transition-colors">
                   View Cart
-                </Link>
+                </span>
               </li>
               <li>
                 <Link
-                  to="/About"
+                  to="/about"
                   className="text-gray-300 hover:text-[#D4AF37] transition-colors">
                   About Us
                 </Link>

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const About = () => {
   return (
     <div className="w-full bg-white">
@@ -25,12 +27,12 @@ const About = () => {
             <p className="text-gray-700 mb-4 leading-relaxed">
               This portfolio is a snapshot of the work we’re proud of—tailor-made projects that reflect our commitment to quality, innovation, and customer satisfaction. Thank you for taking the time to learn more about our journey. I invite you to explore our portfolio and see what we can build together.
             </p>
-            <a
-              href="/custom-request"
+            <Link
+              to="/custom-request"
               className="inline-block mt-4 bg-[#D4AF37] hover:bg-[#b8942a] text-white font-semibold px-8 py-3 rounded-full transition-all duration-300 shadow-lg"
             >
               Reach Out to Me
-            </a>
+            </Link>
           </div>
 
           {/* CEO pic */}

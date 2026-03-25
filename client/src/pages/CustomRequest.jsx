@@ -1,38 +1,7 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MessageSquare, User, Mail, Phone, Home, CheckCircle } from "lucide-react";
 
 export default function CustomRequest() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    roomType: "",
-    message: "",
-  });
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // In production, this would send the data to an API
-    console.log("Custom Request:", formData);
-    setSubmitted(true);
-    
-    // Reset form after 3 seconds
-    setTimeout(() => {
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        address: "",
-        roomType: "",
-        message: "",
-      });
-      setSubmitted(false);
-    }, 3000);
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container-custom">
@@ -43,25 +12,14 @@ export default function CustomRequest() {
               Custom Furniture Request
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Can't find what you're looking for? Let us create custom furniture 
+              Can't find what you're looking for? Let us create custom furniture
               tailored to your specific needs and space requirements.
             </p>
           </div>
 
-          {/* Success Message */}
-          {submitted && (
-            <div className="mb-8 bg-green-50 border-2 border-green-500 text-green-800 px-6 py-4 rounded-xl flex items-center gap-3">
-              <CheckCircle size={24} className="flex-shrink-0" />
-              <div>
-                <p className="font-semibold">Request Submitted Successfully!</p>
-                <p className="text-sm">We'll contact you within 24 hours to discuss your custom furniture needs.</p>
-              </div>
-            </div>
-          )}
-
           {/* Form */}
           <div className="bg-white rounded-2xl shadow-lg p-8 md:p-10">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -72,8 +30,6 @@ export default function CustomRequest() {
                     <input
                       type="text"
                       placeholder="Enter your name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="input-field pl-10"
                       required
                     />
@@ -89,8 +45,6 @@ export default function CustomRequest() {
                     <input
                       type="email"
                       placeholder="your@email.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="input-field pl-10"
                       required
                     />
@@ -106,8 +60,6 @@ export default function CustomRequest() {
                     <input
                       type="tel"
                       placeholder="+234 123 456 7890"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="input-field pl-10"
                       required
                     />
@@ -121,8 +73,6 @@ export default function CustomRequest() {
                   <div className="relative">
                     <Home className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                     <select
-                      value={formData.roomType}
-                      onChange={(e) => setFormData({ ...formData, roomType: e.target.value })}
                       className="input-field pl-10 appearance-none"
                       required
                     >
@@ -145,8 +95,6 @@ export default function CustomRequest() {
                 <input
                   type="text"
                   placeholder="Your delivery address"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   className="input-field"
                 />
               </div>
@@ -159,8 +107,6 @@ export default function CustomRequest() {
                   <MessageSquare className="absolute left-3 top-3 text-gray-400" size={20} />
                   <textarea
                     placeholder="Tell us about the furniture you need, dimensions, style preferences, materials, colors, or any special requirements..."
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     className="input-field pl-10 min-h-[150px] resize-y"
                     required
                   />

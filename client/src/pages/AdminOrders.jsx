@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
 export default function AdminOrders() {
-  const { updateOrderStatus: updateUserOrderStatus } = useAuth();
   const [orders, setOrders] = useState([]);
 
   // Mock orders data - in real app, this would come from API

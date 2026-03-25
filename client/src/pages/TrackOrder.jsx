@@ -1,12 +1,36 @@
 import { useState } from "react";
-// import { useAuth } from "../context/AuthContext";
 import { Truck, MapPin, Clock, CheckCircle, Package } from "lucide-react";
 
 export default function TrackOrder() {
-  const { user } = useAuth();
   const [orderId, setOrderId] = useState("");
   const [trackingInfo, setTrackingInfo] = useState(null);
   const [error, setError] = useState("");
+
+  // Static orders for demo
+  const sampleOrders = [
+    {
+      id: "ORD-001",
+      product: "Luxury King Bed Frame",
+      status: "delivered",
+      tracking: [
+        { status: "Order Placed", completed: true, date: "2026-01-10" },
+        { status: "Processing", completed: true, date: "2026-01-11" },
+        { status: "Shipped", completed: true, date: "2026-01-12" },
+        { status: "Delivered", completed: true, date: "2026-01-15" }
+      ]
+    },
+    {
+      id: "ORD-002",
+      product: "Premium Velvet Sofa",
+      status: "shipped",
+      tracking: [
+        { status: "Order Placed", completed: true, date: "2026-01-09" },
+        { status: "Processing", completed: true, date: "2026-01-10" },
+        { status: "Shipped", completed: true, date: "2026-01-14" },
+        { status: "Out for Delivery", completed: false, date: "Expected 2026-01-16" }
+      ]
+    }
+  ];
 
   const handleTrackOrder = (e) => {
     e.preventDefault();
@@ -17,9 +41,8 @@ export default function TrackOrder() {
       return;
     }
 
-    // Find the order in user's orders
-    const userOrders = user?.orders || [];
-    const foundOrder = userOrders.find(order => order.id.toUpperCase() === orderId.trim().toUpperCase());
+    // Find the order in sample orders
+    const foundOrder = sampleOrders.find(order => order.id.toUpperCase() === orderId.trim().toUpperCase());
 
     if (foundOrder) {
       setTrackingInfo(foundOrder);
@@ -42,16 +65,6 @@ export default function TrackOrder() {
         return <Package className="text-gray-500" size={20} />;
     }
   };
-
-  if (!user) {
-    return (
-      <div className="container-custom py-8">
-        <div className="text-center">
-          <p className="text-gray-500">Please sign in to track your orders.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="container-custom py-8">

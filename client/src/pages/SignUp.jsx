@@ -1,11 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { register } from "../api/authService";
+import { Link } from "react-router-dom";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 
 export default function SignUp() {
-  const navigate = useNavigate();
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -15,9 +12,8 @@ export default function SignUp() {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
 
@@ -31,17 +27,8 @@ export default function SignUp() {
       return;
     }
 
-    setLoading(true);
-    try {
-      // 1. Call Backend
-      await register(formData.name, formData.email, formData.password);
-
-      navigate("/signin");
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
-    } finally {
-      setLoading(false);
-    }
+    // For frontend only, just show success message
+    alert("Account created successfully!");
   };
 
   return (
@@ -157,11 +144,10 @@ export default function SignUp() {
             </div>
 
             <button
-              disabled={loading}
               type="submit"
-              className="btn-primary w-full text-center disabled:opacity-50"
+              className="btn-primary w-full text-center"
             >
-              {loading ? "Creating..." : "Create Account"}
+              Create Account
             </button>
           </form>
 

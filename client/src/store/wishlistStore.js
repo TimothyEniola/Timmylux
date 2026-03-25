@@ -1,41 +1,32 @@
-import { create } from "zustand";
-import { wishlistService } from "../api/wishlistService";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-export const useWishlistStore = create((set, get) => ({
-  wishlist: [],
-  isLoading: false,
-  error: null,
-
-  fetchWishlist: async () => {
-    set({ isLoading: true });
-    try {
-      const response = await wishlistService.getWishlist();
-      set({ wishlist: response.data, isLoading: false });
-    } catch (error) {
-      set({ error: error.message, isLoading: false });
+const useWishlistStore = create(
+  persist(
+    (set, get) => ({
+      items: [],
+      addItem: (product) => {
+        const items = get().items;
+        const existingItem = items.find(item => item.id === product.id);
+        if (!existingItem) {
+          set({ items: [...items, product] });
+        }
+      },
+      removeItem: (id) => {
+        set({ items: get().items.filter(item => item.id !== id) });
+      },
+      isInWishlist: (id) => {
+        return get().items.some(item => item.id === id);
+      },
+      clearWishlist: () => set({ items: [] }),
+      getItemCount: () => {
+        return get().items.length;
+      }
+    }),
+    {
+      name: 'wishlist-storage',
     }
-  },
+  )
+);
 
-  addToWishlist: async (productId) => {
-    try {
-      const response = await wishlistService.addToWishlist(productId);
-      set({ wishlist: response.data });
-    } catch (error) {
-      console.error("Add to wishlist failed", error);
-      throw error; // Let component handle auth redirect if needed
-    }
-  },
-
-  removeFromWishlist: async (productId) => {
-    try {
-      const response = await wishlistService.removeFromWishlist(productId);
-      set({ wishlist: response.data });
-    } catch (error) {
-      console.error("Remove from wishlist failed", error);
-    }
-  },
-
-  isInWishlist: (productId) => {
-    return get().wishlist.some(item => item.id === productId);
-  }
-}));
+export default useWishlistStore;
