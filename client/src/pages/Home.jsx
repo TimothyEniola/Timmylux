@@ -3,6 +3,9 @@ import {
   CreditCard,
   Headphones,
   Star,
+  Heart,
+  ShoppingCart,
+  Eye,
 } from "lucide-react";
 
 export default function Home() {
@@ -331,69 +334,189 @@ export default function Home() {
           {/* Static Product Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {/* Sample Product 1 */}
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-square bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-500">Product Image</span>
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">Modern Sofa</h3>
-                <p className="text-gray-600 text-sm mb-2">Comfortable living room furniture</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-[#D4AF37]">₦250,000</span>
-                  <button className="btn-primary text-sm px-3 py-1">
-                    Add to Cart
+            <div className="card card-elevated group relative">
+              <div className="relative overflow-hidden h-64">
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500">Product Image</span>
+                </div>
+
+                {/* Action Icons */}
+                <div className="absolute top-3 right-3 flex flex-col gap-2">
+                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-red-500 shadow-lg transition-colors">
+                    <Heart size={16} fill="none" />
                   </button>
+                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors">
+                    <ShoppingCart size={16} />
+                  </button>
+                  <div className="p-2 rounded-full bg-green-500 text-white shadow-lg">
+                    <Eye size={16} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <p className="text-sm text-gray-500 mb-1">Living Room</p>
+                <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">Modern Sofa</h3>
+
+                {/* Rating and Price Section */}
+                <div className="flex items-center gap-1 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      className="fill-yellow-400 text-yellow-400"
+                    />
+                  ))}
+                  <span className="text-sm font-semibold text-gray-900 ml-1">4.9</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-lg font-bold text-[#D4AF37]">
+                      ₦250,000
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Sample Product 2 */}
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-square bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-500">Product Image</span>
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">Dining Table</h3>
-                <p className="text-gray-600 text-sm mb-2">Elegant dining room centerpiece</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-[#D4AF37]">₦180,000</span>
-                  <button className="btn-primary text-sm px-3 py-1">
-                    Add to Cart
+            <div className="card card-elevated group relative">
+              <div className="relative overflow-hidden h-64">
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500">Product Image</span>
+                </div>
+
+                {/* Action Icons */}
+                <div className="absolute top-3 right-3 flex flex-col gap-2">
+                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-red-500 shadow-lg transition-colors">
+                    <Heart size={16} fill="none" />
                   </button>
+                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors">
+                    <ShoppingCart size={16} />
+                  </button>
+                  <div className="p-2 rounded-full bg-green-500 text-white shadow-lg">
+                    <Eye size={16} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <p className="text-sm text-gray-500 mb-1">Dining</p>
+                <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">Dining Table</h3>
+
+                {/* Rating and Price Section */}
+                <div className="flex items-center gap-1 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      className="fill-yellow-400 text-yellow-400"
+                    />
+                  ))}
+                  <span className="text-sm font-semibold text-gray-900 ml-1">4.9</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-lg font-bold text-[#D4AF37]">
+                      ₦180,000
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Sample Product 3 */}
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-square bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-500">Product Image</span>
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">Bed Frame</h3>
-                <p className="text-gray-600 text-sm mb-2">Stylish bedroom furniture</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-[#D4AF37]">₦150,000</span>
-                  <button className="btn-primary text-sm px-3 py-1">
-                    Add to Cart
+            <div className="card card-elevated group relative">
+              <div className="relative overflow-hidden h-64">
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500">Product Image</span>
+                </div>
+
+                {/* Action Icons */}
+                <div className="absolute top-3 right-3 flex flex-col gap-2">
+                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-red-500 shadow-lg transition-colors">
+                    <Heart size={16} fill="none" />
                   </button>
+                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors">
+                    <ShoppingCart size={16} />
+                  </button>
+                  <div className="p-2 rounded-full bg-green-500 text-white shadow-lg">
+                    <Eye size={16} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <p className="text-sm text-gray-500 mb-1">Bedroom</p>
+                <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">Bed Frame</h3>
+
+                {/* Rating and Price Section */}
+                <div className="flex items-center gap-1 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      className="fill-yellow-400 text-yellow-400"
+                    />
+                  ))}
+                  <span className="text-sm font-semibold text-gray-900 ml-1">4.9</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-lg font-bold text-[#D4AF37]">
+                      ₦150,000
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Sample Product 4 */}
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="aspect-square bg-gray-200 flex items-center justify-center">
-                <span className="text-gray-500">Product Image</span>
-              </div>
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">Office Chair</h3>
-                <p className="text-gray-600 text-sm mb-2">Ergonomic workspace solution</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-lg font-bold text-[#D4AF37]">₦85,000</span>
-                  <button className="btn-primary text-sm px-3 py-1">
-                    Add to Cart
+            <div className="card card-elevated group relative">
+              <div className="relative overflow-hidden h-64">
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-gray-500">Product Image</span>
+                </div>
+
+                {/* Action Icons */}
+                <div className="absolute top-3 right-3 flex flex-col gap-2">
+                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-red-500 shadow-lg transition-colors">
+                    <Heart size={16} fill="none" />
                   </button>
+                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors">
+                    <ShoppingCart size={16} />
+                  </button>
+                  <div className="p-2 rounded-full bg-green-500 text-white shadow-lg">
+                    <Eye size={16} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4">
+                <p className="text-sm text-gray-500 mb-1">Office</p>
+                <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">Office Chair</h3>
+
+                {/* Rating and Price Section */}
+                <div className="flex items-center gap-1 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      className="fill-yellow-400 text-yellow-400"
+                    />
+                  ))}
+                  <span className="text-sm font-semibold text-gray-900 ml-1">4.9</span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-lg font-bold text-[#D4AF37]">
+                      ₦85,000
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -407,89 +530,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="container-custom">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">What Our Customers Say</h2>
-            <p className="text-gray-600">Real reviews from satisfied customers</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-2xl shadow-sm">
-              <div className="flex items-center gap-1 text-[#fbbf24] mb-4">
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-              </div>
-              <p className="text-gray-600 mb-4">
-                "Absolutely love my new sofa! The quality is outstanding and it arrived exactly as described."
-              </p>
-              <div className="flex items-center gap-3">
-                <img
-                  src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=40&h=40&fit=crop&crop=face"
-                  alt="Sarah Johnson"
-                  className="w-10 h-10 rounded-full"
-                  loading="lazy"
-                />
-                <div>
-                  <p className="font-semibold text-gray-900">Sarah Johnson</p>
-                  <p className="text-sm text-gray-600">Verified Customer</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm">
-              <div className="flex items-center gap-1 text-[#fbbf24] mb-4">
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-              </div>
-              <p className="text-gray-600 mb-4">
-                "The bedroom set I purchased exceeded my expectations. Everything fits perfectly."
-              </p>
-              <div className="flex items-center gap-3">
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
-                  alt="Michael Chen"
-                  className="w-10 h-10 rounded-full"
-                  loading="lazy"
-                />
-                <div>
-                  <p className="font-semibold text-gray-900">Michael Chen</p>
-                  <p className="text-sm text-gray-600">Verified Customer</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-2xl shadow-sm">
-              <div className="flex items-center gap-1 text-[#fbbf24] mb-4">
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-                <Star size={16} fill="#fbbf24" />
-              </div>
-              <p className="text-gray-600 mb-4">
-                "Great customer service and beautiful furniture. Worth every penny!"
-              </p>
-              <div className="flex items-center gap-3">
-                <img
-                  src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face"
-                  alt="Emma Davis"
-                  className="w-10 h-10 rounded-full"
-                  loading="lazy"
-                />
-                <div>
-                  <p className="font-semibold text-gray-900">Emma Davis</p>
-                  <p className="text-sm text-gray-600">Verified Customer</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

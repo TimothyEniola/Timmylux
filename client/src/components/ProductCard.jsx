@@ -1,14 +1,7 @@
 import { Star, Eye } from "lucide-react";
 import { Heart, ShoppingCart } from "lucide-react";
-import useCartStore from "../store/cartStore";
-import useWishlistStore from "../store/wishlistStore";
 
 export default function ProductCard({ product, showDiscount = false }) {
-  const addToCart = useCartStore((state) => state.addItem);
-  const addToWishlist = useWishlistStore((state) => state.addItem);
-  const removeFromWishlist = useWishlistStore((state) => state.removeItem);
-  const isInWishlist = useWishlistStore((state) => state.isInWishlist(product.id));
-
   // Calculate discount (mock - 10% for featured items)
   const discountPercentage = product.featured ? 10 : 0;
 
@@ -28,26 +21,10 @@ export default function ProductCard({ product, showDiscount = false }) {
 
         {/* Action Icons */}
         <div className="absolute top-3 right-3 flex flex-col gap-2">
-          <button
-            onClick={() => {
-              if (isInWishlist) {
-                removeFromWishlist(product.id);
-              } else {
-                addToWishlist(product);
-              }
-            }}
-            className={`p-2 rounded-full shadow-lg transition-colors ${
-              isInWishlist
-                ? "bg-red-500 text-white hover:bg-red-600"
-                : "bg-white text-gray-600 hover:text-red-500"
-            }`}
-          >
-            <Heart size={16} fill={isInWishlist ? "currentColor" : "none"} />
+          <button className="p-2 rounded-full bg-white text-gray-600 hover:text-red-500 shadow-lg transition-colors">
+            <Heart size={16} fill="none" />
           </button>
-          <button
-            onClick={() => addToCart(product)}
-            className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors"
-          >
+          <button className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors">
             <ShoppingCart size={16} />
           </button>
           <div className={`p-2 rounded-full shadow-lg ${
