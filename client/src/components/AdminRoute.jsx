@@ -1,8 +1,6 @@
-import { Outlet } from 'react-router-dom';
-
-const AdminRoute = () => {
+const AdminRoute = ({ children }) => {
   // Always render since auth is removed
-  return <Outlet />;
+  return <>{children}</>;
 };
 
 export default AdminRoute;

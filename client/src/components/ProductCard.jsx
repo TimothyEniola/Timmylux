@@ -1,9 +1,11 @@
-import { Star, Eye } from "lucide-react";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Star, Eye, EyeOff, Heart, ShoppingCart } from "lucide-react";
 
-export default function ProductCard({ product, showDiscount = false }) {
+export default function ProductCard({ product, showDiscount = false, timerText, timerColor }) {
   // Calculate discount (mock - 10% for featured items)
   const discountPercentage = product.featured ? 10 : 0;
+  const timerClassName = timerText
+    ? `absolute bottom-3 left-3 z-10 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white ${timerColor || "bg-emerald-500"}`
+    : "";
 
   return (
     <div className="card card-elevated group relative">
@@ -14,6 +16,12 @@ export default function ProductCard({ product, showDiscount = false }) {
           className="product-image w-full h-full object-cover"
           loading="lazy"
         />
+
+        {timerText && (
+          <div className={timerClassName}>
+            {timerText}
+          </div>
+        )}
 
         {showDiscount && discountPercentage > 0 && (
           <span className="discount-badge">{discountPercentage}% off</span>
@@ -27,10 +35,14 @@ export default function ProductCard({ product, showDiscount = false }) {
           <button className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors">
             <ShoppingCart size={16} />
           </button>
-          <div className={`p-2 rounded-full shadow-lg ${
-            product.available ? "bg-green-500 text-white" : "bg-red-500 text-white"
-          }`}>
-            <Eye size={16} />
+          <div
+            className={`p-2 rounded-full shadow-lg ${
+              product.available
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
+            }`}
+          >
+            {product.available ? <Eye size={16} /> : <EyeOff size={16} />}
           </div>
         </div>
       </div>
@@ -58,6 +70,11 @@ export default function ProductCard({ product, showDiscount = false }) {
             </p>
           </div>
         </div>
+        {!product.available && (
+          <div className="mt-3 text-sm font-semibold text-red-600 uppercase tracking-[0.08em]">
+            Out of Stock
+          </div>
+        )}
       </div>
     </div>
   );

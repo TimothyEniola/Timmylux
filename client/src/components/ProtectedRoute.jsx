@@ -1,8 +1,6 @@
-import { Outlet } from 'react-router-dom';
-
-const ProtectedRoute = () => {
+const ProtectedRoute = ({ children }) => {
   // Always render the protected page since auth is removed
-  return <Outlet />;
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

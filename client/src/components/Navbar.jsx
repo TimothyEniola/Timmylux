@@ -49,18 +49,24 @@ export default function Navbar() {
 
           {/* Action Icons */}
           <div className="hidden lg:flex items-center gap-6">
-            {/* Search Icon */}
-            <button className="hover:text-[#D4AF37] transition-colors">
+            <Link
+              to="/products"
+              className="hover:text-[#D4AF37] transition-colors"
+            >
               <Search size={20} />
-            </button>
-            {/* Wishlist Icon */}
-            <button className="hover:text-[#D4AF37] transition-colors relative">
+            </Link>
+            <Link
+              to="/wishlist"
+              className="hover:text-[#D4AF37] transition-colors relative"
+            >
               <Heart size={20} />
-            </button>
-            {/* Cart Icon */}
-            <button className="hover:text-[#D4AF37] transition-colors relative">
+            </Link>
+            <Link
+              to="/cart"
+              className="hover:text-[#D4AF37] transition-colors relative"
+            >
               <ShoppingCart size={20} />
-            </button>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -105,15 +111,24 @@ export default function Navbar() {
             </Link>
             {/* Mobile Action Icons */}
             <div className="flex items-center gap-4 pt-2">
-              <button className="hover:text-[#D4AF37] transition-colors">
+              <Link
+                to="/products"
+                className="hover:text-[#D4AF37] transition-colors"
+              >
                 <Search size={20} />
-              </button>
-              <button className="hover:text-[#D4AF37] transition-colors relative">
+              </Link>
+              <Link
+                to="/wishlist"
+                className="hover:text-[#D4AF37] transition-colors relative"
+              >
                 <Heart size={20} />
-              </button>
-              <button className="hover:text-[#D4AF37] transition-colors relative">
+              </Link>
+              <Link
+                to="/cart"
+                className="hover:text-[#D4AF37] transition-colors relative"
+              >
                 <ShoppingCart size={20} />
-              </button>
+              </Link>
             </div>
           </div>
         )}

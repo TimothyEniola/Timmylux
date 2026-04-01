@@ -1,14 +1,37 @@
-import {
-  Package,
-  CreditCard,
-  Headphones,
-  Star,
-  Heart,
-  ShoppingCart,
-  Eye,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Package, CreditCard, Headphones, Star } from "lucide-react";
+import ProductCard from "../components/ProductCard";
+import { products } from "../data/Products";
 
 export default function Home() {
+  const navigate = useNavigate();
+  const [countdown, setCountdown] = useState("00:00:00");
+  const [timerColor, setTimerColor] = useState("bg-emerald-500");
+
+  const homepageProducts = products.slice(0, 4);
+
+  useEffect(() => {
+    const saleEndTime = Date.now() + 3 * 24 * 60 * 60 * 1000;
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const diff = saleEndTime - now;
+      if (diff <= 0) {
+        setCountdown("00:00:00");
+        setTimerColor("bg-red-500");
+        clearInterval(interval);
+        return;
+      }
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      const nextCountdown = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      setCountdown(nextCountdown);
+      setTimerColor(diff <= 6 * 60 * 60 * 1000 ? "bg-red-500" : "bg-emerald-500");
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
   return (
     <div>
       {/* Hero Section */}
@@ -31,10 +54,16 @@ export default function Home() {
                 pieces that blend luxury craftsmanship with contemporary design.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                <button className="btn-primary text-center inline-flex items-center justify-center">
+                <button
+                  className="btn-primary text-center inline-flex items-center justify-center"
+                  onClick={() => navigate("/products")}
+                >
                   Shop Now →
                 </button>
-                <button className="btn-outline text-center">
+                <button
+                  className="btn-outline text-center"
+                  onClick={() => navigate("/products")}
+                >
                   View All Products
                 </button>
               </div>
@@ -321,209 +350,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Sample Products Section */}
+      {/* Featured Products Section */}
       <section className="py-16 bg-white">
         <div className="container-custom">
           <div className="text-center mb-8">
-            <p className="text-gray-600 mb-2">Our Products</p>
+            <p className="text-gray-600 mb-2">Featured Products</p>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Our Products Collections
+              Curated Home Highlights
             </h2>
           </div>
 
-          {/* Static Product Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {/* Sample Product 1 */}
-            <div className="card card-elevated group relative">
-              <div className="relative overflow-hidden h-64">
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500">Product Image</span>
-                </div>
-
-                {/* Action Icons */}
-                <div className="absolute top-3 right-3 flex flex-col gap-2">
-                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-red-500 shadow-lg transition-colors">
-                    <Heart size={16} fill="none" />
-                  </button>
-                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors">
-                    <ShoppingCart size={16} />
-                  </button>
-                  <div className="p-2 rounded-full bg-green-500 text-white shadow-lg">
-                    <Eye size={16} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4">
-                <p className="text-sm text-gray-500 mb-1">Living Room</p>
-                <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">Modern Sofa</h3>
-
-                {/* Rating and Price Section */}
-                <div className="flex items-center gap-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      className="fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                  <span className="text-sm font-semibold text-gray-900 ml-1">4.9</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-lg font-bold text-[#D4AF37]">
-                      ₦250,000
-                    </p>
-                  </div>
-                </div>
-              </div>
+          <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.24em] text-[#D4AF37]">
+                Flash Sale
+              </p>
+              <h3 className="text-2xl font-semibold text-gray-900">
+                Only 4 exclusive items featured here
+              </h3>
             </div>
-
-            {/* Sample Product 2 */}
-            <div className="card card-elevated group relative">
-              <div className="relative overflow-hidden h-64">
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500">Product Image</span>
-                </div>
-
-                {/* Action Icons */}
-                <div className="absolute top-3 right-3 flex flex-col gap-2">
-                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-red-500 shadow-lg transition-colors">
-                    <Heart size={16} fill="none" />
-                  </button>
-                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors">
-                    <ShoppingCart size={16} />
-                  </button>
-                  <div className="p-2 rounded-full bg-green-500 text-white shadow-lg">
-                    <Eye size={16} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4">
-                <p className="text-sm text-gray-500 mb-1">Dining</p>
-                <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">Dining Table</h3>
-
-                {/* Rating and Price Section */}
-                <div className="flex items-center gap-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      className="fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                  <span className="text-sm font-semibold text-gray-900 ml-1">4.9</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-lg font-bold text-[#D4AF37]">
-                      ₦180,000
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Sample Product 3 */}
-            <div className="card card-elevated group relative">
-              <div className="relative overflow-hidden h-64">
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500">Product Image</span>
-                </div>
-
-                {/* Action Icons */}
-                <div className="absolute top-3 right-3 flex flex-col gap-2">
-                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-red-500 shadow-lg transition-colors">
-                    <Heart size={16} fill="none" />
-                  </button>
-                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors">
-                    <ShoppingCart size={16} />
-                  </button>
-                  <div className="p-2 rounded-full bg-green-500 text-white shadow-lg">
-                    <Eye size={16} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4">
-                <p className="text-sm text-gray-500 mb-1">Bedroom</p>
-                <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">Bed Frame</h3>
-
-                {/* Rating and Price Section */}
-                <div className="flex items-center gap-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      className="fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                  <span className="text-sm font-semibold text-gray-900 ml-1">4.9</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-lg font-bold text-[#D4AF37]">
-                      ₦150,000
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Sample Product 4 */}
-            <div className="card card-elevated group relative">
-              <div className="relative overflow-hidden h-64">
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500">Product Image</span>
-                </div>
-
-                {/* Action Icons */}
-                <div className="absolute top-3 right-3 flex flex-col gap-2">
-                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-red-500 shadow-lg transition-colors">
-                    <Heart size={16} fill="none" />
-                  </button>
-                  <button className="p-2 rounded-full bg-white text-gray-600 hover:text-[#D4AF37] shadow-lg transition-colors">
-                    <ShoppingCart size={16} />
-                  </button>
-                  <div className="p-2 rounded-full bg-green-500 text-white shadow-lg">
-                    <Eye size={16} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4">
-                <p className="text-sm text-gray-500 mb-1">Office</p>
-                <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">Office Chair</h3>
-
-                {/* Rating and Price Section */}
-                <div className="flex items-center gap-1 mb-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={14}
-                      className="fill-yellow-400 text-yellow-400"
-                    />
-                  ))}
-                  <span className="text-sm font-semibold text-gray-900 ml-1">4.9</span>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-lg font-bold text-[#D4AF37]">
-                      ₦85,000
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className={`rounded-full px-4 py-3 text-sm font-semibold text-white ${timerColor}`}>
+              {countdown === "00:00:00" ? "Sale ended" : `Ends in ${countdown}`}
             </div>
           </div>
 
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {homepageProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                showDiscount={product.featured}
+                timerText={countdown === "00:00:00" ? "Sale ended" : `Ends in ${countdown}`}
+                timerColor={timerColor}
+              />
+            ))}
+          </div>
+
           <div className="text-center mt-12">
-            <button className="btn-outline">
+            <button
+              className="btn-outline"
+              onClick={() => navigate("/products")}
+            >
               View All Products →
             </button>
           </div>

@@ -1,15 +1,56 @@
+import { Routes, Route, useLocation } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import Navbar from "./components/Navbar";
+import AdminNavbar from "./components/AdminNavbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
+import About from "./pages/About";
+import Products from "./pages/Products";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import UserProfile from "./pages/UserProfile";
+import UserSettings from "./pages/UserSettings";
+import Wishlist from "./pages/Wishlist";
+import OrderHistory from "./pages/OrderHistory";
+import TrackOrder from "./pages/TrackOrder";
+import CustomRequest from "./pages/CustomRequest";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminProducts from "./pages/AdminProducts";
+import AdminAddProduct from "./pages/AdminAddProduct";
+import AdminOrders from "./pages/AdminOrders";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 export default function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
     <div className="flex flex-col min-h-screen">
-      <TopBar />
-      <Navbar />
+      {!isAdminRoute && <TopBar />}
+      {isAdminRoute ? <AdminNavbar /> : <Navbar />}
       <div className="flex-grow">
-        <Home />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><UserSettings /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
+          <Route path="/track-order" element={<ProtectedRoute><TrackOrder /></ProtectedRoute>} />
+          <Route path="/custom-request" element={<CustomRequest />} />
+          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
+          <Route path="/admin/add-product" element={<AdminRoute><AdminAddProduct /></AdminRoute>} />
+          <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+        </Routes>
       </div>
       <Footer />
     </div>
