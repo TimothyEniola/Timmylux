@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Mail, Phone, MapPin, Calendar, Save, Edit } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar, Save, Edit, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export default function AdminProfile() {
@@ -11,7 +11,8 @@ export default function AdminProfile() {
     role: "Administrator",
     created_at: "2024-01-01T00:00:00.000Z",
     bio: "Furniture store administrator responsible for managing products and orders.",
-    permissions: ["manage_products", "manage_orders", "manage_users", "view_analytics"]
+    permissions: ["manage_products", "manage_orders", "manage_users", "view_analytics"],
+    profileImage: localStorage.getItem("adminProfileImage") || null,
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -32,6 +33,21 @@ export default function AdminProfile() {
   const handleCancel = () => {
     setFormData({ ...admin });
     setIsEditing(false);
+  };
+
+  const handleProfileImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageData = reader.result;
+        localStorage.setItem("adminProfileImage", imageData);
+        setAdmin(prev => ({ ...prev, profileImage: imageData }));
+        window.dispatchEvent(new Event("adminProfileImageUpdated"));
+        alert("Profile picture updated successfully!");
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -69,8 +85,24 @@ export default function AdminProfile() {
         <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:p-8">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-[#011F5B] rounded-full flex items-center justify-center border-4 border-white shadow-sm flex-shrink-0">
-              <User size={32} className="text-white" />
+            <div className="relative group">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 bg-[#011F5B] rounded-full flex items-center justify-center border-4 border-white shadow-sm flex-shrink-0 overflow-hidden">
+                {admin.profileImage ? (
+                  <img src={admin.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User size={40} className="text-white" />
+                )}
+              </div>
+              <label className="absolute bottom-0 right-0 bg-[#D4AF37] p-3 rounded-full cursor-pointer hover:bg-[#b8942a] transition-colors shadow-lg">
+                <Upload size={18} className="text-white" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfileImageUpload}
+                  className="hidden"
+                  title="Upload profile picture"
+                />
+              </label>
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-xl sm:text-2xl font-bold text-[#011F5B] truncate">

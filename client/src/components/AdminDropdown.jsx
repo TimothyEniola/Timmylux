@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 export default function AdminDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(localStorage.getItem("adminProfileImage") || null);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -17,14 +18,36 @@ export default function AdminDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const refreshAvatar = () => {
+      setAvatarUrl(localStorage.getItem("adminProfileImage") || null);
+    };
+
+    window.addEventListener("storage", refreshAvatar);
+    window.addEventListener("adminProfileImageUpdated", refreshAvatar);
+
+    return () => {
+      window.removeEventListener("storage", refreshAvatar);
+      window.removeEventListener("adminProfileImageUpdated", refreshAvatar);
+    };
+  }, []);
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 hover:text-[#D4AF37] transition-colors"
       >
-        <div className="w-8 h-8 bg-[#011F5B] rounded-full flex items-center justify-center border-2 border-[#D4AF37]">
-          <User size={16} className="text-white" />
+        <div className="w-8 h-8 bg-[#011F5B] rounded-full overflow-hidden flex items-center justify-center border-2 border-[#D4AF37]">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Admin avatar"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <User size={16} className="text-white" />
+          )}
         </div>
         <span className="text-sm">Admin</span>
         <ChevronDown

@@ -6,6 +6,7 @@ import logo from "../assets/reallogo.png";
 const Navbar = memo(function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState(localStorage.getItem("userProfileImage") || null);
   const dropdownRef = useRef(null);
   const location = useLocation();
 
@@ -19,6 +20,20 @@ const Navbar = memo(function Navbar() {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const refreshProfileImage = () => {
+      setProfileImage(localStorage.getItem("userProfileImage") || null);
+    };
+
+    window.addEventListener("storage", refreshProfileImage);
+    window.addEventListener("userProfileImageUpdated", refreshProfileImage);
+
+    return () => {
+      window.removeEventListener("storage", refreshProfileImage);
+      window.removeEventListener("userProfileImageUpdated", refreshProfileImage);
+    };
   }, []);
 
   return (
@@ -102,10 +117,20 @@ const Navbar = memo(function Navbar() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="hover:text-[#D4AF37] transition-colors flex items-center gap-1"
+                className="hover:text-[#D4AF37] transition-colors flex items-center gap-2"
                 title="User Menu"
               >
-                <User size={20} />
+                <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-white bg-[#011F5B] flex items-center justify-center">
+                  {profileImage ? (
+                    <img
+                      src={profileImage}
+                      alt="User avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User size={18} />
+                  )}
+                </div>
                 <ChevronDown size={16} className={`transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -247,10 +272,20 @@ const Navbar = memo(function Navbar() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="hover:text-[#D4AF37] transition-colors flex items-center gap-1"
+                  className="hover:text-[#D4AF37] transition-colors flex items-center gap-2"
                   title="User Menu"
                 >
-                  <User size={20} />
+                  <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-white bg-[#011F5B] flex items-center justify-center">
+                    {profileImage ? (
+                      <img
+                        src={profileImage}
+                        alt="User avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User size={18} />
+                    )}
+                  </div>
                   <ChevronDown size={16} className={`transition-transform ${userDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 

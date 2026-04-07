@@ -19,6 +19,7 @@ import AdminDropdown from "./AdminDropdown";
 export default function AdminNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const [adminAvatar, setAdminAvatar] = useState(localStorage.getItem("adminProfileImage") || null);
 
   useEffect(() => {
     if (location.hash) {
@@ -28,6 +29,20 @@ export default function AdminNavbar() {
       }
     }
   }, [location]);
+
+  useEffect(() => {
+    const refreshAvatar = () => {
+      setAdminAvatar(localStorage.getItem("adminProfileImage") || null);
+    };
+
+    window.addEventListener("storage", refreshAvatar);
+    window.addEventListener("adminProfileImageUpdated", refreshAvatar);
+
+    return () => {
+      window.removeEventListener("storage", refreshAvatar);
+      window.removeEventListener("adminProfileImageUpdated", refreshAvatar);
+    };
+  }, []);
 
   const navItems = [
     { path: "/admin", label: "Dashboard", icon: BarChart3 },
@@ -107,6 +122,20 @@ export default function AdminNavbar() {
                 </Link>
               );
             })}
+
+            <div className="flex items-center gap-3 px-4 py-4 border-t border-white/10">
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#D4AF37] bg-[#011F5B] flex items-center justify-center">
+                {adminAvatar ? (
+                  <img src={adminAvatar} alt="Admin avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <User size={18} className="text-white" />
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-white">Admin</p>
+                <p className="text-xs text-gray-300">Profile access</p>
+              </div>
+            </div>
 
             <div className="border-t border-white/10 mt-4 pt-4 px-4 space-y-3">
               <Link
