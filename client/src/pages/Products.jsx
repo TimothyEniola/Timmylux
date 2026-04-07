@@ -1,17 +1,32 @@
 import { useState } from "react";
 import ProductCard from "../components/ProductCard";
-import { products } from "../data/Products";
+import { products, categories } from "../data/Products";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
   const filteredProducts = products.filter((product) => {
     const query = searchQuery.trim().toLowerCase();
-    return (
+    const categoryMatch = selectedCategory === "All" || product.category === selectedCategory;
+    const searchMatch = query === "" ||
       product.name.toLowerCase().includes(query) ||
       product.category.toLowerCase().includes(query) ||
-      product.description.toLowerCase().includes(query)
-    );
+      product.description.toLowerCase().includes(query) ||
+      product.collection?.toLowerCase().includes(query);
+
+    return categoryMatch && searchMatch;
   });
+
+  // Group products by collection
+  const collections = filteredProducts.reduce((acc, product) => {
+    if (!acc[product.collection]) {
+      acc[product.collection] = [];
+    }
+    acc[product.collection].push(product);
+    return acc;
+  }, {});
 
   return (
     <div className="py-12">
@@ -19,45 +34,132 @@ export default function Products() {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="section-heading">
-            Our Premium Collection
+            Our Premium Collections
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Browse through our exquisite range of luxury furniture
+            Explore our curated collections with multiple design variations
           </p>
         </div>
 
-        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
+        {/* Search and Filter */}
+        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex-1">
             <p className="text-sm uppercase tracking-[0.24em] text-[#D4AF37]">
-              Search products
+              Search collections
             </p>
             <h2 className="text-2xl font-bold text-gray-900">
-              Find what you need quickly
+              Find your perfect style
             </h2>
           </div>
-          <div className="w-full md:w-1/3">
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search furniture, categories, or rooms"
-              className="w-full rounded-2xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
-            />
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Category Filter */}
+            <div className="w-full sm:w-48">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full rounded-2xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white"
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Search Input */}
+            <div className="w-full sm:w-80">
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search collections, products..."
+                className="w-full rounded-2xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} showDiscount={product.featured} />
-            ))
-          ) : (
-            <div className="col-span-full rounded-3xl border border-dashed border-gray-300 p-12 text-center text-gray-500">
-              No products found for "{searchQuery}"
-            </div>
-          )}
-        </div>
+        {/* Collections Display */}
+        {Object.keys(collections).length > 0 ? (
+          <div className="space-y-12">
+            {Object.entries(collections).map(([collectionName, collectionProducts]) => (
+              <div key={collectionName} className="collection-section">
+                {/* Collection Header */}
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    {collectionName}
+                  </h3>
+                  <p className="text-gray-600">
+                    {collectionProducts.length} design{collectionProducts.length > 1 ? 's' : ''} available
+                  </p>
+                </div>
+
+                {/* Collection Products */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {collectionProducts.map((product) => (
+                    <div key={product.id} className="space-y-4">
+                      {/* Main Product Card */}
+                      <ProductCard
+                        product={product}
+                        showDiscount={product.featured}
+                      />
+
+                      {/* Variations */}
+                      {product.variations && product.variations.length > 0 && (
+                        <div className="bg-gray-50 rounded-xl p-4">
+                          <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                            Design Variations
+                          </h4>
+                          <div className="grid grid-cols-3 gap-2">
+                            {product.variations.map((variation) => (
+                              <div
+                                key={variation.id}
+                                className="group cursor-pointer"
+                                title={`${variation.name} - ₦${variation.price.toLocaleString()}`}
+                              >
+                                <div className="aspect-square rounded-lg overflow-hidden bg-white border border-gray-200 group-hover:border-[#D4AF37] transition-colors">
+                                  <img
+                                    src={variation.image}
+                                    alt={variation.name}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                    loading="lazy"
+                                  />
+                                </div>
+                                <div className="mt-2 text-center">
+                                  <p className="text-xs font-medium text-gray-900 truncate">
+                                    {variation.name}
+                                  </p>
+                                  <p className="text-xs text-[#D4AF37] font-semibold">
+                                    ₦{variation.price.toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-dashed border-gray-300 p-12 text-center text-gray-500">
+            <p className="text-lg mb-2">No collections found</p>
+            <p className="text-sm">
+              {searchQuery && selectedCategory !== "All"
+                ? `for "${searchQuery}" in ${selectedCategory}`
+                : searchQuery
+                ? `for "${searchQuery}"`
+                : selectedCategory !== "All"
+                ? `in ${selectedCategory}`
+                : "Try adjusting your search or filters"}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

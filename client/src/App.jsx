@@ -19,7 +19,11 @@ import CustomRequest from "./pages/CustomRequest";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
 import AdminAddProduct from "./pages/AdminAddProduct";
+import AdminEditProduct from "./pages/AdminEditProduct";
+import AdminCollections from "./pages/AdminCollections";
+import AdminFeatured from "./pages/AdminFeatured";
 import AdminOrders from "./pages/AdminOrders";
+import AdminProfile from "./pages/AdminProfile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 
@@ -49,6 +53,10 @@ export default function App() {
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
           <Route path="/admin/add-product" element={<AdminRoute><AdminAddProduct /></AdminRoute>} />
+          <Route path="/admin/edit-product/:id" element={<AdminRoute><AdminEditProduct /></AdminRoute>} />
+          <Route path="/admin/collections" element={<AdminRoute><AdminCollections /></AdminRoute>} />
+          <Route path="/admin/featured" element={<AdminRoute><AdminFeatured /></AdminRoute>} />
+          <Route path="/admin/profile" element={<AdminRoute><AdminProfile /></AdminRoute>} />
           <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
         </Routes>
       </div>

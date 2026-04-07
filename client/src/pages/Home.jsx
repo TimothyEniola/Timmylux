@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package, CreditCard, Headphones, Star } from "lucide-react";
 import ProductCard from "../components/ProductCard";
@@ -6,28 +6,34 @@ import { products } from "../data/Products";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState("00:00:00");
+  const [countdown, setCountdown] = useState("07:00:00");
   const [timerColor, setTimerColor] = useState("bg-emerald-500");
+  const saleEndTimeRef = useRef(Date.now() + 7 * 60 * 60 * 1000);
 
   const homepageProducts = products.slice(0, 4);
 
   useEffect(() => {
-    const saleEndTime = Date.now() + 3 * 24 * 60 * 60 * 1000;
     const interval = setInterval(() => {
       const now = Date.now();
-      const diff = saleEndTime - now;
+      const diff = saleEndTimeRef.current - now;
+      
       if (diff <= 0) {
         setCountdown("00:00:00");
         setTimerColor("bg-red-500");
         clearInterval(interval);
         return;
       }
+
       const hours = Math.floor(diff / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
       const nextCountdown = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      
       setCountdown(nextCountdown);
-      setTimerColor(diff <= 6 * 60 * 60 * 1000 ? "bg-red-500" : "bg-emerald-500");
+      
+      // Only update color if it changes
+      const newColor = diff <= 6 * 60 * 60 * 1000 ? "bg-red-500" : "bg-emerald-500";
+      setTimerColor(prev => prev !== newColor ? newColor : prev);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -68,7 +74,7 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Ratings */}
+              {/*
               <div className="flex items-center gap-4">
                 <div className="flex -space-x-2">
                   <img
@@ -109,22 +115,23 @@ export default function Home() {
                   </p>
                 </div>
               </div>
+              */}
             </div>
 
             {/* Right Content - Static Image */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="relative group overflow-hidden rounded-2xl col-span-2">
+            <div className="relative">
+              <div className="relative group overflow-hidden rounded-2xl">
                 <img
                   src="https://images.unsplash.com/photo-1759691555105-17e609a3e46f?auto=format&fit=crop&q=80"
                   alt="Living Room"
-                  className="w-full h-64 object-cover"
+                  className="w-full h-96 object-cover"
                   loading="lazy"
                 />
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-                  <h3 className="text-white font-bold text-lg">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-6">
+                  <h3 className="text-white font-bold text-xl">
                     Living Room
                   </h3>
-                  <p className="text-white/90 text-sm">
+                  <p className="text-white/90 text-base">
                     2,500+ Items
                   </p>
                 </div>
