@@ -57,7 +57,7 @@ npm run preview
 - ✅ **Product Details**: View pricing, descriptions, and product variations
 - ✅ **Shopping Cart**: Add/remove items with quantity management, persisted with localStorage
 - ✅ **Wishlist**: Save favorite items for later, persistent across sessions
-- ✅ **Checkout**: Integrated payment system (Paystack ready)
+- ✅ **Checkout**: Paystack + Cash on Delivery frontend demo with live order summary
 - ✅ **User Profile**: View and edit profile information with profile picture upload
 - ✅ **Order History**: Track previously placed orders
 - ✅ **Order Tracking**: Real-time order status tracking
@@ -88,7 +88,7 @@ npm run preview
 | `/about` | About.jsx | About the company page |
 | `/custom-request` | CustomRequest.jsx | Request custom furniture |
 | `/cart` | Cart.jsx | Shopping cart review & checkout |
-| `/checkout` | Checkout.jsx | Payment and order confirmation |
+| `/checkout` | Checkout.jsx | Payment and order confirmation with Paystack/COD frontend demo |
 | `/wishlist` | Wishlist.jsx | Saved favorite items |
 | `/order-history` | OrderHistory.jsx | View past orders |
 | `/track-order` | TrackOrder.jsx | Track order status |
@@ -129,7 +129,7 @@ client/
 │   │   ├── Home.jsx
 │   │   ├── Products.jsx
 │   │   ├── Cart.jsx             # Shopping cart page
-│   │   ├── Checkout.jsx         # Checkout with Paystack
+│   │   ├── Checkout.jsx         # Checkout with Paystack + COD frontend demo
 │   │   ├── Wishlist.jsx
 │   │   ├── UserProfile.jsx      # User profile with image upload
 │   │   ├── AdminDashboard.jsx   # Admin overview dashboard
