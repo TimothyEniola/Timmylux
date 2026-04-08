@@ -7,10 +7,10 @@ export default function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="py-20">
+      <div className="py-16 sm:py-20 px-4">
         <div className="container-custom text-center">
           <ShoppingBag size={80} className="mx-auto text-gray-300 mb-6" />
-          <h2 className="text-3xl font-bold text-[#011F5B] mb-4">
+          <h2 className="text-2xl sm:text-3xl font-bold text-[#011F5B] mb-4">
             Your Cart is Empty
           </h2>
           <p className="text-gray-600 mb-8">
@@ -25,26 +25,28 @@ export default function Cart() {
   }
 
   return (
-    <div className="py-12">
+    <div className="py-8 sm:py-12 px-4 sm:px-0">
       <div className="container-custom">
-        <h1 className="text-3xl font-bold text-[#011F5B] mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#011F5B] mb-8">
           Shopping Cart
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-6">
             {items.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-xl shadow-md p-6 flex gap-4"
+                className="bg-white rounded-xl shadow-md p-4 sm:p-6 flex flex-col sm:flex-row gap-4"
               >
+                {/* Image */}
                 <img
                   src={item.image}
                   alt={item.name}
-                  className="w-24 h-24 object-cover rounded-lg"
+                  className="w-full sm:w-24 h-48 sm:h-24 object-cover rounded-lg"
                 />
 
+                {/* Info */}
                 <div className="flex-1">
                   <h3 className="font-bold text-lg text-[#011F5B] mb-1">
                     {item.name}
@@ -52,11 +54,12 @@ export default function Cart() {
                   <p className="text-sm text-gray-500 mb-2">
                     {item.category}
                   </p>
-                  <p className="text-xl font-bold text-[#D4AF37] mb-3">
+                  <p className="text-lg sm:text-xl font-bold text-[#D4AF37] mb-3">
                     ₦{Number(item.price).toLocaleString()}
                   </p>
 
-                  <div className="flex items-center gap-4">
+                  {/* Quantity + Delete */}
+                  <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-2 bg-gray-100 rounded-lg">
                       <button
                         onClick={() =>
@@ -90,13 +93,13 @@ export default function Cart() {
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-sm text-gray-500 mb-1">
+                {/* Subtotal */}
+                <div className="flex sm:block justify-between items-center sm:text-right">
+                  <p className="text-sm text-gray-500 sm:mb-1">
                     Subtotal
                   </p>
-                  <p className="text-2xl font-bold text-[#011F5B]">
-                    ₦
-                    {(item.price * item.quantity).toLocaleString()}
+                  <p className="text-xl sm:text-2xl font-bold text-[#011F5B]">
+                    ₦{(item.price * item.quantity).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -105,8 +108,8 @@ export default function Cart() {
 
           {/* Order Summary */}
           <div>
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
-              <h2 className="text-2xl font-bold text-[#011F5B] mb-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 lg:sticky lg:top-24">
+              <h2 className="text-xl sm:text-2xl font-bold text-[#011F5B] mb-6">
                 Order Summary
               </h2>
 
@@ -127,7 +130,7 @@ export default function Cart() {
 
                 <div className="border-t pt-3 flex justify-between">
                   <span className="text-lg font-bold">Total</span>
-                  <span className="text-2xl font-bold text-[#D4AF37]">
+                  <span className="text-xl sm:text-2xl font-bold text-[#D4AF37]">
                     ₦{getTotal().toLocaleString()}
                   </span>
                 </div>
