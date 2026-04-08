@@ -54,14 +54,34 @@ npm run preview
 
 ### Customer Features
 - ✅ **Browse Products**: Responsive product catalog with filtering and search
+- ✅ **Product Collections**: 8+ curated collections organized by style and room type:
+  - Modern Bedroom Collection (luxury and contemporary bedroom furniture)
+  - Luxury Living Collection (premium sofas and seating)
+  - Modern Dining Collection (elegant dining sets and tables)
+  - Comfort Seating Collection (armchairs, ottomans, and lounge furniture)
+  - Contemporary Tables Collection (coffee tables and side tables)
+  - Contemporary Storage Collection (bookshelves and wall cabinets)
+  - Professional Office Collection (desks and office chairs)
+  - Luxury Bedroom Suite (premium complete bedroom sets)
 - ✅ **Product Details**: View pricing, descriptions, and product variations
+- ✅ **Product Variations**: Each product has 3+ design variations with different colors, materials, and price points
 - ✅ **Shopping Cart**: Add/remove items with quantity management, persisted with localStorage
 - ✅ **Wishlist**: Save favorite items for later, persistent across sessions
 - ✅ **Checkout**: Paystack + Cash on Delivery frontend demo with live order summary
+  - Product images displayed for each item
+  - **Variation Selector**: Select collection type (color/material) for each product during checkout
+  - Real-time price updates based on selected variation
+  - Expandable variation selector with preview images
+- ✅ **Order Customization**: Choose from multiple design variations (colors, materials) before purchase
 - ✅ **User Profile**: View and edit profile information with profile picture upload
-- ✅ **Order History**: Track previously placed orders
+- ✅ **Order History**: Track previously placed orders with details modal
 - ✅ **Order Tracking**: Real-time order status tracking
-- ✅ **Responsive Design**: Full mobile, tablet, and desktop support
+- ✅ **Order Details**: View complete order information including customer details, shipping address, and items
+- ✅ **Responsive Design**: 
+  - Mobile-first design (< 640px)
+  - Tablet optimization (640px - 1024px)
+  - Full desktop experience (> 1024px)
+  - All components fully responsive across devices
 
 ### Admin Features
 - ✅ **Admin Dashboard**: Overview of store metrics and statistics
@@ -79,6 +99,30 @@ npm run preview
 - ✅ **Admin Settings**: Access control and permissions management
 
 ## 📄 Pages & Routes
+
+### Shop Page Features (`/products`)
+
+The enhanced shop page showcases 20+ premium furniture products organized into 8 curated collections:
+
+**Collections Available**:
+1. **Modern Bedroom Collection** - 5 products (beds, wardrobes, nightstands)
+2. **Luxury Living Collection** - 3 products (sofas, sectional sofas)
+3. **Modern Dining Collection** - 4 products (dining sets, tables, chairs)
+4. **Comfort Seating Collection** - 2 products (armchairs, ottomans)
+5. **Contemporary Tables Collection** - 3 products (coffee tables, side tables)
+6. **Contemporary Storage Collection** - 2 products (bookshelves, wall cabinets)
+7. **Professional Office Collection** - 3 products (desks, office chairs, corner desks)
+
+**Features**:
+- **Product Variations**: Each product displays 3 design variations with different colors/materials
+- **Responsive Grid Layout**:
+  - Mobile: 1 column layout
+  - Tablet: 2 columns
+  - Desktop: 3 columns
+- **Search & Filter**: Search by product name, collection, or category; filter by furniture type
+- **Collection Grouping**: Products automatically grouped and displayed by collection
+- **Product Images**: High-quality images for all product variations
+- **Lazy Loading**: Images load on demand for better performance
 
 ### Public Routes
 | Route | Component | Description |
@@ -127,7 +171,7 @@ client/
 │   │   └── loader.jsx           # Loading spinner
 │   ├── pages/                   # Page components
 │   │   ├── Home.jsx
-│   │   ├── Products.jsx
+│   │   ├── Products.jsx         # Shop page with 20+ products organized in 8 collections
 │   │   ├── Cart.jsx             # Shopping cart page
 │   │   ├── Checkout.jsx         # Checkout with Paystack + COD frontend demo
 │   │   ├── Wishlist.jsx
@@ -138,9 +182,9 @@ client/
 │   │   ├── AdminEditProduct.jsx # Edit products & variations
 │   │   ├── AdminCollections.jsx # Manage collections
 │   │   ├── AdminFeatured.jsx    # Manage featured items
-│   │   ├── AdminOrders.jsx      # Manage orders
+│   │   ├── AdminOrders.jsx      # Manage orders with order details modal
 │   │   ├── AdminProfile.jsx     # Admin profile with image upload
-│   │   ├── OrderHistory.jsx
+│   │   ├── OrderHistory.jsx     # User order history with tracking modal
 │   │   ├── TrackOrder.jsx
 │   │   ├── SignIn.jsx
 │   │   ├── SignUp.jsx
@@ -150,8 +194,8 @@ client/
 │   │   └── wishlistStore.js     # ❤️ Wishlist state
 │   ├── config/                  # Configuration files
 │   │   └── paystack.js          # Paystack payment config
-│   ├── data/                    # Mock data
-│   │   └── Products.js
+│   ├── data/                    # Mock data with 20+ products
+│   │   └── Products.js          # Complete product listings with collections & variations
 │   ├── App.jsx                  # Main app component with routes
 │   ├── App.css                  # App styles
 │   ├── main.jsx                 # App entry point
@@ -164,6 +208,23 @@ client/
 ├── eslint.config.js            # ESLint configuration
 └── package.json                # Dependencies and scripts
 ```
+
+### Product Data Structure
+
+**Products.js** now contains:
+- **20+ premium furniture items**
+- **8 organized collections** by style and room type
+- **3+ design variations per product** with:
+  - Different colors/finishes
+  - Alternative materials
+  - Varied pricing
+  - High-quality images
+- **Full product details** including:
+  - Name, price, category
+  - Description
+  - Material information
+  - Availability status
+  - Featured status for homepage
 
 ## 🎨 Styling
 
@@ -340,5 +401,15 @@ This project is open source and available for learning purposes.
 
 ---
 
-**Last Updated**: 2024
-**Version**: 1.0.0
+**Last Updated**: April 8, 2026
+**Version**: 1.5.0
+
+## 📝 Recent Updates (Frontend Only)
+
+### Version 1.5.0
+- ✅ **Enhanced Shop Page**: Expanded product catalog to 20+ items with detailed variations
+- ✅ **Collection System**: Organized products into 8 curated collections by style and room type
+- ✅ **Product Variations**: Each product now features 3+ design variations with different colors, materials, and pricing
+- ✅ **Order Details Modal**: Added detailed order information modal in Admin Orders page
+- ✅ **Responsive Improvements**: Enhanced mobile responsiveness across all screen sizes
+- ✅ **Search & Filter**: Improved product discovery with search by name, collection, or category

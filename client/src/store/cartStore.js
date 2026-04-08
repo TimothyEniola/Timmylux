@@ -17,8 +17,23 @@ const useCartStore = create(
             )
           });
         } else {
-          set({ items: [...items, { ...product, quantity: 1 }] });
+          set({ items: [...items, { ...product, quantity: 1, selectedVariation: null }] });
         }
+      },
+      updateVariation: (id, variation) => {
+        set({
+          items: get().items.map(item =>
+            item.id === id 
+              ? { 
+                  ...item, 
+                  selectedVariation: variation,
+                  price: variation?.price || item.price,
+                  image: variation?.image || item.image,
+                  color: variation?.color
+                }
+              : item
+          )
+        });
       },
       removeItem: (id) => {
         set({ items: get().items.filter(item => item.id !== id) });

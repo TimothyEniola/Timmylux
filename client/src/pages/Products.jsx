@@ -42,23 +42,23 @@ export default function Products() {
         </div>
 
         {/* Search and Filter */}
-        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex-1">
             <p className="text-sm uppercase tracking-[0.24em] text-[#D4AF37]">
               Search collections
             </p>
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
               Find your perfect style
             </h2>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-4 w-full lg:w-auto lg:flex-row">
             {/* Category Filter */}
-            <div className="w-full sm:w-48">
+            <div className="w-full lg:w-48">
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full rounded-2xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white"
+                className="w-full rounded-2xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white text-sm"
               >
                 {categories.map((category) => (
                   <option key={category} value={category}>
@@ -69,13 +69,13 @@ export default function Products() {
             </div>
 
             {/* Search Input */}
-            <div className="w-full sm:w-80">
+            <div className="w-full lg:w-80">
               <input
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search collections, products..."
-                className="w-full rounded-2xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
+                className="w-full rounded-2xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] text-sm"
               />
             </div>
           </div>
@@ -88,16 +88,16 @@ export default function Products() {
               <div key={collectionName} className="collection-section">
                 {/* Collection Header */}
                 <div className="mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
                     {collectionName}
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-sm sm:text-base text-gray-600">
                     {collectionProducts.length} design{collectionProducts.length > 1 ? 's' : ''} available
                   </p>
                 </div>
 
                 {/* Collection Products */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {collectionProducts.map((product) => (
                     <div key={product.id} className="space-y-4">
                       {/* Main Product Card */}
@@ -108,11 +108,11 @@ export default function Products() {
 
                       {/* Variations */}
                       {product.variations && product.variations.length > 0 && (
-                        <div className="bg-gray-50 rounded-xl p-4">
-                          <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                        <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
+                          <h4 className="text-xs sm:text-sm font-semibold text-gray-900 mb-3">
                             Design Variations
                           </h4>
-                          <div className="grid grid-cols-3 gap-2">
+                          <div className="grid grid-cols-3 gap-2 sm:gap-3">
                             {product.variations.map((variation) => (
                               <div
                                 key={variation.id}

@@ -1,9 +1,11 @@
 import { useMemo, useState } from "react";
-import { Truck, CreditCard } from "lucide-react";
+import { Truck, CreditCard, ChevronDown } from "lucide-react";
 import useCartStore from "../store/cartStore";
+import { products } from "../data/Products";
 
 export default function Checkout() {
   const items = useCartStore((state) => state.items);
+  const updateVariation = useCartStore((state) => state.updateVariation);
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -13,6 +15,7 @@ export default function Checkout() {
     state: "",
   });
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [expandedVariations, setExpandedVariations] = useState({});
 
   const total = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -194,43 +197,112 @@ export default function Checkout() {
             </h2>
 
             {items.length > 0 ? (
-              <div className="space-y-4">
-                {items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 pb-4 border-b">
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={item.name || item.title}
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
-                        No Image
+              <div className="space-y-6">
+                {items.map((item) => {
+                  const product = products.find(p => p.id === item.id);
+                  const hasVariations = product?.variations && product.variations.length > 0;
+                  
+                  return (
+                    <div key={item.id} className="border-b pb-6 space-y-3">
+                      {/* Product Image and Basic Info */}
+                      <div className="flex items-start gap-4">
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.name || item.title}
+                            className="w-20 h-20 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
+                            No Image
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-[#011F5B]">
+                            {item.name || item.title || "Product"}
+                          </p>
+                          {item.color && (
+                            <p className="text-xs text-gray-500">
+                              Selected: {item.color}
+                            </p>
+                          )}
+                          <p className="text-sm text-gray-600 mt-1">
+                            Qty: <span className="font-semibold">{item.quantity}</span>
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-[#D4AF37]">
+                            ₦{(item.price * item.quantity).toLocaleString()}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            ₦{item.price.toLocaleString()} each
+                          </p>
+                        </div>
                       </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-[#011F5B] truncate">
-                        {item.name || item.title || "Product"}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Qty: {item.quantity}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-[#D4AF37]">
-                        ₦{(item.price * item.quantity).toFixed(2)}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        ₦{item.price.toFixed(2)} each
-                      </p>
-                    </div>
-                  </div>
-                ))}
 
-                <div className="pt-4 space-y-2">
+                      {/* Variation Selector */}
+                      {hasVariations && (
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedVariations({
+                              ...expandedVariations,
+                              [item.id]: !expandedVariations[item.id]
+                            })}
+                            className="w-full flex items-center justify-between text-sm font-medium text-gray-700 hover:text-[#011F5B] transition-colors"
+                          >
+                            <span>Choose Collection Type</span>
+                            <ChevronDown 
+                              size={18} 
+                              className={`transition-transform ${expandedVariations[item.id] ? 'rotate-180' : ''}`}
+                            />
+                          </button>
+
+                          {expandedVariations[item.id] && (
+                            <div className="mt-3 space-y-2">
+                              {product.variations.map((variation) => (
+                                <button
+                                  key={variation.id}
+                                  onClick={() => {
+                                    updateVariation(item.id, variation);
+                                    setExpandedVariations({
+                                      ...expandedVariations,
+                                      [item.id]: false
+                                    });
+                                  }}
+                                  className={`w-full flex items-center gap-3 p-2 rounded-lg text-left text-sm border transition-colors ${
+                                    item.selectedVariation?.id === variation.id
+                                      ? 'bg-[#D4AF37] border-[#D4AF37] text-white'
+                                      : 'bg-white border-gray-200 hover:border-[#D4AF37] text-gray-700'
+                                  }`}
+                                >
+                                  {variation.image && (
+                                    <img
+                                      src={variation.image}
+                                      alt={variation.name}
+                                      className="w-10 h-10 rounded object-cover"
+                                    />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-medium truncate">{variation.name}</p>
+                                    <p className="text-xs opacity-75">
+                                      {variation.color} • ₦{variation.price.toLocaleString()}
+                                    </p>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                <div className="pt-4 space-y-2 border-t">
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>₦{total.toFixed(2)}</span>
+                    <span>₦{total.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
@@ -238,7 +310,7 @@ export default function Checkout() {
                   </div>
                   <div className="border-t pt-2 flex justify-between text-lg font-bold text-[#011F5B]">
                     <span>Total</span>
-                    <span>₦{total.toFixed(2)}</span>
+                    <span>₦{total.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
