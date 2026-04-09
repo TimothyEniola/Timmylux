@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +20,7 @@ export default function SignIn() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-[#D4AF37] rounded-full mb-4">
-            <span className="text-white font-bold text-2xl">F</span>
+            <User className="text-white" size={32} />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
           <p className="text-gray-600 mt-2">Sign in to your account</p>

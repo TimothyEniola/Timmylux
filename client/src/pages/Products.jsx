@@ -2,10 +2,12 @@ import { useState } from "react";
 import ProductCard from "../components/ProductCard";
 import { products, categories } from "../data/Products";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 
 export default function Products() {
+  const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "All");
 
   const filteredProducts = products.filter((product) => {
     const query = searchQuery.trim().toLowerCase();

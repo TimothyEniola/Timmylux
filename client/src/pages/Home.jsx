@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package, CreditCard, Headphones, Star } from "lucide-react";
 import ProductCard from "../components/ProductCard";
+import EventsSection from "../components/EventsSection";
 import { products } from "../data/Products";
 
 export default function Home() {
@@ -10,7 +11,95 @@ export default function Home() {
   const [timerColor, setTimerColor] = useState("bg-emerald-500");
   const saleEndTimeRef = useRef(Date.now() + 7 * 60 * 60 * 1000);
 
-  const homepageProducts = products.slice(0, 4);
+  // Load editable content from localStorage
+  const [content, setContent] = useState({
+    hero: {
+      title: "Explore Our Modern Furniture Collection",
+      subtitle: "Discover timeless elegance and modern comfort with our curated collection of premium furniture. Transform your space with pieces that blend luxury craftsmanship with contemporary design.",
+      backgroundImage: "https://images.unsplash.com/photo-1759691555105-17e609a3e46f?auto=format&fit=crop&q=80",
+      ctaText: "Shop Now →",
+      secondaryCtaText: "View All Products"
+    },
+    features: {
+      title: "Why Choose Us",
+      subtitle: "Experience luxury furniture shopping like never before",
+      features: [
+        {
+          title: "Free Shipping",
+          description: "Free shipping for orders above $1000",
+          icon: "Package"
+        },
+        {
+          title: "Secure Payment",
+          description: "100% secure payment methods",
+          icon: "CreditCard"
+        },
+        {
+          title: "24/7 Support",
+          description: "Round the clock customer support",
+          icon: "Headphones"
+        },
+        {
+          title: "Quality Guarantee",
+          description: "Premium quality furniture guaranteed",
+          icon: "Star"
+        }
+      ]
+    },
+    categories: {
+      title: "Browse by Category",
+      subtitle: "Explore our wide range of collections",
+      categories: [
+        {
+          name: "Living Room",
+          count: "200+ Items",
+          image: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
+          items: ["Sofa Sets", "Coffee Tables", "Armchairs", "TV Units"]
+        },
+        {
+          name: "Bedroom",
+          count: "150+ Items",
+          image: "https://images.pexels.com/photos/1454806/pexels-photo-1454806.jpeg",
+          items: ["Beds", "Wardrobes", "Nightstands", "Dressers"]
+        },
+        {
+          name: "Dining",
+          count: "80+ Items",
+          image: "https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg",
+          items: ["Dining Tables", "Chairs", "Sideboards", "Bar Stools"]
+        }
+      ]
+    },
+    products: {
+      title: "Curated Home Highlights",
+      subtitle: "Featured Products",
+      flashSaleText: "Flash Sale",
+      description: "Only 4 exclusive items featured here"
+    }
+  });
+
+  const homepageProducts = products.filter(product => product.featured).slice(0, 4);
+
+  useEffect(() => {
+    // Load saved content from localStorage
+    const savedContent = localStorage.getItem("adminContent");
+    if (savedContent) {
+      const loaded = JSON.parse(savedContent);
+      if (loaded?.categories?.categories) {
+        loaded.categories.categories = loaded.categories.categories.map((category) => ({
+          ...category,
+          count:
+            category.count ||
+            (Array.isArray(category.items)
+              ? `${category.items.length} Items`
+              : typeof category.items === "string"
+              ? category.items
+              : ""),
+        }));
+      }
+      setContent(loaded);
+    }
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -50,27 +139,23 @@ export default function Home() {
                 The Best Online Furniture Store
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Explore Our Modern
-                <br />
-                Furniture Collection
+                {content.hero.title}
               </h1>
               <p className="text-gray-600 text-lg mb-8 max-w-md">
-                Discover timeless elegance and modern comfort with our curated
-                collection of premium furniture. Transform your space with
-                pieces that blend luxury craftsmanship with contemporary design.
+                {content.hero.subtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                 <button
                   className="btn-primary text-center inline-flex items-center justify-center"
                   onClick={() => navigate("/products")}
                 >
-                  Shop Now →
+                  {content.hero.ctaText}
                 </button>
                 <button
                   className="btn-outline text-center"
                   onClick={() => navigate("/products")}
                 >
-                  View All Products
+                  {content.hero.secondaryCtaText}
                 </button>
               </div>
 
@@ -122,7 +207,7 @@ export default function Home() {
             <div className="relative">
               <div className="relative group overflow-hidden rounded-2xl">
                 <img
-                  src="https://images.unsplash.com/photo-1759691555105-17e609a3e46f?auto=format&fit=crop&q=80"
+                  src={content.hero.backgroundImage}
                   alt="Living Room"
                   className="w-full h-96 object-cover"
                   loading="lazy"
@@ -145,70 +230,36 @@ export default function Home() {
       <section className="py-16 bg-white">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Us</h2>
-            <p className="text-gray-600">Experience luxury furniture shopping like never before</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{content.features.title}</h2>
+            <p className="text-gray-600">{content.features.subtitle}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-14 h-14 bg-[#fbbf24] rounded-full flex items-center justify-center">
-                  <Package className="text-white" size={24} />
+            {content.features.features.map((feature, index) => {
+              const IconComponent = feature.icon === "Package" ? Package :
+                                   feature.icon === "CreditCard" ? CreditCard :
+                                   feature.icon === "Headphones" ? Headphones : Star;
+              const bgColor = index === 0 ? "bg-[#fbbf24]" :
+                             index === 1 ? "bg-[#D4AF37]" :
+                             index === 2 ? "bg-[#011F5B]" : "bg-[#fbbf24]";
+              
+              return (
+                <div key={index} className="flex items-start gap-4">
+                  <div className="flex-shrink-0">
+                    <div className={`w-14 h-14 ${bgColor} rounded-full flex items-center justify-center`}>
+                      <IconComponent className="text-white" size={24} />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg mb-1 text-gray-900">
+                      {feature.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      {feature.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1 text-gray-900">
-                  Free Shipping
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Free shipping for orders above $1000
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-14 h-14 bg-[#D4AF37] rounded-full flex items-center justify-center">
-                  <CreditCard className="text-white" size={24} />
-                </div>
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1 text-gray-900">
-                  Secure Payment
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  100% secure payment methods
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-14 h-14 bg-[#011F5B] rounded-full flex items-center justify-center">
-                  <Headphones className="text-white" size={24} />
-                </div>
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1 text-gray-900">
-                  24/7 Support
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Round the clock customer support
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0">
-                <div className="w-14 h-14 bg-[#fbbf24] rounded-full flex items-center justify-center">
-                  <Star className="text-white" size={24} />
-                </div>
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1 text-gray-900">
-                  Quality Guarantee
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  Premium quality furniture guaranteed
-                </p>
-              </div>
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -217,140 +268,54 @@ export default function Home() {
       <section className="py-16 bg-gray-50">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Browse by Category</h2>
-            <p className="text-gray-600">Explore our wide range of collections</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{content.categories.title}</h2>
+            <p className="text-gray-600">{content.categories.subtitle}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-[#fbbf24] font-semibold text-sm mb-1">
-                    200+ Items
-                  </p>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Living Room
-                  </h3>
-                  <ul className="space-y-2 text-gray-600 text-sm mb-4">
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Sofa Sets
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Coffee Tables
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Armchairs
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      TV Units
-                    </li>
-                  </ul>
-                  <span className="text-[#D4AF37] font-semibold text-sm">
-                    View Collection →
-                  </span>
-                </div>
-                <div className="w-32 h-40 rounded-lg overflow-hidden">
-                  <img
-                    src="https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
-                    alt="Living Room"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+            {content.categories.categories.map((category, index) => (
+              <div key={index} className="bg-white rounded-2xl p-6 shadow-sm">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <p className="text-[#fbbf24] font-semibold text-sm mb-1">
+                      {category.count}
+                    </p>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                      {category.name}
+                    </h3>
+                    <ul className="space-y-2 text-gray-600 text-sm mb-4">
+                      {category.items.map((item, itemIndex) => (
+                        <li key={itemIndex} className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                    <button 
+                      className="text-[#D4AF37] font-semibold text-sm hover:text-[#011F5B] transition-colors"
+                      onClick={() => navigate(`/products?category=${category.name}`)}
+                    >
+                      View Collection →
+                    </button>
+                  </div>
+                  <div className="w-32 h-40 rounded-lg overflow-hidden">
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-[#fbbf24] font-semibold text-sm mb-1">
-                    150+ Items
-                  </p>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Bedroom
-                  </h3>
-                  <ul className="space-y-2 text-gray-600 text-sm mb-4">
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Beds
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Wardrobes
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Nightstands
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Dressers
-                    </li>
-                  </ul>
-                  <span className="text-[#D4AF37] font-semibold text-sm">
-                    View Collection →
-                  </span>
-                </div>
-                <div className="w-32 h-40 rounded-lg overflow-hidden">
-                  <img
-                    src="https://images.pexels.com/photos/1454806/pexels-photo-1454806.jpeg"
-                    alt="Bedroom"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <p className="text-[#fbbf24] font-semibold text-sm mb-1">
-                    80+ Items
-                  </p>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Dining
-                  </h3>
-                  <ul className="space-y-2 text-gray-600 text-sm mb-4">
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Dining Tables
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Chairs
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Sideboards
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
-                      Bar Stools
-                    </li>
-                  </ul>
-                  <span className="text-[#D4AF37] font-semibold text-sm">
-                    View Collection →
-                  </span>
-                </div>
-                <div className="w-32 h-40 rounded-lg overflow-hidden">
-                  <img
-                    src="https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg"
-                    alt="Dining"
-                    className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
 
           <div className="text-center mt-8">
-            <button className="text-[#011F5B] font-semibold hover:text-[#D4AF37] transition-colors">
+            <button 
+              className="text-[#011F5B] font-semibold hover:text-[#D4AF37] transition-colors"
+              onClick={() => navigate("/products")}
+            >
               View All Categories →
             </button>
           </div>
@@ -361,24 +326,19 @@ export default function Home() {
       <section className="py-16 bg-white">
         <div className="container-custom">
           <div className="text-center mb-8">
-            <p className="text-gray-600 mb-2">Featured Products</p>
+            <p className="text-gray-600 mb-2">{content.products.subtitle}</p>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Curated Home Highlights
+              {content.products.title}
             </h2>
           </div>
 
-          <div className="mb-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-[0.24em] text-[#D4AF37]">
-                Flash Sale
-              </p>
-              <h3 className="text-2xl font-semibold text-gray-900">
-                Only 4 exclusive items featured here
-              </h3>
-            </div>
-            <div className={`rounded-full px-4 py-3 text-sm font-semibold text-white ${timerColor}`}>
-              {countdown === "00:00:00" ? "Sale ended" : `Ends in ${countdown}`}
-            </div>
+          <div className="mb-8">
+            <p className="text-sm uppercase tracking-[0.24em] text-[#D4AF37]">
+              {content.products.flashSaleText}
+            </p>
+            <h3 className="text-2xl font-semibold text-gray-900">
+              {content.products.description}
+            </h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -387,8 +347,7 @@ export default function Home() {
                 key={product.id}
                 product={product}
                 showDiscount={product.featured}
-                timerText={countdown === "00:00:00" ? "Sale ended" : `Ends in ${countdown}`}
-                timerColor={timerColor}
+                showCardTimer={true}
               />
             ))}
           </div>
@@ -403,6 +362,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Events Section */}
+      <EventsSection />
 
     </div>
   );

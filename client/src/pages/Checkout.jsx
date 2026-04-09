@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Truck, CreditCard, ChevronDown } from "lucide-react";
+import { useMemo, useState, useEffect } from "react";
+import { Truck, CreditCard, ChevronDown, Tag } from "lucide-react";
 import useCartStore from "../store/cartStore";
 import { products } from "../data/Products";
 
@@ -16,28 +16,68 @@ export default function Checkout() {
   });
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [expandedVariations, setExpandedVariations] = useState({});
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [coupons, setCoupons] = useState([]);
+
+  // Load coupons from localStorage
+  useEffect(() => {
+    const savedCoupons = localStorage.getItem("adminCoupons");
+    if (savedCoupons) {
+      setCoupons(JSON.parse(savedCoupons));
+    }
+  }, []);
 
   const total = useMemo(
     () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     [items]
   );
 
-  const validateForm = () => {
-    if (!formData.fullName || !formData.phone || !formData.address || !formData.city || !formData.state) {
-      alert("Please complete all required delivery fields before continuing.");
-      return false;
+  const discount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+    if (appliedCoupon.type === "percentage") {
+      return (total * appliedCoupon.discount) / 100;
+    } else {
+      return Math.min(appliedCoupon.discount, total);
     }
-    if (items.length === 0) {
-      alert("Your cart is empty. Add items before checking out.");
-      return false;
+  }, [appliedCoupon, total]);
+
+  const finalTotal = total - discount;
+
+  const applyCoupon = () => {
+    if (!couponCode.trim()) {
+      alert("Please enter a coupon code");
+      return;
     }
-    return true;
+
+    const coupon = coupons.find(c => c.code.toLowerCase() === couponCode.toLowerCase() && c.active);
+    
+    if (!coupon) {
+      alert("Invalid or inactive coupon code");
+      return;
+    }
+
+    const expiryDate = new Date(coupon.expiryDate);
+    const now = new Date();
+    
+    if (expiryDate < now) {
+      alert("This coupon has expired");
+      return;
+    }
+
+    setAppliedCoupon(coupon);
+    alert(`Coupon "${coupon.code}" applied! ${coupon.type === "percentage" ? coupon.discount + "%" : "₦" + coupon.discount} discount`);
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
   };
 
   const handlePaystack = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    alert(`Paystack checkout simulated for ₦${total.toFixed(2)}. This is a frontend-only demo.`);
+    alert(`Paystack checkout simulated for ₦${finalTotal.toFixed(2)}. This is a frontend-only demo.`);
   };
 
   const handleCodOrder = (e) => {
@@ -300,17 +340,63 @@ export default function Checkout() {
                 })}
 
                 <div className="pt-4 space-y-2 border-t">
+                  {/* Coupon Section */}
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Tag className="text-[#D4AF37]" size={16} />
+                      <span className="text-sm font-medium text-gray-700">Have a coupon?</span>
+                    </div>
+                    {!appliedCoupon ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                          placeholder="Enter coupon code"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                        />
+                        <button
+                          onClick={applyCoupon}
+                          className="px-4 py-2 bg-[#D4AF37] text-white text-sm font-medium rounded-md hover:bg-[#011F5B] transition-colors"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between bg-green-50 p-2 rounded-md">
+                        <div className="flex items-center gap-2">
+                          <span className="text-green-600 font-medium text-sm">{appliedCoupon.code}</span>
+                          <span className="text-green-600 text-xs">
+                            ({appliedCoupon.type === "percentage" ? appliedCoupon.discount + "%" : "₦" + appliedCoupon.discount} off)
+                          </span>
+                        </div>
+                        <button
+                          onClick={removeCoupon}
+                          className="text-red-500 hover:text-red-700 text-sm font-medium"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
                     <span>₦{total.toLocaleString()}</span>
                   </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Discount ({appliedCoupon.code})</span>
+                      <span>-₦{discount.toLocaleString()}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
                     <span>₦0.00</span>
                   </div>
                   <div className="border-t pt-2 flex justify-between text-lg font-bold text-[#011F5B]">
                     <span>Total</span>
-                    <span>₦{total.toLocaleString()}</span>
+                    <span>₦{finalTotal.toLocaleString()}</span>
                   </div>
                 </div>
               </div>

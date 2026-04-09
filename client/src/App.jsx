@@ -24,6 +24,10 @@ import AdminCollections from "./pages/AdminCollections";
 import AdminFeatured from "./pages/AdminFeatured";
 import AdminOrders from "./pages/AdminOrders";
 import AdminProfile from "./pages/AdminProfile";
+import AdminContentEditor from "./pages/AdminContentEditor";
+import AdminEvents from "./pages/AdminEvents";
+import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminCoupons from "./pages/AdminCoupons";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 
@@ -51,6 +55,10 @@ export default function App() {
           <Route path="/track-order" element={<ProtectedRoute><TrackOrder /></ProtectedRoute>} />
           <Route path="/custom-request" element={<CustomRequest />} />
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin/content" element={<AdminRoute><AdminContentEditor /></AdminRoute>} />
+          <Route path="/admin/events" element={<AdminRoute><AdminEvents /></AdminRoute>} />
+          <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+          <Route path="/admin/coupons" element={<AdminRoute><AdminCoupons /></AdminRoute>} />
           <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
           <Route path="/admin/add-product" element={<AdminRoute><AdminAddProduct /></AdminRoute>} />
           <Route path="/admin/edit-product/:id" element={<AdminRoute><AdminEditProduct /></AdminRoute>} />

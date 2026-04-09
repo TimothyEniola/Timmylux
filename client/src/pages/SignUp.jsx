@@ -36,7 +36,7 @@ export default function SignUp() {
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-[#D4AF37] rounded-full mb-4">
-            <span className="text-white font-bold text-2xl">F</span>
+            <User className="text-white" size={32} />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
         </div>
