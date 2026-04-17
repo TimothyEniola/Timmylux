@@ -1,7 +1,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import Navbar from "./components/Navbar";
-import AdminNavbar from "./components/AdminNavbar";
+import AdminSidebar from "./components/AdminSidebar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -38,7 +38,7 @@ export default function App() {
   return (
     <div className="flex flex-col min-h-screen">
       {!isAdminRoute && <TopBar />}
-      {isAdminRoute ? <AdminNavbar /> : <Navbar />}
+      {isAdminRoute ? <AdminSidebar /> : <Navbar />}
       <div className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
