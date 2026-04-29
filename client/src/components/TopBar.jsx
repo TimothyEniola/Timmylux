@@ -1,4 +1,4 @@
-import { Phone } from "lucide-react";
+import { Phone, Search, Bell } from "lucide-react";
 import {
   FaFacebook,
   FaInstagram,
@@ -10,63 +10,100 @@ import { Link } from "react-router-dom";
 
 export default function TopBar() {
   return (
-    <div className="bg-[#D4AF37] text-white py-2">
-      <div className="container-custom">
-        <div className="flex flex-col md:flex-row items-center justify-between text-sm gap-2">
-          {/* Contact Info */}
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <Phone size={14} />
-              <a href="tel:+2348140838535" className="hover:text-[#011F5B] transition-colors">
-                Call Us: +234 8140838535
-              </a>
-            </div>
+    <div className="bg-[#D4AF37] text-white px-4 py-3">
+      <div className="container-custom flex flex-col md:flex-row items-center gap-3 md:gap-4">
+
+        {/* TOP ROW (Mobile: contact + icons, Desktop: left section) */}
+        <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-4">
+
+          {/* Contact */}
+          <div className="flex items-center gap-2 text-sm">
+            <Phone size={14} />
+            <a
+              href="tel:+2348140838535"
+              className="hover:text-[#011F5B] transition-colors"
+            >
+              +234 8140838535
+            </a>
           </div>
 
-          {/* Sign Up Link & Social Icons */}
-          <div className="flex items-center gap-6">
-            <Link
-              to="/signup"
-              className="hover:text-[#011F5B] transition-colors">
-              Sign up and GET 25% OFF for your first order.{" "}
-              <span className="font-semibold underline">Sign up now</span>
-            </Link>
+          {/* Mobile notification (visible only on small screens) */}
+          <button className="relative md:hidden hover:text-[#011F5B] transition-colors">
+            <Bell size={18} />
+            <span className="absolute -top-1 -right-1 bg-red-500 text-[10px] px-1 rounded-full">
+              3
+            </span>
+          </button>
+        </div>
 
-            {/* Social Media Icons */}
-            <div className="flex items-center gap-3">
-              <a
-                href="https://www.fb.com/l/6lp1kJRRR"
-                className="hover:text-[#011F5B] transition-colors"
-                aria-label="Facebook">
-                <FaFacebook size={16} />
-              </a>
-              <a
-                href="https://www.instagram.com/timmy_lux?igsh=MXRuNThldzZkMDJ3NA=="
-                className="hover:text-[#011F5B] transition-colors"
-                aria-label="Instagram">
-                <FaInstagram size={16} />
-              </a>
-              <a
-                href="c:\Users\Timothy\AppData\Local\Packages\5319275A.WhatsAppDesktop_cv1g1gvanyjgm\LocalState\sessions\7F56C44AF03239413CA2CEB98FB75207FC8CED42\transfers\2026-10\WhatsApp Image 2026-03-04 at 7.39.11 AM.jpeg"
-                className="hover:text-[#011F5B] transition-colors"
-                aria-label="Whatsapp">
-                <FaWhatsapp size={16} />
-              </a>
-              <a
-                href="https://x.com/YemitanT26859"
-                className="hover:text-[#011F5B] transition-colors"
-                aria-label="Twitter">
-                <FaXTwitter size={16} />
-              </a>
-              <a
-                href="www.linkedin.com/in/yemitan-timothy-6235b73ab"
-                className="hover:text-[#011F5B] transition-colors"
-                aria-label="Linkedin">
-                <FaLinkedin size={16} />
-              </a>
-            </div>
+        {/* SEARCH BAR */}
+        <div className="w-full md:flex-1 flex justify-center">
+          <div className="flex items-center w-full max-w-xl bg-white rounded-full overflow-hidden">
+            <input
+              type="text"
+              placeholder="Search products, services..."
+              className="w-full px-4 py-2 text-black outline-none text-sm md:text-base"
+            />
+            <button className="bg-[#011F5B] px-4 py-2 text-white hover:opacity-90">
+              <Search size={18} />
+            </button>
           </div>
         </div>
+
+        {/* RIGHT SECTION */}
+        <div className="flex w-full md:w-auto items-center justify-between md:justify-end gap-4">
+
+          {/* Desktop notification */}
+          <button className="relative hidden md:flex hover:text-[#011F5B] transition-colors">
+            <Bell size={18} />
+            <span className="absolute -top-1 -right-1 bg-red-500 text-[10px] px-1 rounded-full">
+              3
+            </span>
+          </button>
+
+          {/* Signup */}
+          <Link
+            to="/signup"
+            className="text-sm hover:text-[#011F5B] transition-colors whitespace-nowrap"
+          >
+            Sign up
+          </Link>
+
+          {/* Social Icons (wrap on small screens) */}
+          <div className="flex items-center gap-3 flex-wrap justify-center md:justify-end">
+            <a href="https://www.fb.com/l/6lp1kJRRR" aria-label="Facebook">
+              <FaFacebook size={16} />
+            </a>
+
+            <a
+              href="https://www.instagram.com/timmy_lux?igsh=MXRuNThldzZkMDJ3NA=="
+              aria-label="Instagram"
+            >
+              <FaInstagram size={16} />
+            </a>
+
+            <a
+              href="https://wa.me/2348140838535"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="WhatsApp"
+            >
+              <FaWhatsapp size={16} />
+            </a>
+
+            <a href="https://x.com/YemitanT26859" aria-label="Twitter">
+              <FaXTwitter size={16} />
+            </a>
+
+            <a
+              href="https://www.linkedin.com/in/yemitan-timothy-6235b73ab"
+              aria-label="LinkedIn"
+            >
+              <FaLinkedin size={16} />
+            </a>
+          </div>
+        </div>
+
       </div>
     </div>
   );
