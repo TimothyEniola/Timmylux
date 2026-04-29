@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, User } from "lucide-react";
+import { setCurrentUser, getCurrentUser, getDisplayNameFromEmail } from "../utils/userHelpers";
 
 export default function SignIn() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -12,7 +14,18 @@ export default function SignIn() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const existingUser = getCurrentUser();
+    const user = existingUser?.email === formData.email.trim()
+      ? existingUser
+      : {
+          name: getDisplayNameFromEmail(formData.email),
+          email: formData.email.trim(),
+          profileImage: existingUser?.profileImage || null,
+        };
+
+    setCurrentUser(user);
     alert("Sign in successful!");
+    navigate("/");
   };
 
   return (

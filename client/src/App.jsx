@@ -23,14 +23,15 @@ import AdminEditProduct from "./pages/AdminEditProduct";
 import AdminCollections from "./pages/AdminCollections";
 import AdminFeatured from "./pages/AdminFeatured";
 import AdminOrders from "./pages/AdminOrders";
-import AdminProfile from "./pages/AdminProfile";
+import AdminSettings from "./pages/AdminSettings";
+import AdminNotifications from "./pages/AdminNotifications";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import AdminContentEditor from "./pages/AdminContentEditor";
 import AdminEvents from "./pages/AdminEvents";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminCoupons from "./pages/AdminCoupons";
-import ProtectedRoute from "./components/ProtectedRoute";
-import AdminRoute from "./components/AdminRoute";
-
+import AdminProfile from "./pages/AdminProfile";
 export default function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
@@ -65,6 +66,8 @@ export default function App() {
           <Route path="/admin/collections" element={<AdminRoute><AdminCollections /></AdminRoute>} />
           <Route path="/admin/featured" element={<AdminRoute><AdminFeatured /></AdminRoute>} />
           <Route path="/admin/profile" element={<AdminRoute><AdminProfile /></AdminRoute>} />
+          <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+          <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
           <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
         </Routes>
       </div>

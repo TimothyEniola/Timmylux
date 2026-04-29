@@ -2,17 +2,22 @@ import { Link } from "react-router-dom";
 import { Heart, Trash2, ShoppingCart } from "lucide-react";
 import useWishlistStore from "../store/wishlistStore";
 import useCartStore from "../store/cartStore";
+import useNotificationStore from "../store/notificationStore";
 
 export default function Wishlist() {
-  const { items = [], removeFromWishlist } = useWishlistStore();
+  const { items = [], removeItem } = useWishlistStore();
   const { addItem } = useCartStore();
+  const { addNotification } = useNotificationStore();
 
   const handleAddToCart = (product) => {
     addItem(product);
-
-    // OPTIONAL: remove from wishlist after adding to cart
-    // removeFromWishlist(product.id);
-  };
+    removeItem(product.id);
+    addNotification({
+      title: "Moved to Cart",
+      message: `${product.name} has been moved from wishlist to cart.`,
+    });
+    alert(`${product.name} added to cart and removed from wishlist.`);
+  }; 
 
   if (!items || items.length === 0) {
     return (
@@ -60,7 +65,7 @@ export default function Wishlist() {
 
                 {/* DELETE BUTTON */}
                 <button
-                  onClick={() => removeFromWishlist(product.id)}
+                  onClick={() => removeItem(product.id)}
                   className="absolute top-3 right-3 p-2 bg-white rounded-full text-red-500 shadow-md hover:bg-red-50 transition"
                 >
                   <Trash2 size={18} />

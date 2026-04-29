@@ -1,19 +1,23 @@
 import { useState } from "react";
 import { User, Mail, Phone, MapPin, Calendar, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getCurrentUser, setCurrentUser } from "../utils/userHelpers";
 
 export default function UserProfile() {
-  // Static user data (frontend demo)
+  const storedUser = getCurrentUser();
+
   const [user, setUser] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
+    name: storedUser?.name || "John Doe",
+    email: storedUser?.email || "john.doe@example.com",
     phone: "+1 (555) 123-4567",
     role: "Customer",
     created_at: "2024-01-15T00:00:00.000Z",
-    profileImage: localStorage.getItem("userProfileImage") || null,
+    profileImage:
+      storedUser?.profileImage ||
+      localStorage.getItem("userProfileImage") ||
+      null,
   });
 
-  // Mock address state
   const [addresses] = useState([
     {
       houseNumber: "12A",
@@ -31,11 +35,27 @@ export default function UserProfile() {
       const reader = new FileReader();
       reader.onloadend = () => {
         const imageData = reader.result;
+
         localStorage.setItem("userProfileImage", imageData);
-        setUser((prev) => ({ ...prev, profileImage: imageData }));
-        window.dispatchEvent(new Event("userProfileImageUpdated"));
+
+        setUser((prev) => ({
+          ...prev,
+          profileImage: imageData,
+        }));
+
+        const existingUser = getCurrentUser() || {};
+
+        setCurrentUser({
+          ...existingUser,
+          name: existingUser.name || user.name,
+          email: existingUser.email || user.email,
+          profileImage: imageData,
+        });
+
+        window.dispatchEvent(new Event("userDataChanged"));
         alert("Profile picture updated successfully!");
       };
+
       reader.readAsDataURL(file);
     }
   };
@@ -43,13 +63,15 @@ export default function UserProfile() {
   return (
     <div className="container-custom py-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-[#011F5B] mb-8">My Profile</h1>
+        <h1 className="text-3xl font-bold text-[#011F5B] mb-8">
+          My Profile
+        </h1>
 
         <div className="bg-white rounded-lg shadow-md p-8">
           {/* Header */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8">
             <div className="relative group">
-              <div className="w-32 h-32 bg-[#011F5B] rounded-full flex items-center justify-center border-4 border-white shadow-sm overflow-hidden flex-shrink-0">
+              <div className="w-32 h-32 bg-[#011F5B] rounded-full flex items-center justify-center border-4 border-white shadow-sm overflow-hidden">
                 {user.profileImage ? (
                   <img
                     src={user.profileImage}
@@ -60,6 +82,7 @@ export default function UserProfile() {
                   <User size={50} className="text-white" />
                 )}
               </div>
+
               <label className="absolute bottom-0 right-0 bg-[#D4AF37] p-3 rounded-full cursor-pointer hover:bg-[#b8942a] transition-colors shadow-lg">
                 <Upload size={18} className="text-white" />
                 <input
@@ -67,25 +90,28 @@ export default function UserProfile() {
                   accept="image/*"
                   onChange={handleProfileImageUpload}
                   className="hidden"
-                  title="Upload profile picture"
                 />
               </label>
             </div>
+
             <div>
-              <h2 className="text-2xl font-bold text-[#011F5B]">{user.name}</h2>
-              <p className="text-gray-600 font-medium capitalize">{user.role}</p>
+              <h2 className="text-2xl font-bold text-[#011F5B]">
+                {user.name}
+              </h2>
+              <p className="text-gray-600 font-medium capitalize">
+                {user.role}
+              </p>
             </div>
           </div>
 
-          {/* Info + Stats */}
+          {/* Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Contact Info */}
             <div className="space-y-6">
               <div className="flex items-center gap-3">
                 <Mail className="text-[#D4AF37]" size={20} />
                 <div>
                   <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium text-gray-900">{user.email}</p>
+                  <p className="font-medium">{user.email}</p>
                 </div>
               </div>
 
@@ -93,7 +119,9 @@ export default function UserProfile() {
                 <Phone className="text-[#D4AF37]" size={20} />
                 <div>
                   <p className="text-sm text-gray-500">Phone</p>
-                  <p className="font-medium text-gray-900">{user.phone || "Not provided"}</p>
+                  <p className="font-medium">
+                    {user.phone || "Not provided"}
+                  </p>
                 </div>
               </div>
 
@@ -101,7 +129,7 @@ export default function UserProfile() {
                 <Calendar className="text-[#D4AF37]" size={20} />
                 <div>
                   <p className="text-sm text-gray-500">Member Since</p>
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium">
                     {new Date(user.created_at).toLocaleDateString("en-US", {
                       month: "long",
                       year: "numeric",
@@ -111,71 +139,44 @@ export default function UserProfile() {
               </div>
             </div>
 
-            {/* Account Status */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                  <h3 className="text-xs font-semibold text-blue-800 uppercase mb-1">
-                    Status
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                    <p className="text-blue-900 font-bold">Active</p>
-                  </div>
-                </div>
+            <div className="bg-gray-50 p-4 rounded-lg border">
+              <h3 className="text-sm font-semibold mb-2">Security</h3>
+              <p className="text-xs text-gray-500 mb-3">
+                Last login: Just now
+              </p>
 
-                <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
-                  <h3 className="text-xs font-semibold text-amber-800 uppercase mb-1">
-                    Role
-                  </h3>
-                  <p className="text-amber-900 font-bold capitalize">{user.role}</p>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Security</h3>
-                <p className="text-xs text-gray-500 mb-3">Last login: Just now</p>
-                <Link
-                  to="/settings"
-                  className="text-sm text-[#011F5B] hover:text-[#D4AF37] font-medium"
-                >
-                  Manage Password & Security →
-                </Link>
-              </div>
+              <Link
+                to="/settings"
+                className="text-sm text-[#011F5B] hover:text-[#D4AF37]"
+              >
+                Manage Password & Security →
+              </Link>
             </div>
           </div>
 
-          {/* Addresses Section */}
+          {/* Addresses */}
           <div className="mt-10">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-[#011F5B]">Addresses</h3>
-              <Link
-                to="/settings"
-                className="text-sm text-[#D4AF37] font-semibold hover:underline"
-              >
-                + Add New
-              </Link>
-            </div>
+            <h3 className="text-xl font-bold text-[#011F5B] mb-4">
+              Addresses
+            </h3>
 
-            {isLoadingAddresses ? (
-              <p className="text-gray-500 text-sm">Loading addresses...</p>
-            ) : addresses.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {addresses.length > 0 ? (
+              <div className="grid md:grid-cols-2 gap-4">
                 {addresses.map((addr, index) => (
                   <div
                     key={index}
-                    className="border p-4 rounded-lg hover:border-[#D4AF37] transition-colors"
+                    className="border p-4 rounded-lg"
                   >
-                    <div className="flex items-start gap-3">
-                      <MapPin className="text-gray-400 mt-1" size={18} />
+                    <div className="flex gap-3">
+                      <MapPin size={18} />
                       <div>
-                        <h4 className="font-medium text-[#011F5B]">
-                          {index === 0 ? "Main Address" : `Address ${index + 1}`}
+                        <h4 className="font-medium">
+                          {index === 0
+                            ? "Main Address"
+                            : `Address ${index + 1}`}
                         </h4>
                         <p className="text-sm text-gray-600">
-                          {[addr.houseNumber && `House ${addr.houseNumber}`, addr.street]
-                            .filter(Boolean)
-                            .join(", ")}
+                          {addr.houseNumber}, {addr.street}
                         </p>
                         <p className="text-sm text-gray-600">
                           {addr.lga}, {addr.state}
@@ -186,34 +187,21 @@ export default function UserProfile() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6 bg-gray-50 rounded-lg border border-dashed">
-                <MapPin className="mx-auto text-gray-300 mb-2" size={32} />
-                <p className="text-gray-500">No addresses saved yet.</p>
-              </div>
+              <p>No address yet</p>
             )}
           </div>
 
           {/* Navigation */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
-            <Link to="/order-history" className="block group">
-              <div className="bg-gray-50 hover:bg-[#011F5B] p-6 rounded-lg transition">
-                <h3 className="text-lg font-bold text-[#011F5B] group-hover:text-white mb-2">
-                  Order History
-                </h3>
-                <p className="text-sm text-gray-500 group-hover:text-gray-300">
-                  View your past orders and status.
-                </p>
+          <div className="grid md:grid-cols-2 gap-4 mt-10">
+            <Link to="/order-history">
+              <div className="bg-gray-50 p-6 rounded-lg hover:bg-[#011F5B] hover:text-white transition">
+                Order History
               </div>
             </Link>
 
-            <Link to="/track-order" className="block group">
-              <div className="bg-gray-50 hover:bg-[#011F5B] p-6 rounded-lg transition">
-                <h3 className="text-lg font-bold text-[#011F5B] group-hover:text-white mb-2">
-                  Track Orders
-                </h3>
-                <p className="text-sm text-gray-500 group-hover:text-gray-300">
-                  Check shipment location in real-time.
-                </p>
+            <Link to="/settings">
+              <div className="bg-gray-50 p-6 rounded-lg hover:bg-[#011F5B] hover:text-white transition">
+                Account Settings
               </div>
             </Link>
           </div>

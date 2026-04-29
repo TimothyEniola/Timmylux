@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { setCurrentUser, getDisplayNameFromEmail } from "../utils/userHelpers";
 
 export default function SignUp() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -27,8 +29,15 @@ export default function SignUp() {
       return;
     }
 
-    // For frontend only, just show success message
+    const user = {
+      name: formData.name.trim() || getDisplayNameFromEmail(formData.email),
+      email: formData.email.trim(),
+      profileImage: null,
+    };
+
+    setCurrentUser(user);
     alert("Account created successfully!");
+    navigate("/");
   };
 
   return (

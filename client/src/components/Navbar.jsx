@@ -2,47 +2,25 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Menu,
   X,
-  Search,
   Heart,
   ShoppingCart,
-  User,
-  Settings,
   Home,
   Info,
   ClipboardList,
   Package,
-  UserCircle,
-  SlidersHorizontal,
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import logo from "../assets/reallogo.png";
+import ProfileDropdown from "./ProfileDropdown";
 
 export default function UserSidebar() {
   const [open, setOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [profileImage, setProfileImage] = useState(
-    localStorage.getItem("userProfileImage") || null
-  );
 
   const location = useLocation();
-  const dropdownRef = useRef(null);
 
   useEffect(() => {
     setOpen(false); // close sidebar on route change (mobile)
   }, [location.pathname]);
-
-  // close dropdown outside click
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setUserDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
@@ -110,47 +88,8 @@ export default function UserSidebar() {
         </div>
 
         {/* FOOTER / USER */}
-        <div
-          className="absolute bottom-0 w-full border-t border-[#D4AF37]/30 p-4"
-          ref={dropdownRef}
-        >
-          <button
-            onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-            className="flex items-center gap-3 w-full"
-          >
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white flex items-center justify-center">
-              {profileImage ? (
-                <img
-                  src={profileImage}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <User size={20} />
-              )}
-            </div>
-            <span className="text-sm">My Account</span>
-          </button>
-
-          {userDropdownOpen && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 bg-white text-black rounded-lg shadow-xl border border-gray-200 py-2 z-[100]">
-              <DropdownLink
-                to="/profile"
-                label="My Profile"
-                icon={UserCircle}
-              />
-              <DropdownLink
-                to="/orders"
-                label="Order History"
-                icon={ClipboardList}
-              />
-              <DropdownLink
-                to="/settings"
-                label="Settings"
-                icon={SlidersHorizontal}
-              />
-            </div>
-          )}
+        <div className="absolute bottom-0 w-full border-t border-[#D4AF37]/30 p-4">
+          <ProfileDropdown />
         </div>
       </aside>
 

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { User, Shield, Bell } from "lucide-react";
+import { User, Shield, Bell, Settings } from "lucide-react";
 import useNotificationStore from "../store/notificationStore";
 
-export default function UserSettings() {
+export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState("profile");
 
   const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotificationStore();
@@ -16,13 +16,6 @@ export default function UserSettings() {
     name: "",
     email: "",
     phone: "",
-  });
-
-  const [addressData, setAddressData] = useState({
-    street: "",
-    lga: "",
-    state: "",
-    houseNumber: "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -51,7 +44,7 @@ export default function UserSettings() {
 
         {/* Header */}
         <h1 className="text-2xl sm:text-3xl font-bold text-[#011F5B] mb-8">
-          Account Settings
+          Admin Settings
         </h1>
 
         <div className="bg-white rounded-lg shadow-md w-full overflow-hidden">
@@ -59,7 +52,7 @@ export default function UserSettings() {
           {/* Responsive Tabs */}
           <div className="border-b overflow-x-auto">
             <div className="flex min-w-max">
-              {["profile", "address", "security", "notifications"].map(
+              {["profile", "security", "notifications"].map(
                 (tab) => (
                   <button
                     key={tab}
@@ -119,73 +112,6 @@ export default function UserSettings() {
 
                 <button className="btn-primary w-full sm:w-auto" disabled>
                   Update Profile (Disabled)
-                </button>
-              </form>
-            )}
-
-            {/* ADDRESS TAB */}
-            {activeTab === "address" && (
-              <form className="space-y-4">
-                <h2 className="text-lg sm:text-xl font-bold">
-                  Address Information
-                </h2>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <input
-                    type="text"
-                    placeholder="Street"
-                    value={addressData.street}
-                    onChange={(e) =>
-                      setAddressData({
-                        ...addressData,
-                        street: e.target.value,
-                      })
-                    }
-                    className="w-full border p-3 rounded-lg"
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="House Number"
-                    value={addressData.houseNumber}
-                    onChange={(e) =>
-                      setAddressData({
-                        ...addressData,
-                        houseNumber: e.target.value,
-                      })
-                    }
-                    className="w-full border p-3 rounded-lg"
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="LGA"
-                    value={addressData.lga}
-                    onChange={(e) =>
-                      setAddressData({
-                        ...addressData,
-                        lga: e.target.value,
-                      })
-                    }
-                    className="w-full border p-3 rounded-lg"
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="State"
-                    value={addressData.state}
-                    onChange={(e) =>
-                      setAddressData({
-                        ...addressData,
-                        state: e.target.value,
-                      })
-                    }
-                    className="w-full border p-3 rounded-lg"
-                  />
-                </div>
-
-                <button className="btn-primary w-full sm:w-auto" disabled>
-                  Save Address (Disabled)
                 </button>
               </form>
             )}

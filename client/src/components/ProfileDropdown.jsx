@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   User,
   Settings,
@@ -9,13 +9,18 @@ import {
   ChevronRight,
   ChevronUp,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getCurrentUser, clearCurrentUser } from "../utils/userHelpers";
 
 export default function ProfileDropdown() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(getCurrentUser());
   const ref = useRef(null);
+  const navigate = useNavigate();
 
-  const userName = "Yemitan Timothy";
+  const userName = user?.name || "Guest User";
+  const profileImage = user?.profileImage || null;
+  const isAuthenticated = Boolean(user?.email);
 
   const initials = userName
     .split(" ")
@@ -29,7 +34,14 @@ export default function ProfileDropdown() {
       if (!ref.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener("pointerdown", handleClick);
-    return () => document.removeEventListener("pointerdown", handleClick);
+
+    const syncUser = () => setUser(getCurrentUser());
+    window.addEventListener("userDataChanged", syncUser);
+
+    return () => {
+      document.removeEventListener("pointerdown", handleClick);
+      window.removeEventListener("userDataChanged", syncUser);
+    };
   }, []);
 
   return (
@@ -83,16 +95,28 @@ export default function ProfileDropdown() {
               Help
             </button>
 
-            <button
-              onClick={() => {
-                alert("Logout logic here");
-                setOpen(false);
-              }}
-              className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
-            >
-              <LogOut size={14} />
-              Log out
-            </button>
+            {isAuthenticated ? (
+              <button
+                onClick={() => {
+                  clearCurrentUser();
+                  setOpen(false);
+                  navigate("/signin");
+                }}
+                className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+              >
+                <LogOut size={14} />
+                Sign Out
+              </button>
+            ) : (
+              <Link
+                to="/signin"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-[#011F5B] hover:bg-gray-50 transition"
+              >
+                <LogOut size={14} />
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
       )}
@@ -102,8 +126,12 @@ export default function ProfileDropdown() {
         onClick={() => setOpen((p) => !p)}
         className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-indigo-50 transition"
       >
-        <div className="w-9 h-9 rounded-full bg-[#011F5B] border-2 border-indigo-400 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
-          {initials}
+        <div className="w-9 h-9 rounded-full overflow-hidden bg-[#011F5B] border-2 border-indigo-400 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+          {profileImage ? (
+            <img src={profileImage} alt={userName} className="w-full h-full object-cover" />
+          ) : (
+            <span>{initials}</span>
+          )}
         </div>
 
         <div className="flex flex-col text-left flex-1">

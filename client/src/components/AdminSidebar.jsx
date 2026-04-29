@@ -12,6 +12,7 @@ import {
   Edit3,
   Calendar,
   Tag,
+  Bell,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import logo from "../assets/reallogo.png";
@@ -33,6 +34,7 @@ export default function AdminSidebar() {
 
   const navItems = [
     { path: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+    { path: "/admin/notifications", label: "Notifications", icon: Bell },
     { path: "/admin/coupons", label: "Coupons", icon: Tag },
     { path: "/admin/content", label: "Content Editor", icon: Edit3 },
     { path: "/admin/events", label: "Events", icon: Calendar },
