@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Package, Truck, CheckCircle, Clock, Eye } from "lucide-react";
-import ProfileDropdown from "../components/ProfileDropdown";
-
 export default function OrderHistory() {
   const [selectedOrder, setSelectedOrder] = useState(null);
 
@@ -89,12 +87,9 @@ export default function OrderHistory() {
   return (
     <div className="container-custom py-8">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-[#011F5B]">
-            Order History
-          </h1>
-          <ProfileDropdown />
-        </div>
+        <h1 className="text-3xl font-bold text-[#011F5B] mb-8">
+          Order History
+        </h1>
 
         <div className="space-y-6">
           {orders.length > 0 ? (

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { User, Mail, Phone, MapPin, Calendar, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
-import ProfileDropdown from "../components/ProfileDropdown";
 
 export default function UserProfile() {
   // Static user data (frontend demo)
@@ -44,10 +43,7 @@ export default function UserProfile() {
   return (
     <div className="container-custom py-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-[#011F5B]">My Profile</h1>
-          <ProfileDropdown />
-        </div>
+        <h1 className="text-3xl font-bold text-[#011F5B] mb-8">My Profile</h1>
 
         <div className="bg-white rounded-lg shadow-md p-8">
           {/* Header */}

@@ -1,166 +1,13 @@
-// import { useState, useRef, useEffect } from "react";
-// import {
-//   User,
-//   Settings,
-//   Package,
-//   Truck,
-//   LogOut,
-//   HelpCircle,
-//   Sparkles,
-//   ChevronRight,
-// } from "lucide-react";
-// import { Link } from "react-router-dom";
-
-// export default function ProfileDropdown() {
-//   const [open, setOpen] = useState(false);
-//   const ref = useRef(null);
-
-//   // 🔥 Replace with real data later
-//   const userName = "Yemitan Timothy";
-//   const userPlan = "Free";
-//   const profileImage = null;
-
-//   // close on outside click
-//   useEffect(() => {
-//     const handleClick = (e) => {
-//       if (ref.current && !ref.current.contains(e.target)) {
-//         setOpen(false);
-//       }
-//     };
-//     document.addEventListener("mousedown", handleClick);
-//     return () => document.removeEventListener("mousedown", handleClick);
-//   }, []);
-
-//   return (
-//     <div ref={ref} className="relative">
-//       {/* TRIGGER BUTTON */}
-//       <button
-//         onClick={() => setOpen((prev) => !prev)}
-//         className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-[#D4AF37]/20 transition"
-//       >
-//         <div className="w-9 h-9 rounded-full bg-yellow-600 flex items-center justify-center text-white text-sm font-semibold">
-//           {userName
-//             .split(" ")
-//             .map((n) => n[0])
-//             .join("")
-//             .slice(0, 2)}
-//         </div>
-
-//         <div className="flex flex-col text-left">
-//           <span className="text-sm font-medium truncate">
-//             {userName}
-//           </span>
-//           <span className="text-xs text-gray-400">
-//             {userPlan}
-//           </span>
-//         </div>
-//       </button>
-
-//       {/* FLOATING PANEL */}
-//       {open && (
-//         <div className="absolute bottom-full left-0 mb-2 w-72 bg-white text-black rounded-2xl shadow-2xl border border-gray-200 z-[999] overflow-hidden">
-
-//           {/* HEADER */}
-//           <div className="flex items-center justify-between px-4 py-3">
-//             <div className="flex items-center gap-3">
-//               <div className="w-10 h-10 rounded-full bg-yellow-600 flex items-center justify-center text-white font-semibold">
-//                 {userName
-//                   .split(" ")
-//                   .map((n) => n[0])
-//                   .join("")
-//                   .slice(0, 2)}
-//               </div>
-
-//               <div>
-//                 <div className="text-sm font-semibold">
-//                   {userName}
-//                 </div>
-//                 <div className="text-xs text-gray-500">
-//                   {userPlan}
-//                 </div>
-//               </div>
-//             </div>
-
-//             <ChevronRight size={16} className="text-gray-400" />
-//           </div>
-
-//           <div className="border-t" />
-
-//           {/* MAIN LINKS */}
-//           <div className="py-1">
-//             <button className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-100">
-//               <Sparkles size={16} />
-//               Upgrade for free
-//             </button>
-
-//             <Link
-//               to="/profile"
-//               onClick={() => setOpen(false)}
-//               className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100"
-//             >
-//               <User size={16} />
-//               Profile
-//             </Link>
-
-//             <Link
-//               to="/settings"
-//               onClick={() => setOpen(false)}
-//               className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100"
-//             >
-//               <Settings size={16} />
-//               Settings
-//             </Link>
-
-//             <Link
-//               to="/orders"
-//               onClick={() => setOpen(false)}
-//               className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100"
-//             >
-//               <Package size={16} />
-//               Orders
-//             </Link>
-
-//             <Link
-//               to="/track-order"
-//               onClick={() => setOpen(false)}
-//               className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-100"
-//             >
-//               <Truck size={16} />
-//               Track Order
-//             </Link>
-//           </div>
-
-//           <div className="border-t" />
-
-//           {/* FOOTER LINKS */}
-//           <div className="py-1">
-//             <button className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-100">
-//               <HelpCircle size={16} />
-//               Help
-//             </button>
-
-//             <button
-//               onClick={() => {
-//                 alert("Logout logic here");
-//                 setOpen(false);
-//               }}
-//               className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-red-50 text-red-600"
-//             >
-//               <LogOut size={16} />
-//               Log out
-//             </button>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
 import { useState, useRef, useEffect } from "react";
 import {
-  User, Settings, Package, Truck, LogOut,
-  HelpCircle, Sparkles, ChevronRight, ChevronUp,
+  User,
+  Settings,
+  Package,
+  Truck,
+  LogOut,
+  HelpCircle,
+  ChevronRight,
+  ChevronUp,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -169,7 +16,6 @@ export default function ProfileDropdown() {
   const ref = useRef(null);
 
   const userName = "Yemitan Timothy";
-  const userPlan = "Free";
 
   const initials = userName
     .split(" ")
@@ -179,39 +25,31 @@ export default function ProfileDropdown() {
 
   useEffect(() => {
     const handleClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      if (!ref.current) return;
+      if (!ref.current.contains(e.target)) setOpen(false);
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    document.addEventListener("pointerdown", handleClick);
+    return () => document.removeEventListener("pointerdown", handleClick);
   }, []);
 
   return (
     <div ref={ref} className="relative">
 
-      {/* FLOATING PANEL — renders above trigger */}
+      {/* 🔥 FLOATING PANEL */}
       {open && (
-        <div className="absolute bottom-[calc(100%+10px)] left-0 w-68 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[999] overflow-hidden origin-bottom-left animate-slide-up">
+        <div className="absolute bottom-[calc(100%+10px)] left-0 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[999] overflow-hidden transition-all duration-200">
 
           {/* HEADER */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-amber-50 to-yellow-100 border-b border-yellow-200 cursor-pointer hover:from-yellow-100 hover:to-amber-200 transition">
-            <div className="w-10 h-10 rounded-full bg-yellow-700 border-2 border-yellow-400/50 flex items-center justify-center text-white font-semibold text-sm">
+          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-blue-50 to-indigo-100 border-b border-indigo-200 cursor-pointer hover:from-indigo-100 hover:to-blue-200 transition">
+            <div className="w-10 h-10 rounded-full bg-[#011F5B] border-2 border-indigo-300 flex items-center justify-center text-white font-semibold text-sm">
               {initials}
             </div>
+
             <div className="flex-1">
               <p className="text-sm font-semibold text-gray-900">{userName}</p>
-              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-amber-800 bg-yellow-300 rounded px-1.5 py-0.5 mt-0.5">
-                <Sparkles size={9} /> {userPlan} plan
-              </span>
             </div>
-            <ChevronRight size={14} className="text-gray-400" />
-          </div>
 
-          {/* UPGRADE */}
-          <div className="py-1">
-            <button className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-amber-700 hover:bg-amber-50 transition">
-              <Sparkles size={14} className="text-amber-500" />
-              Upgrade for free
-            </button>
+            <ChevronRight size={14} className="text-gray-400" />
           </div>
 
           <div className="border-t border-gray-100" />
@@ -244,8 +82,12 @@ export default function ProfileDropdown() {
               <HelpCircle size={14} className="text-gray-400" />
               Help
             </button>
+
             <button
-              onClick={() => { alert("Logout logic here"); setOpen(false); }}
+              onClick={() => {
+                alert("Logout logic here");
+                setOpen(false);
+              }}
               className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
             >
               <LogOut size={14} />
@@ -255,21 +97,24 @@ export default function ProfileDropdown() {
         </div>
       )}
 
-      {/* TRIGGER — never moves */}
+      {/* 🔥 TRIGGER */}
       <button
         onClick={() => setOpen((p) => !p)}
-        className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-[#D4AF37]/20 transition"
+        className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-indigo-50 transition"
       >
-        <div className="w-9 h-9 rounded-full bg-yellow-700 border-2 border-yellow-500/40 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+        <div className="w-9 h-9 rounded-full bg-[#011F5B] border-2 border-indigo-400 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
           {initials}
         </div>
+
         <div className="flex flex-col text-left flex-1">
           <span className="text-sm font-medium">{userName}</span>
-          <span className="text-xs text-gray-400">{userPlan}</span>
         </div>
+
         <ChevronUp
           size={14}
-          className={`text-gray-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`text-gray-500 transition-transform duration-200 ${
+            open ? "rotate-180" : ""
+          }`}
         />
       </button>
     </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Truck, MapPin, Clock, CheckCircle, Package } from "lucide-react";
-import ProfileDropdown from "../components/ProfileDropdown";
+// import ProfileDropdown from "../components/ProfileDropdown";
 
 export default function TrackOrder() {
   const [orderId, setOrderId] = useState("");
@@ -70,10 +70,7 @@ export default function TrackOrder() {
   return (
     <div className="container-custom py-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-[#011F5B]">Track Your Order</h1>
-          <ProfileDropdown />
-        </div>
+        <h1 className="text-3xl font-bold text-[#011F5B] mb-8">Track Your Order</h1>
 
         <div className="bg-white rounded-lg shadow-md p-8 mb-8">
           <form onSubmit={handleTrackOrder} className="space-y-4">
@@ -136,8 +133,8 @@ export default function TrackOrder() {
                   </div>
                 </div>
               )) || (
-                <p className="text-gray-500">No tracking history available yet.</p>
-              )}
+                  <p className="text-gray-500">No tracking history available yet.</p>
+                )}
             </div>
 
             <div className="mt-8 p-4 bg-gray-50 rounded-lg">

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { User, Shield, Bell } from "lucide-react";
-import ProfileDropdown from "../components/ProfileDropdown";
 
 export default function UserSettings() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -41,17 +40,14 @@ export default function UserSettings() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 overflow-x-hidden">
       <div className="max-w-4xl mx-auto w-full">
-        
+
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#011F5B]">
-            Account Settings
-          </h1>
-          <ProfileDropdown />
-        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#011F5B] mb-8">
+          Account Settings
+        </h1>
 
         <div className="bg-white rounded-lg shadow-md w-full overflow-hidden">
-          
+
           {/* Responsive Tabs */}
           <div className="border-b overflow-x-auto">
             <div className="flex min-w-max">
@@ -60,11 +56,10 @@ export default function UserSettings() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base font-medium whitespace-nowrap transition-colors ${
-                      activeTab === tab
+                    className={`px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-base font-medium whitespace-nowrap transition-colors ${activeTab === tab
                         ? "text-[#D4AF37] border-b-2 border-[#D4AF37]"
                         : "text-gray-600 hover:text-[#011F5B]"
-                    }`}
+                      }`}
                   >
                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
                   </button>
@@ -74,7 +69,7 @@ export default function UserSettings() {
           </div>
 
           <div className="p-4 sm:p-6">
-            
+
             {/* PROFILE TAB */}
             {activeTab === "profile" && (
               <form className="space-y-4">

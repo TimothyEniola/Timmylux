@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { User, Mail, Phone, MapPin, Calendar, Save, Edit, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
-import AdminDropdown from "../components/AdminDropdown";
 
 export default function AdminProfile() {
   // Static admin data (frontend demo)
@@ -80,7 +79,6 @@ export default function AdminProfile() {
                 </button>
               </>
             )}
-            <AdminDropdown />
           </div>
         </div>
 

@@ -1,4 +1,3 @@
-
 import { Link, useLocation } from "react-router-dom";
 import {
   Menu,
@@ -9,6 +8,11 @@ import {
   User,
   Settings,
   Home,
+  Info,
+  ClipboardList,
+  Package,
+  UserCircle,
+  SlidersHorizontal,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import logo from "../assets/reallogo.png";
@@ -16,7 +20,10 @@ import logo from "../assets/reallogo.png";
 export default function UserSidebar() {
   const [open, setOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [profileImage, setProfileImage] = useState(localStorage.getItem("userProfileImage") || null);
+  const [profileImage, setProfileImage] = useState(
+    localStorage.getItem("userProfileImage") || null
+  );
+
   const location = useLocation();
   const dropdownRef = useRef(null);
 
@@ -31,18 +38,20 @@ export default function UserSidebar() {
         setUserDropdownOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/products", label: "Shop", icon: ShoppingCart },
-    { path: "/about", label: "About", icon: User },
-    { path: "/custom-request", label: "Custom Request", icon: Settings },
+    { path: "/about", label: "About", icon: Info },
+    { path: "/custom-request", label: "Custom Request", icon: ClipboardList },
     { path: "/wishlist", label: "Wishlist", icon: Heart },
     { path: "/cart", label: "Cart", icon: ShoppingCart },
-    { path: "/track-order", label: "Track Order", icon: Search },
+    { path: "/track-order", label: "Track Order", icon: Package },
   ];
 
   return (
@@ -87,10 +96,11 @@ export default function UserSidebar() {
                 key={item.path}
                 to={item.path}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition
-                ${isActive
+                ${
+                  isActive
                     ? "bg-[#D4AF37] text-black"
                     : "hover:bg-[#D4AF37]/20"
-                  }`}
+                }`}
               >
                 <Icon size={18} />
                 {item.label}
@@ -110,7 +120,11 @@ export default function UserSidebar() {
           >
             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white flex items-center justify-center">
               {profileImage ? (
-                <img src={profileImage} className="w-full h-full object-cover" />
+                <img
+                  src={profileImage}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <User size={20} />
               )}
@@ -120,23 +134,39 @@ export default function UserSidebar() {
 
           {userDropdownOpen && (
             <div className="absolute bottom-full left-0 right-0 mb-2 bg-white text-black rounded-lg shadow-xl border border-gray-200 py-2 z-[100]">
-              <DropdownLink to="/profile" label="My Profile" />
-              <DropdownLink to="/orders" label="Order History" />
-              <DropdownLink to="/settings" label="Settings" />
+              <DropdownLink
+                to="/profile"
+                label="My Profile"
+                icon={UserCircle}
+              />
+              <DropdownLink
+                to="/orders"
+                label="Order History"
+                icon={ClipboardList}
+              />
+              <DropdownLink
+                to="/settings"
+                label="Settings"
+                icon={SlidersHorizontal}
+              />
             </div>
           )}
         </div>
       </aside>
 
-      {/* CONTENT SPACING (SAME AS ADMIN) */}
+      {/* CONTENT SPACING */}
       <div className="xl:ml-64" />
     </>
   );
 }
 
 /* Reusable dropdown link */
-const DropdownLink = ({ to, label }) => (
-  <Link to={to} className="block px-4 py-2 hover:bg-gray-100">
+const DropdownLink = ({ to, label, icon: Icon }) => (
+  <Link
+    to={to}
+    className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100"
+  >
+    <Icon size={16} />
     {label}
   </Link>
 );
