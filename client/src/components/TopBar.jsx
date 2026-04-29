@@ -1,4 +1,4 @@
-import { Phone, Search, Bell } from "lucide-react";
+import { Phone, Search, Bell, ShoppingCart, Heart } from "lucide-react";
 import {
   FaFacebook,
   FaInstagram,
@@ -8,15 +8,24 @@ import {
 } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 
+import useCartStore from "../store/cartStore";
+import useWishlistStore from "../store/wishlistStore";
+
 export default function TopBar() {
+  // CART
+  const { items: cartItems } = useCartStore();
+  const cartCount = cartItems?.length || 0;
+
+  // WISHLIST
+  const { items: wishlistItems } = useWishlistStore();
+  const wishlistCount = wishlistItems?.length || 0;
+
   return (
     <div className="bg-[#D4AF37] text-white px-4 py-3">
       <div className="container-custom flex flex-col md:flex-row items-center gap-3 md:gap-4">
 
-        {/* TOP ROW (Mobile: contact + icons, Desktop: left section) */}
+        {/* LEFT SECTION */}
         <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-4">
-
-          {/* Contact */}
           <div className="flex items-center gap-2 text-sm">
             <Phone size={14} />
             <a
@@ -27,7 +36,7 @@ export default function TopBar() {
             </a>
           </div>
 
-          {/* Mobile notification (visible only on small screens) */}
+          {/* Mobile Bell */}
           <button className="relative md:hidden hover:text-[#011F5B] transition-colors">
             <Bell size={18} />
             <span className="absolute -top-1 -right-1 bg-red-500 text-[10px] px-1 rounded-full">
@@ -53,7 +62,7 @@ export default function TopBar() {
         {/* RIGHT SECTION */}
         <div className="flex w-full md:w-auto items-center justify-between md:justify-end gap-4">
 
-          {/* Desktop notification */}
+          {/* Desktop Bell */}
           <button className="relative hidden md:flex hover:text-[#011F5B] transition-colors">
             <Bell size={18} />
             <span className="absolute -top-1 -right-1 bg-red-500 text-[10px] px-1 rounded-full">
@@ -61,7 +70,33 @@ export default function TopBar() {
             </span>
           </button>
 
-          {/* Signup */}
+          {/* ❤️ Wishlist */}
+          <Link
+            to="/wishlist"
+            className="relative hover:text-[#011F5B] transition-colors"
+          >
+            <Heart size={18} />
+            {wishlistCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] px-1 rounded-full">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
+
+          {/* 🛒 Cart */}
+          <Link
+            to="/cart"
+            className="relative hover:text-[#011F5B] transition-colors"
+          >
+            <ShoppingCart size={18} />
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] px-1 rounded-full">
+                {cartCount}
+              </span>
+            )}
+          </Link>
+
+          {/* SIGN UP */}
           <Link
             to="/signup"
             className="text-sm hover:text-[#011F5B] transition-colors whitespace-nowrap"
@@ -69,7 +104,7 @@ export default function TopBar() {
             Sign up
           </Link>
 
-          {/* Social Icons (wrap on small screens) */}
+          {/* SOCIAL ICONS */}
           <div className="flex items-center gap-3 flex-wrap justify-center md:justify-end">
             <a href="https://www.fb.com/l/6lp1kJRRR" aria-label="Facebook">
               <FaFacebook size={16} />
@@ -84,9 +119,9 @@ export default function TopBar() {
 
             <a
               href="https://wa.me/2348140838535"
+              aria-label="WhatsApp"
               target="_blank"
               rel="noreferrer"
-              aria-label="WhatsApp"
             >
               <FaWhatsapp size={16} />
             </a>
@@ -102,8 +137,8 @@ export default function TopBar() {
               <FaLinkedin size={16} />
             </a>
           </div>
-        </div>
 
+        </div>
       </div>
     </div>
   );
