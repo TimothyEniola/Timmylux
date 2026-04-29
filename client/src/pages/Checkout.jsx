@@ -74,6 +74,30 @@ export default function Checkout() {
     setCouponCode("");
   };
 
+  const validateForm = () => {
+    if (!formData.fullName.trim()) {
+      alert("Please enter your full name");
+      return false;
+    }
+    if (!formData.phone.trim()) {
+      alert("Please enter your phone number");
+      return false;
+    }
+    if (!formData.address.trim()) {
+      alert("Please enter your delivery address");
+      return false;
+    }
+    if (!formData.city.trim()) {
+      alert("Please enter your city");
+      return false;
+    }
+    if (!formData.state.trim()) {
+      alert("Please enter your state");
+      return false;
+    }
+    return true;
+  };
+
   const handlePaystack = (e) => {
     e.preventDefault();
     if (!validateForm()) return;

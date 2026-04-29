@@ -68,6 +68,21 @@ export default function AdminOrders() {
   }, []);
 
   const updateOrderStatus = (orderId, newStatus) => {
+    // Find the current order
+    const currentOrder = orders.find(o => o.id === orderId);
+    if (!currentOrder) return;
+
+    // Define valid status progression: Pending → Shipped → Delivered
+    const statusOrder = ['Pending', 'Shipped', 'Delivered'];
+    const currentIndex = statusOrder.indexOf(currentOrder.status);
+    const newIndex = statusOrder.indexOf(newStatus);
+
+    // Only allow forward progression (not going backwards)
+    if (newIndex <= currentIndex) {
+      alert(`Cannot change status from ${currentOrder.status} to ${newStatus}. Status can only progress forward.`);
+      return;
+    }
+
     // Update local state
     setOrders(prev => prev.map(order =>
       order.id === orderId ? { ...order, status: newStatus } : order
@@ -128,12 +143,16 @@ export default function AdminOrders() {
                 <select
                   value={order.status}
                   onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                  className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(order.status)}`}
+                  disabled={order.status === 'Delivered'}
+                  className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(order.status)} ${order.status === 'Delivered' ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <option value="Pending">Pending</option>
                   <option value="Shipped">Shipped</option>
                   <option value="Delivered">Delivered</option>
                 </select>
+                {order.status === 'Delivered' && (
+                  <span className="text-xs text-gray-500 italic">(Locked)</span>
+                )}
               </div>
               <button 
                 onClick={() => setSelectedOrder(order)}

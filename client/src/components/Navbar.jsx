@@ -8,7 +8,7 @@ import {
   ShoppingCart,
   User,
   Settings,
-  Package,
+  Home,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import logo from "../assets/reallogo.png";
@@ -36,7 +36,7 @@ export default function UserSidebar() {
   }, []);
 
   const navItems = [
-    { path: "/", label: "Home", icon: Package },
+    { path: "/", label: "Home", icon: Home },
     { path: "/products", label: "Shop", icon: ShoppingCart },
     { path: "/about", label: "About", icon: User },
     { path: "/custom-request", label: "Custom Request", icon: Settings },
@@ -119,7 +119,7 @@ export default function UserSidebar() {
           </button>
 
           {userDropdownOpen && (
-            <div className="mt-3 bg-white text-black rounded-lg shadow-lg py-2">
+            <div className="absolute bottom-full left-0 right-0 mb-2 bg-white text-black rounded-lg shadow-xl border border-gray-200 py-2 z-[100]">
               <DropdownLink to="/profile" label="My Profile" />
               <DropdownLink to="/orders" label="Order History" />
               <DropdownLink to="/settings" label="Settings" />

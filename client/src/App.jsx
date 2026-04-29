@@ -37,9 +37,9 @@ export default function App() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isAdminRoute && <TopBar />}
+      {!isAdminRoute && <div className="xl:ml-64"><TopBar /></div>}
       {isAdminRoute ? <AdminSidebar /> : <Navbar />}
-      <div className="flex-grow">
+      <div className={`flex-grow ${isAdminRoute ? 'xl:ml-64' : 'xl:ml-64'}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -68,7 +68,7 @@ export default function App() {
           <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
         </Routes>
       </div>
-      <Footer />
+      <div className="xl:ml-64"><Footer /></div>
     </div>
   );
 }

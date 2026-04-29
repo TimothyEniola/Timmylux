@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { User, Mail, Phone, MapPin, Calendar, Save, Edit, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
+import AdminDropdown from "../components/AdminDropdown";
 
 export default function AdminProfile() {
   // Static admin data (frontend demo)
@@ -53,9 +54,9 @@ export default function AdminProfile() {
   return (
     <div className="container-custom py-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-[#011F5B]">Admin Profile</h1>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-4">
             {!isEditing ? (
               <button
                 onClick={() => setIsEditing(true)}
@@ -79,6 +80,7 @@ export default function AdminProfile() {
                 </button>
               </>
             )}
+            <AdminDropdown />
           </div>
         </div>
 
