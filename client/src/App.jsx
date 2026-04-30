@@ -17,6 +17,7 @@ import Wishlist from "./pages/Wishlist";
 import OrderHistory from "./pages/OrderHistory";
 import TrackOrder from "./pages/TrackOrder";
 import CustomRequest from "./pages/CustomRequest";
+import Help from "./pages/Help";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminProducts from "./pages/AdminProducts";
 import AdminAddProduct from "./pages/AdminAddProduct";
@@ -57,6 +58,7 @@ export default function App() {
           <Route path="/orders" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
           <Route path="/track-order" element={<ProtectedRoute><TrackOrder /></ProtectedRoute>} />
           <Route path="/custom-request" element={<CustomRequest />} />
+          <Route path="/help" element={<Help />} />
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/content" element={<AdminRoute><AdminContentEditor /></AdminRoute>} />
           <Route path="/admin/events" element={<AdminRoute><AdminEvents /></AdminRoute>} />

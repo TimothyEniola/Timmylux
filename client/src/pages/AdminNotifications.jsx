@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Bell, Plus, Trash2, Send, ShoppingCart, AlertCircle, Share2, Copy, Check as CheckIcon } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa6";
+import { Bell, Plus, Trash2, Send, ShoppingCart, AlertCircle, Share2 } from "lucide-react";
 import useNotificationStore from "../store/notificationStore";
 
 export default function AdminNotifications() {
@@ -11,7 +10,6 @@ export default function AdminNotifications() {
     type: "info",
   });
   const [activeTab, setActiveTab] = useState("received");
-  const [copiedNotificationId, setCopiedNotificationId] = useState(null);
 
   const unreadCount = getUnreadCount();
 
@@ -55,23 +53,6 @@ export default function AdminNotifications() {
       await navigator.clipboard.writeText(message);
       alert("Unable to open share sheet. Notification copied to clipboard.");
     }
-  };
-
-  const shareViaWhatsApp = (notif) => {
-    const message = encodeURIComponent(formatNotificationDetails(notif));
-    window.open(`https://wa.me/?text=${message}`, "_blank");
-  };
-
-  const shareViaEmail = (notif) => {
-    const subject = encodeURIComponent(`Admin Notification: ${notif.title}`);
-    const body = encodeURIComponent(formatNotificationDetails(notif));
-    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
-  };
-
-  const copyToClipboard = async (notif) => {
-    await navigator.clipboard.writeText(formatNotificationDetails(notif));
-    setCopiedNotificationId(notif.id);
-    setTimeout(() => setCopiedNotificationId(null), 2000);
   };
 
   return (
@@ -160,44 +141,20 @@ export default function AdminNotifications() {
                               e.stopPropagation();
                               shareNotification(notif);
                             }}
-                            className="p-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
-                            title="Share to device apps"
+                            className="p-2 bg-[#011F5B] text-white rounded-lg hover:bg-[#003366] transition-colors"
+                            title="Share Notification"
                           >
                             <Share2 size={14} />
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              shareViaWhatsApp(notif);
+                              deleteNotification(notif.id);
                             }}
-                            className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                            title="Share via WhatsApp"
+                            className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                            title="Delete Notification"
                           >
-                            <FaWhatsapp size={14} />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              shareViaEmail(notif);
-                            }}
-                            className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                            title="Share via Email"
-                          >
-                            <span className="text-sm font-bold">✉</span>
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              copyToClipboard(notif);
-                            }}
-                            className="p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                            title="Copy to Clipboard"
-                          >
-                            {copiedNotificationId === notif.id ? (
-                              <CheckIcon size={14} />
-                            ) : (
-                              <Copy size={14} />
-                            )}
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </div>
@@ -308,35 +265,10 @@ export default function AdminNotifications() {
                               <div className="flex flex-wrap gap-1">
                                 <button
                                   onClick={() => shareNotification(notif)}
-                                  className="p-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-colors"
-                                  title="Share to device apps"
+                                  className="p-2 bg-[#011F5B] text-white rounded-lg hover:bg-[#003366] transition-colors"
+                                  title="Share Notification"
                                 >
                                   <Share2 size={14} />
-                                </button>
-                                <button
-                                  onClick={() => shareViaWhatsApp(notif)}
-                                  className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                                  title="Share via WhatsApp"
-                                >
-                                  <FaWhatsapp size={14} />
-                                </button>
-                                <button
-                                  onClick={() => shareViaEmail(notif)}
-                                  className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                                  title="Share via Email"
-                                >
-                                  <span className="text-sm font-bold">✉</span>
-                                </button>
-                                <button
-                                  onClick={() => copyToClipboard(notif)}
-                                  className="p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                                  title="Copy to Clipboard"
-                                >
-                                  {copiedNotificationId === notif.id ? (
-                                    <CheckIcon size={14} />
-                                  ) : (
-                                    <Copy size={14} />
-                                  )}
                                 </button>
                               </div>
                             </div>

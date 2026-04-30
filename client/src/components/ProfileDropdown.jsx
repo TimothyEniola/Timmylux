@@ -20,7 +20,7 @@ export default function ProfileDropdown() {
 
   const userName = user?.name || "Guest User";
   const profileImage = user?.profileImage || null;
-  const isAuthenticated = Boolean(user?.email);
+  const isAuthenticated = Boolean(user?.email || user?.name);
 
   const initials = userName
     .split(" ")
@@ -90,10 +90,14 @@ export default function ProfileDropdown() {
 
           {/* FOOTER */}
           <div className="py-1">
-            <button className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+            <Link
+              to="/help"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+            >
               <HelpCircle size={14} className="text-gray-400" />
               Help
-            </button>
+            </Link>
 
             {isAuthenticated ? (
               <button

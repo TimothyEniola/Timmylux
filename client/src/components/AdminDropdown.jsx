@@ -5,7 +5,6 @@ import {
   Package,
   Truck,
   LogOut,
-  HelpCircle,
   ChevronRight,
   ChevronUp,
 } from "lucide-react";
@@ -93,11 +92,6 @@ export default function AdminDropdown() {
 
           {/* FOOTER */}
           <div className="py-1">
-            <button className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
-              <HelpCircle size={14} className="text-gray-400" />
-              Help
-            </button>
-
             <button
               onClick={() => {
                 clearCurrentUser();

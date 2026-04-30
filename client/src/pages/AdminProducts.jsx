@@ -1,57 +1,15 @@
 import { useState } from "react";
-import { Edit, Trash2, Plus, Share2, Copy, Check as CheckIcon } from "lucide-react";
+import { Edit, Trash2, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { FaWhatsapp } from "react-icons/fa6";
 import { products } from "../data/Products";
 
 export default function AdminProducts() {
   const [productsList, setProductsList] = useState(products);
-  const [copiedProductId, setCopiedProductId] = useState(null);
 
   const handleDeleteProduct = (productId) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       setProductsList(productsList.filter(product => product.id !== productId));
       alert("Product deleted successfully!");
-    }
-  };
-
-  const formatProductDetails = (product) => {
-    const details = `
-Product Details:
-Name: ${product.name}
-Collection: ${product.collection}
-Category: ${product.category}
-Price: ₦${Number(product.price).toLocaleString()}
-Variations: ${product.variations?.length || 1}
-Description: ${product.description || 'N/A'}
-    `.trim();
-    return details;
-  };
-
-  const shareViaWhatsApp = (product) => {
-    const details = formatProductDetails(product);
-    const message = encodeURIComponent(`Check out this product:\n${details}`);
-    const url = `https://wa.me/?text=${message}`;
-    window.open(url, '_blank');
-  };
-
-  const shareViaEmail = (product) => {
-    const details = formatProductDetails(product);
-    const subject = encodeURIComponent(`Product: ${product.name}`);
-    const body = encodeURIComponent(`Hi,\n\nI wanted to share this product with you:\n\n${details}\n\nBest regards`);
-    const url = `mailto:?subject=${subject}&body=${body}`;
-    window.open(url, '_blank');
-  };
-
-  const copyToClipboard = async (product) => {
-    const details = formatProductDetails(product);
-    try {
-      await navigator.clipboard.writeText(details);
-      setCopiedProductId(product.id);
-      setTimeout(() => setCopiedProductId(null), 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-      alert('Failed to copy to clipboard');
     }
   };
 
@@ -103,31 +61,6 @@ Description: ${product.description || 'N/A'}
                   </td>
                   <td className="px-4 lg:px-6 py-4">
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => shareViaWhatsApp(product)}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded transition-colors"
-                        title="Share via WhatsApp"
-                      >
-                        <FaWhatsapp size={16} />
-                      </button>
-                      <button
-                        onClick={() => shareViaEmail(product)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                        title="Share via Email"
-                      >
-                        <span className="text-sm font-bold">✉</span>
-                      </button>
-                      <button
-                        onClick={() => copyToClipboard(product)}
-                        className="p-2 text-gray-600 hover:bg-gray-50 rounded transition-colors"
-                        title="Copy to Clipboard"
-                      >
-                        {copiedProductId === product.id ? (
-                          <CheckIcon size={16} />
-                        ) : (
-                          <Copy size={16} />
-                        )}
-                      </button>
                       <Link
                         to={`/admin/edit-product/${product.id}`}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
@@ -173,33 +106,6 @@ Description: ${product.description || 'N/A'}
                     </p>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => shareViaWhatsApp(product)}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded transition-colors"
-                        title="Share via WhatsApp"
-                      >
-                        <FaWhatsapp size={16} />
-                      </button>
-                      <button
-                        onClick={() => shareViaEmail(product)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                        title="Share via Email"
-                      >
-                        <span className="text-sm font-bold">✉</span>
-                      </button>
-                      <button
-                        onClick={() => copyToClipboard(product)}
-                        className="p-2 text-gray-600 hover:bg-gray-50 rounded transition-colors"
-                        title="Copy to Clipboard"
-                      >
-                        {copiedProductId === product.id ? (
-                          <CheckIcon size={16} />
-                        ) : (
-                          <Copy size={16} />
-                        )}
-                      </button>
-                    </div>
                     <Link
                       to={`/admin/edit-product/${product.id}`}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"

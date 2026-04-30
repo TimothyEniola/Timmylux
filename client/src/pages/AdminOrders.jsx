@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
-import { X, Share2, Copy, Check as CheckIcon } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa6";
+import { X, Share2 } from "lucide-react";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [copiedOrderId, setCopiedOrderId] = useState(null);
 
   // Mock data (FIXED status values)
   useEffect(() => {
@@ -105,29 +103,29 @@ export default function AdminOrders() {
     }
   };
 
-  // SHARE FUNCTIONS
-  const formatOrderDetails = (order) => {
+  // SHARE FUNCTION
+  const shareOrder = async (order) => {
     const itemsList = order.items
       .map((item) => `${item.name} (x${item.quantity}) - ₦${item.price.toLocaleString()}`)
       .join("\n");
-    return `Order #${order.id}\nCustomer: ${order.customerName}\nEmail: ${order.email}\nStatus: ${order.status}\nTotal: ₦${order.total.toLocaleString()}\nDate: ${order.date}\n\nItems:\n${itemsList}\n\nShipping Address:\n${order.shippingAddress.fullName}\n${order.shippingAddress.address}\n${order.shippingAddress.city}, ${order.shippingAddress.state}\nPhone: ${order.shippingAddress.phone}`;
-  };
 
-  const shareViaWhatsApp = (order) => {
-    const message = encodeURIComponent(formatOrderDetails(order));
-    window.open(`https://wa.me/?text=${message}`, "_blank");
-  };
+    const shareData = {
+      title: `Order #${order.id} - Timmy Lux Furniture`,
+      text: `Order #${order.id}\nDate: ${order.date}\nStatus: ${order.status}\nTotal: ₦${order.total.toLocaleString()}\n\nItems:\n${itemsList}`,
+      url: window.location.href,
+    };
 
-  const shareViaEmail = (order) => {
-    const subject = encodeURIComponent(`Order Details #${order.id}`);
-    const body = encodeURIComponent(formatOrderDetails(order));
-    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
-  };
-
-  const copyToClipboard = (order) => {
-    navigator.clipboard.writeText(formatOrderDetails(order));
-    setCopiedOrderId(order.id);
-    setTimeout(() => setCopiedOrderId(null), 2000);
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        navigator.clipboard.writeText(shareData.text);
+        alert("Order details copied to clipboard!");
+      }
+    } catch (error) {
+      console.log("Error sharing:", error);
+    }
   };
 
   return (
@@ -192,31 +190,14 @@ export default function AdminOrders() {
               </div>
 
               <div className="flex gap-2">
-                {/* Share Buttons */}
+                {/* Share Button */}
                 <button
-                  onClick={() => shareViaWhatsApp(order)}
-                  className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                  title="Share via WhatsApp"
+                  onClick={() => shareOrder(order)}
+                  className="flex items-center gap-2 px-3 py-2 bg-[#011F5B] text-white rounded-lg hover:bg-[#003366] transition-colors"
+                  title="Share Order"
                 >
-                  <FaWhatsapp size={14} />
-                </button>
-                <button
-                  onClick={() => shareViaEmail(order)}
-                  className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                  title="Share via Email"
-                >
-                  <span className="text-sm font-bold">✉</span>
-                </button>
-                <button
-                  onClick={() => copyToClipboard(order)}
-                  className="p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                  title="Copy to Clipboard"
-                >
-                  {copiedOrderId === order.id ? (
-                    <CheckIcon size={14} />
-                  ) : (
-                    <Copy size={14} />
-                  )}
+                  <Share2 size={16} />
+                  Share
                 </button>
 
                 <button
@@ -247,31 +228,6 @@ export default function AdminOrders() {
                   Order #{selectedOrder.id}
                 </h2>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => shareViaWhatsApp(selectedOrder)}
-                    className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                    title="Share via WhatsApp"
-                  >
-                    <FaWhatsapp size={16} />
-                  </button>
-                  <button
-                    onClick={() => shareViaEmail(selectedOrder)}
-                    className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    title="Share via Email"
-                  >
-                    <span className="text-sm font-bold">✉</span>
-                  </button>
-                  <button
-                    onClick={() => copyToClipboard(selectedOrder)}
-                    className="p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                    title="Copy to Clipboard"
-                  >
-                    {copiedOrderId === selectedOrder.id ? (
-                      <CheckIcon size={16} />
-                    ) : (
-                      <Copy size={16} />
-                    )}
-                  </button>
                   <button
                     onClick={() => setSelectedOrder(null)}
                     className="text-gray-500 hover:text-gray-700"
