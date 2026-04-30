@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Share2, Copy, Check as CheckIcon } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa6";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [copiedOrderId, setCopiedOrderId] = useState(null);
 
   // Mock data (FIXED status values)
   useEffect(() => {
@@ -103,6 +105,31 @@ export default function AdminOrders() {
     }
   };
 
+  // SHARE FUNCTIONS
+  const formatOrderDetails = (order) => {
+    const itemsList = order.items
+      .map((item) => `${item.name} (x${item.quantity}) - ₦${item.price.toLocaleString()}`)
+      .join("\n");
+    return `Order #${order.id}\nCustomer: ${order.customerName}\nEmail: ${order.email}\nStatus: ${order.status}\nTotal: ₦${order.total.toLocaleString()}\nDate: ${order.date}\n\nItems:\n${itemsList}\n\nShipping Address:\n${order.shippingAddress.fullName}\n${order.shippingAddress.address}\n${order.shippingAddress.city}, ${order.shippingAddress.state}\nPhone: ${order.shippingAddress.phone}`;
+  };
+
+  const shareViaWhatsApp = (order) => {
+    const message = encodeURIComponent(formatOrderDetails(order));
+    window.open(`https://wa.me/?text=${message}`, "_blank");
+  };
+
+  const shareViaEmail = (order) => {
+    const subject = encodeURIComponent(`Order Details #${order.id}`);
+    const body = encodeURIComponent(formatOrderDetails(order));
+    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
+  };
+
+  const copyToClipboard = (order) => {
+    navigator.clipboard.writeText(formatOrderDetails(order));
+    setCopiedOrderId(order.id);
+    setTimeout(() => setCopiedOrderId(null), 2000);
+  };
+
   return (
     <div className="container-custom py-8">
       <h1 className="text-3xl font-bold text-[#011F5B] mb-8">
@@ -142,7 +169,7 @@ export default function AdminOrders() {
             </div>
 
             {/* STATUS */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">Status:</span>
 
@@ -164,12 +191,41 @@ export default function AdminOrders() {
                 )}
               </div>
 
-              <button
-                onClick={() => setSelectedOrder(order)}
-                className="btn-secondary text-sm text-white hover:opacity-90 transition-opacity"
-              >
-                View Details
-              </button>
+              <div className="flex gap-2">
+                {/* Share Buttons */}
+                <button
+                  onClick={() => shareViaWhatsApp(order)}
+                  className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  title="Share via WhatsApp"
+                >
+                  <FaWhatsapp size={14} />
+                </button>
+                <button
+                  onClick={() => shareViaEmail(order)}
+                  className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  title="Share via Email"
+                >
+                  <span className="text-sm font-bold">✉</span>
+                </button>
+                <button
+                  onClick={() => copyToClipboard(order)}
+                  className="p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                  title="Copy to Clipboard"
+                >
+                  {copiedOrderId === order.id ? (
+                    <CheckIcon size={14} />
+                  ) : (
+                    <Copy size={14} />
+                  )}
+                </button>
+
+                <button
+                  onClick={() => setSelectedOrder(order)}
+                  className="btn-secondary text-sm text-white hover:opacity-90 transition-opacity"
+                >
+                  View Details
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -186,16 +242,43 @@ export default function AdminOrders() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-start mb-6">
                 <h2 className="text-2xl font-bold text-[#011F5B]">
                   Order #{selectedOrder.id}
                 </h2>
-                <button
-                  onClick={() => setSelectedOrder(null)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X size={24} />
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => shareViaWhatsApp(selectedOrder)}
+                    className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    title="Share via WhatsApp"
+                  >
+                    <FaWhatsapp size={16} />
+                  </button>
+                  <button
+                    onClick={() => shareViaEmail(selectedOrder)}
+                    className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    title="Share via Email"
+                  >
+                    <span className="text-sm font-bold">✉</span>
+                  </button>
+                  <button
+                    onClick={() => copyToClipboard(selectedOrder)}
+                    className="p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                    title="Copy to Clipboard"
+                  >
+                    {copiedOrderId === selectedOrder.id ? (
+                      <CheckIcon size={16} />
+                    ) : (
+                      <Copy size={16} />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setSelectedOrder(null)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
               </div>
 
               {/* CUSTOMER */}

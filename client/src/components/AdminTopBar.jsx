@@ -1,61 +1,32 @@
 import { useEffect, useState } from "react";
-import { Phone, Search, Bell, ShoppingCart, Heart, Check } from "lucide-react";
-import {
-  FaFacebook,
-  FaInstagram,
-  FaXTwitter,
-  FaLinkedin,
-  FaWhatsapp,
-} from "react-icons/fa6";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Bell, Check, Search, Settings, User } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
-import useCartStore from "../store/cartStore";
-import useWishlistStore from "../store/wishlistStore";
 import useNotificationStore from "../store/notificationStore";
 
-export default function TopBar() {
+export default function AdminTopBar() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-
-  useEffect(() => {
-    setSearchQuery(searchParams.get("q") || "");
-  }, [searchParams]);
-
-  // CART
-  const { items: cartItems } = useCartStore();
-  const cartCount = cartItems?.reduce((total, item) => total + (item.quantity || 1), 0) || 0;
-
-  // WISHLIST
-  const { items: wishlistItems } = useWishlistStore();
-  const wishlistCount = wishlistItems?.length || 0;
 
   // NOTIFICATIONS
   const { notifications, markAsRead, markAllAsRead, getUnreadCount } = useNotificationStore();
   const unreadCount = getUnreadCount();
 
   return (
-    <div className="bg-[#D4AF37] text-white px-4 py-3">
+    <div className="bg-[#011F5B] text-white px-4 py-3">
       <div className="container-custom flex flex-col md:flex-row items-center gap-3 md:gap-4">
 
         {/* LEFT SECTION */}
         <div className="flex w-full md:w-auto items-center justify-between md:justify-start gap-4">
           <div className="flex items-center gap-2 text-sm">
-            <Phone size={14} />
-            <a
-              href="tel:+2348140838535"
-              className="hover:text-[#011F5B] transition-colors"
-            >
-              +234 8140838535
-            </a>
+            <span className="font-semibold">Admin Panel</span>
           </div>
 
           {/* Mobile Bell */}
           <div className="relative md:hidden">
             <button
               onClick={() => setNotificationsOpen((prev) => !prev)}
-              className="relative hover:text-[#011F5B] transition-colors"
+              className="relative hover:text-[#D4AF37] transition-colors"
             >
               <Bell size={18} />
               {unreadCount > 0 && (
@@ -69,7 +40,7 @@ export default function TopBar() {
               <div className="absolute -right-32 top-full mt-2 w-80 max-w-[90vw] bg-white rounded-2xl shadow-2xl border border-gray-100 z-[999] overflow-hidden">
                 <div className="p-4 border-b border-gray-100">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                    <h3 className="font-semibold text-gray-900">Admin Notifications</h3>
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllAsRead}
@@ -128,25 +99,18 @@ export default function TopBar() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              const query = searchQuery.trim();
-              if (query) {
-                navigate(`/products?q=${encodeURIComponent(query)}`);
-              } else {
-                navigate("/products");
-              }
+              // Admin search functionality can be added later
             }}
             className="flex items-center w-full max-w-xl bg-white rounded-full overflow-hidden"
           >
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search products, services..."
+              placeholder="Search admin panel..."
               className="w-full px-4 py-2 text-black outline-none text-sm md:text-base"
             />
             <button
               type="submit"
-              className="bg-[#011F5B] px-4 py-2 text-white hover:opacity-90"
+              className="bg-[#D4AF37] px-4 py-2 text-white hover:opacity-90"
             >
               <Search size={18} />
             </button>
@@ -158,37 +122,11 @@ export default function TopBar() {
 
           {/* Action Icons Row */}
           <div className="flex items-center justify-center gap-4 order-2 sm:order-1">
-            {/* ❤️ Wishlist */}
-            <Link
-              to="/wishlist"
-              className="relative hover:text-[#011F5B] transition-colors"
-            >
-              <Heart size={18} />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] px-1 rounded-full">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
-
-            {/* 🛒 Cart */}
-            <Link
-              to="/cart"
-              className="relative hover:text-[#011F5B] transition-colors"
-            >
-              <ShoppingCart size={18} />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] px-1 rounded-full">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-
             {/* Desktop Bell / Notifications */}
             <div className="relative hidden md:block">
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="relative hover:text-[#011F5B] transition-colors"
+                className="relative hover:text-[#D4AF37] transition-colors"
               >
                 <Bell size={18} />
                 {unreadCount > 0 && (
@@ -203,7 +141,7 @@ export default function TopBar() {
                 <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[999] overflow-hidden">
                   <div className="p-4 border-b border-gray-100">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-semibold text-gray-900">Notifications</h3>
+                      <h3 className="font-semibold text-gray-900">Admin Notifications</h3>
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
@@ -255,13 +193,29 @@ export default function TopBar() {
                 </div>
               )}
             </div>
+
+            {/* Admin Settings */}
+            <Link
+              to="/admin/settings"
+              className="hover:text-[#D4AF37] transition-colors"
+            >
+              <Settings size={18} />
+            </Link>
+
+            {/* Admin Profile */}
+            <Link
+              to="/admin/profile"
+              className="hover:text-[#D4AF37] transition-colors"
+            >
+              <User size={18} />
+            </Link>
           </div>
 
           {/* Mobile Bell */}
           <div className="relative md:hidden order-1 sm:order-2">
             <button
               onClick={() => setNotificationsOpen((prev) => !prev)}
-              className="relative hover:text-[#011F5B] transition-colors"
+              className="relative hover:text-[#D4AF37] transition-colors"
             >
               <Bell size={18} />
               {unreadCount > 0 && (
@@ -275,7 +229,7 @@ export default function TopBar() {
               <div className="absolute -right-32 top-full mt-2 w-80 max-w-[90vw] bg-white rounded-2xl shadow-2xl border border-gray-100 z-[999] overflow-hidden">
                 <div className="p-4 border-b border-gray-100">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                    <h3 className="font-semibold text-gray-900">Admin Notifications</h3>
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllAsRead}
@@ -326,43 +280,6 @@ export default function TopBar() {
                 </div>
               </div>
             )}
-          </div>
-
-          {/* SOCIAL ICONS */}
-          <div className="flex items-center justify-center gap-2 sm:gap-3 order-3">
-            <a href="https://www.fb.com/l/6lp1kJRRR" aria-label="Facebook" className="hover:text-[#011F5B] transition-colors">
-              <FaFacebook size={16} />
-            </a>
-
-            <a
-              href="https://www.instagram.com/timmy_lux?igsh=MXRuNThldzZkMDJ3NA=="
-              aria-label="Instagram"
-              className="hover:text-[#011F5B] transition-colors"
-            >
-              <FaInstagram size={16} />
-            </a>
-
-            <a
-              href="https://wa.me/2348140838535"
-              aria-label="WhatsApp"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-[#011F5B] transition-colors"
-            >
-              <FaWhatsapp size={16} />
-            </a>
-
-            <a href="https://x.com/YemitanT26859" aria-label="Twitter" className="hover:text-[#011F5B] transition-colors">
-              <FaXTwitter size={16} />
-            </a>
-
-            <a
-              href="https://www.linkedin.com/in/yemitan-timothy-6235b73ab"
-              aria-label="LinkedIn"
-              className="hover:text-[#011F5B] transition-colors"
-            >
-              <FaLinkedin size={16} />
-            </a>
           </div>
 
         </div>

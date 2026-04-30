@@ -1,11 +1,14 @@
 import { useMemo, useState, useEffect } from "react";
 import { Truck, CreditCard, ChevronDown, Tag } from "lucide-react";
 import useCartStore from "../store/cartStore";
+import useNotificationStore from "../store/notificationStore";
 import { products } from "../data/Products";
 
 export default function Checkout() {
   const items = useCartStore((state) => state.items);
   const updateVariation = useCartStore((state) => state.updateVariation);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const { addNotification } = useNotificationStore();
   const [formData, setFormData] = useState({
     fullName: "",
     phone: "",
@@ -101,12 +104,34 @@ export default function Checkout() {
   const handlePaystack = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    // Send notification to admin
+    addNotification({
+      title: "New Order Placed",
+      message: `${formData.fullName} placed an order for ₦${finalTotal.toLocaleString()} via Paystack. Items: ${items.length} product(s). Delivery to: ${formData.city}, ${formData.state}.`,
+      type: "order",
+    });
+
+    // Clear cart after successful order
+    clearCart();
+
     alert(`Paystack checkout simulated for ₦${finalTotal.toFixed(2)}. This is a frontend-only demo.`);
   };
 
   const handleCodOrder = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    // Send notification to admin
+    addNotification({
+      title: "New Cash on Delivery Order",
+      message: `${formData.fullName} placed a COD order for ₦${finalTotal.toLocaleString()}. Items: ${items.length} product(s). Delivery to: ${formData.city}, ${formData.state}. Phone: ${formData.phone}.`,
+      type: "order",
+    });
+
+    // Clear cart after successful order
+    clearCart();
+
     alert("Cash on Delivery order placed successfully! This is a frontend-only demo.");
   };
 

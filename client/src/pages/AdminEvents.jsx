@@ -13,12 +13,17 @@ import {
   Users,
   Award,
   MapPin,
+  Share2,
+  Copy,
+  Check as CheckIcon,
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa6";
 
 export default function AdminEvents() {
   const [events, setEvents] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [copiedEventId, setCopiedEventId] = useState(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -170,6 +175,54 @@ export default function AdminEvents() {
     }
   };
 
+  const formatEventDetails = (event) => {
+    const details = `
+Event Details:
+🎉 ${event.title}
+📝 ${event.description}
+
+Type: ${event.type.replace("_", " ")}
+${event.startDate && event.startTime ? `📅 Date: ${new Date(event.startDate).toLocaleDateString()} at ${event.startTime}` : ''}
+${event.endDate && event.endTime ? `📅 Ends: ${new Date(event.endDate).toLocaleDateString()} at ${event.endTime}` : ''}
+${event.location ? `📍 Location: ${event.location}` : ''}
+${event.maxAttendees ? `👥 Max Attendees: ${event.maxAttendees}` : ''}
+${event.contactInfo ? `📞 Contact: ${event.contactInfo}` : ''}
+${event.discountPercentage ? `💰 Discount: ${event.discountPercentage}%` : ''}
+${event.promoCode ? `🎫 Promo Code: ${event.promoCode}` : ''}
+${event.targetUrl ? `🔗 Link: ${event.targetUrl}` : ''}
+
+Status: ${event.isActive ? 'Active' : 'Inactive'}
+    `.trim();
+    return details;
+  };
+
+  const shareViaWhatsApp = (event) => {
+    const details = formatEventDetails(event);
+    const message = encodeURIComponent(`Check out this event:\n${details}`);
+    const url = `https://wa.me/?text=${message}`;
+    window.open(url, '_blank');
+  };
+
+  const shareViaEmail = (event) => {
+    const details = formatEventDetails(event);
+    const subject = encodeURIComponent(`Event: ${event.title}`);
+    const body = encodeURIComponent(`Hi,\n\nI wanted to share this event with you:\n\n${details}\n\nBest regards`);
+    const url = `mailto:?subject=${subject}&body=${body}`;
+    window.open(url, '_blank');
+  };
+
+  const copyToClipboard = async (event) => {
+    const details = formatEventDetails(event);
+    try {
+      await navigator.clipboard.writeText(details);
+      setCopiedEventId(event.id);
+      setTimeout(() => setCopiedEventId(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+      alert('Failed to copy to clipboard');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container-custom py-8">
@@ -236,6 +289,31 @@ export default function AdminEvents() {
                             : "bg-gray-300"
                         }`}
                       />
+                      <button
+                        onClick={() => shareViaWhatsApp(event)}
+                        className="text-gray-400 hover:text-green-500"
+                        title="Share via WhatsApp"
+                      >
+                        <FaWhatsapp size={16} />
+                      </button>
+                      <button
+                        onClick={() => shareViaEmail(event)}
+                        className="text-gray-400 hover:text-blue-500"
+                        title="Share via Email"
+                      >
+                        <span className="text-sm font-bold">✉</span>
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard(event)}
+                        className="text-gray-400 hover:text-gray-600"
+                        title="Copy to Clipboard"
+                      >
+                        {copiedEventId === event.id ? (
+                          <CheckIcon size={16} />
+                        ) : (
+                          <Copy size={16} />
+                        )}
+                      </button>
                       <button
                         onClick={() => handleEdit(event)}
                         className="text-gray-400 hover:text-[#D4AF37]"

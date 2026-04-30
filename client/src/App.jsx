@@ -2,6 +2,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import TopBar from "./components/TopBar";
 import Navbar from "./components/Navbar";
 import AdminSidebar from "./components/AdminSidebar";
+import AdminTopBar from "./components/AdminTopBar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -38,7 +39,8 @@ export default function App() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isAdminRoute && <div className="xl:ml-64"><TopBar /></div>}
+      {!isAdminRoute && <TopBar />}
+      {isAdminRoute && <AdminTopBar />}
       {isAdminRoute ? <AdminSidebar /> : <Navbar />}
       <div className={`flex-grow ${isAdminRoute ? 'xl:ml-64' : 'xl:ml-64'}`}>
         <Routes>
