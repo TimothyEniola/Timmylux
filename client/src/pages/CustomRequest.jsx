@@ -93,6 +93,25 @@ export default function CustomRequest() {
                     </select>
                   </div>
                 </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Request Topic *
+                  </label>
+                  <div className="relative">
+                    <MessageSquare className="absolute left-3 top-1/2 -translate-y-1/2 text-[#D4AF37]" size={20} />
+                    <select
+                      className="w-full border border-gray-200 focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/30 rounded-xl p-3 pl-10 appearance-none outline-none transition"
+                      required
+                    >
+                      <option value="">Select request topic</option>
+                      <option>Custom Furniture Request</option>
+                      <option>How do I return an item?</option>
+                      <option>Order Status / Tracking</option>
+                      <option>Other Support</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               {/* Address */}

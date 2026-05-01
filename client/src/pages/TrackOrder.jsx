@@ -7,12 +7,17 @@ export default function TrackOrder() {
   const [trackingInfo, setTrackingInfo] = useState(null);
   const [error, setError] = useState("");
 
+  const normalizeOrderId = (id) =>
+    id.replace(/[^a-z0-9]/gi, "").toUpperCase();
+
   // Static orders for demo
   const sampleOrders = [
     {
       id: "ORD-001",
       product: "Luxury King Bed Frame",
-      status: "delivered",
+      status: "Delivered",
+      location: "Lagos Warehouse",
+      estimatedDelivery: "2026-01-15",
       tracking: [
         { status: "Order Placed", completed: true, date: "2026-01-10" },
         { status: "Processing", completed: true, date: "2026-01-11" },
@@ -23,7 +28,9 @@ export default function TrackOrder() {
     {
       id: "ORD-002",
       product: "Premium Velvet Sofa",
-      status: "shipped",
+      status: "Shipped",
+      location: "Ikeja Distribution Center",
+      estimatedDelivery: "Expected 2026-01-16",
       tracking: [
         { status: "Order Placed", completed: true, date: "2026-01-09" },
         { status: "Processing", completed: true, date: "2026-01-10" },
@@ -43,7 +50,9 @@ export default function TrackOrder() {
     }
 
     // Find the order in sample orders
-    const foundOrder = sampleOrders.find(order => order.id.toUpperCase() === orderId.trim().toUpperCase());
+    const foundOrder = sampleOrders.find(
+      (order) => normalizeOrderId(order.id) === normalizeOrderId(orderId)
+    );
 
     if (foundOrder) {
       setTrackingInfo(foundOrder);
@@ -106,35 +115,39 @@ export default function TrackOrder() {
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <span className="flex items-center gap-1">
                   <MapPin size={16} />
-                  {trackingInfo.tracking?.location || 'Location not available'}
+                  {trackingInfo.location || 'Location not available'}
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock size={16} />
-                  Est. Delivery: {trackingInfo.tracking?.estimatedDelivery || 'TBD'}
+                  Est. Delivery: {trackingInfo.estimatedDelivery || 'TBD'}
                 </span>
               </div>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-[#011F5B]">Tracking History</h3>
-              {trackingInfo.tracking?.history?.map((step, index) => (
-                <div key={index} className="flex items-start gap-4">
-                  <div className="flex-shrink-0 mt-1">
-                    {getStatusIcon(step.status, step.completed)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <h4 className={`font-medium ${step.completed ? 'text-[#011F5B]' : 'text-gray-500'}`}>
-                        {step.status}
-                      </h4>
-                      <span className="text-sm text-gray-500">{step.date}</span>
+              {trackingInfo.tracking?.length > 0 ? (
+                trackingInfo.tracking.map((step, index) => (
+                  <div key={index} className="flex items-start gap-4">
+                    <div className="flex-shrink-0 mt-1">
+                      {getStatusIcon(step.status, step.completed)}
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">{step.location}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h4 className={`font-medium ${step.completed ? 'text-[#011F5B]' : 'text-gray-500'}`}>
+                          {step.status}
+                        </h4>
+                        <span className="text-sm text-gray-500">{step.date}</span>
+                      </div>
+                      {step.location && (
+                        <p className="text-sm text-gray-600 mt-1">{step.location}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )) || (
-                  <p className="text-gray-500">No tracking history available yet.</p>
-                )}
+                ))
+              ) : (
+                <p className="text-gray-500">No tracking history available yet.</p>
+              )}
             </div>
 
             <div className="mt-8 p-4 bg-gray-50 rounded-lg">

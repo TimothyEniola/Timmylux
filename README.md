@@ -1,6 +1,6 @@
 # Timmy Lux Furniture - E-Commerce Furniture Store
 
-A modern, fully responsive React.js e-commerce application for browsing, purchasing, and managing premium furniture products. Features a complete admin panel for inventory management, product variations, collections, and featured items showcase.
+A modern, fully responsive frontend-only React.js e-commerce application for browsing, purchasing, and managing premium furniture products. This project is built as a frontend prototype and demo, with no backend API required. Features a complete admin panel for inventory management, product variations, collections, and featured items showcase.
 
 ## 🚀 Technology Stack
 
@@ -23,6 +23,7 @@ A modern, fully responsive React.js e-commerce application for browsing, purchas
 - Learning React, Zustand, and Tailwind CSS
 - Portfolio projects
 - E-commerce mockups and UI testing
+- Frontend-only customer support workflows and product demos
 
 **State Management**: Zustand with localStorage persistence for:
 - 🛒 Shopping cart (persists across sessions)
@@ -77,6 +78,7 @@ npm run preview
 - ✅ **Order History**: Track previously placed orders with details modal
 - ✅ **Order Tracking**: Real-time order status tracking
 - ✅ **Order Details**: View complete order information including customer details, shipping address, and items
+- ✅ **Return & Support Requests**: Custom request form includes support options like “How do I return an item?”
 - ✅ **Responsive Design**: 
   - Mobile-first design (< 640px)
   - Tablet optimization (640px - 1024px)

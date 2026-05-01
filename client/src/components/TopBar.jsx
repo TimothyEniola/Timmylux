@@ -44,7 +44,7 @@ export default function TopBar() {
 
   // Notification Dropdown
   const NotificationDropdown = () => (
-    <div className="absolute right-0 top-full mt-2 w-80 max-w-[90vw] bg-white text-black rounded-xl shadow-xl z-[999] overflow-hidden">
+    <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-2 w-80 max-w-[90vw] bg-white text-black rounded-xl shadow-xl z-[9999] overflow-hidden">
       <div className="p-3 border-b flex justify-between items-center bg-gray-50">
         <span className="font-semibold text-sm">Notifications</span>
         {unreadCount > 0 && (
@@ -95,7 +95,7 @@ export default function TopBar() {
   );
 
   return (
-    <div className="bg-[#D4AF37] text-white px-4 py-3">
+    <div className="bg-[#D4AF37] text-white px-4 py-3 xl:ml-64">
       <div className="container-custom flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
         {/* LEFT SIDE (now only mobile icons) */}

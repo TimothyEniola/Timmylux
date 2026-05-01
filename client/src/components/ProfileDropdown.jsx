@@ -20,7 +20,7 @@ export default function ProfileDropdown() {
 
   const userName = user?.name || "Guest User";
   const profileImage = user?.profileImage || null;
-  const isAuthenticated = Boolean(user?.email || user?.name);
+  const isAuthenticated = Boolean(user && (user.email || user.name));
 
   const initials = userName
     .split(" ")

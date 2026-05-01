@@ -22,7 +22,10 @@ const About = () => {
           <div className="order-2 md:order-1">
             <h2 className="text-3xl font-bold mb-4 text-[#011F5B]">A Message from the CEO</h2>
             <p className="text-gray-700 mb-4 leading-relaxed">
-              Hi, I’m <strong>Timmy Lux</strong>, founder and CEO of TimmyLux Furniture & Interior. Over the past decade I’ve poured my passion for design and craftsmanship into building a company that creates not just furniture, but lasting experiences. As a designer, maker, and entrepreneur, I believe that every piece we create should tell a story and elevate the spaces where people live, work, and gather.
+              Hi, I’m <strong>Timmy Lux</strong>, founder and CEO of TimmyLux Furniture & Interior. Over the past decade I’ve poured my passion for design and craftsmanship into building a company that creates not just furniture, but lasting experiences. As a designer, maker, entrepreneur, and project manager, I believe that every piece we create should tell a story and elevate the spaces where people live, work, and gather.
+            </p>
+            <p className="text-gray-700 mb-4 leading-relaxed">
+              I also manage every project from concept through delivery, coordinating timelines, budgets, suppliers, and client communication so each result is polished and delivered on schedule.
             </p>
             <p className="text-gray-700 mb-4 leading-relaxed">
               This portfolio is a snapshot of the work we’re proud of—tailor-made projects that reflect our commitment to quality, innovation, and customer satisfaction. Thank you for taking the time to learn more about our journey. I invite you to explore our portfolio and see what we can build together.
