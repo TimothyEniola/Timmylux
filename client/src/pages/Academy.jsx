@@ -1,7 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { CheckCircle, User, Mail, Phone, Briefcase } from "lucide-react";
 
 const Academy = () => {
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
+  const [applicationSubmitted, setApplicationSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    experience: "",
+    motivation: "",
+    availability: "",
+  });
   const [content, setContent] = useState({
     heroTitle: "TimmyLux Academy",
     heroSubtitle:
@@ -90,6 +101,56 @@ const Academy = () => {
       setContent(JSON.parse(saved));
     }
   }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleApplicationSubmit = (e) => {
+    e.preventDefault();
+    if (
+      !formData.fullName.trim() ||
+      !formData.email.trim() ||
+      !formData.phone.trim() ||
+      !formData.motivation.trim()
+    ) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    // Save application to localStorage
+    const application = {
+      id: Date.now().toString(),
+      ...formData,
+      submittedAt: new Date().toISOString(),
+      status: "pending",
+    };
+
+    const existingApps = JSON.parse(
+      localStorage.getItem("academyApplications") || "[]"
+    );
+    existingApps.push(application);
+    localStorage.setItem("academyApplications", JSON.stringify(existingApps));
+
+    setApplicationSubmitted(true);
+    setFormData({
+      fullName: "",
+      email: "",
+      phone: "",
+      experience: "",
+      motivation: "",
+      availability: "",
+    });
+
+    setTimeout(() => {
+      setApplicationSubmitted(false);
+      setShowApplicationForm(false);
+    }, 3000);
+  };
 
   return (
     <div className="w-full bg-white">
@@ -195,26 +256,165 @@ const Academy = () => {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* CTA - APPLICATION FORM */}
       <section className="py-20 px-6 bg-[#D4AF37] text-white text-center">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl font-bold mb-4">
-            {content.ctaTitle}
-          </h2>
-          <p className="text-lg mb-8">
-            {content.ctaSubtitle}
-          </p>
+          {!showApplicationForm && !applicationSubmitted && (
+            <>
+              <h2 className="text-4xl font-bold mb-4">
+                {content.ctaTitle}
+              </h2>
+              <p className="text-lg mb-8">
+                {content.ctaSubtitle}
+              </p>
 
-          <Link
-            to="/custom-request"
-            className="bg-[#011F5B] px-10 py-4 rounded-full font-semibold hover:opacity-90 transition"
-          >
-            {content.ctaButtonText}
-          </Link>
+              <button
+                onClick={() => setShowApplicationForm(true)}
+                className="bg-[#011F5B] px-10 py-4 rounded-full font-semibold hover:opacity-90 transition"
+              >
+                {content.ctaButtonText}
+              </button>
 
-          <p className="mt-6 text-sm text-white/80">
-            Acceptance Fee: ₦30,000 (Non-refundable)
-          </p>
+              <p className="mt-6 text-sm text-white/80">
+                Acceptance Fee: ₦30,000 (Non-refundable)
+              </p>
+            </>
+          )}
+
+          {showApplicationForm && !applicationSubmitted && (
+            <form onSubmit={handleApplicationSubmit} className="bg-white text-gray-900 p-8 rounded-2xl">
+              <h2 className="text-2xl font-bold text-[#011F5B] mb-6">
+                Academy Application Form
+              </h2>
+
+              <div className="space-y-4 text-left">
+                {/* Full Name */}
+                <div>
+                  <label className="flex items-center gap-2 font-semibold text-[#011F5B] mb-2">
+                    <User size={18} /> Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="flex items-center gap-2 font-semibold text-[#011F5B] mb-2">
+                    <Mail size={18} /> Email *
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
+                    placeholder="your.email@example.com"
+                  />
+                </div>
+
+                {/* Phone */}
+                <div>
+                  <label className="flex items-center gap-2 font-semibold text-[#011F5B] mb-2">
+                    <Phone size={18} /> Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
+                    placeholder="+234 8XX XXX XXXX"
+                  />
+                </div>
+
+                {/* Experience */}
+                <div>
+                  <label className="flex items-center gap-2 font-semibold text-[#011F5B] mb-2">
+                    <Briefcase size={18} /> Relevant Experience
+                  </label>
+                  <textarea
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
+                    placeholder="Any experience with furniture design, woodworking, or interior design (optional)"
+                    rows="3"
+                  />
+                </div>
+
+                {/* Motivation */}
+                <div>
+                  <label className="block font-semibold text-[#011F5B] mb-2">
+                    Why do you want to join our academy? *
+                  </label>
+                  <textarea
+                    name="motivation"
+                    value={formData.motivation}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
+                    placeholder="Tell us about your goals and motivation"
+                    rows="4"
+                    required
+                  />
+                </div>
+
+                {/* Availability */}
+                <div>
+                  <label className="block font-semibold text-[#011F5B] mb-2">
+                    Availability
+                  </label>
+                  <select
+                    name="availability"
+                    value={formData.availability}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
+                  >
+                    <option value="">Select your availability</option>
+                    <option value="fulltime">Full-time</option>
+                    <option value="parttime">Part-time</option>
+                    <option value="weekends">Weekends only</option>
+                    <option value="flexible">Flexible</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-8">
+                <button
+                  type="submit"
+                  className="flex-1 bg-[#011F5B] text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition"
+                >
+                  Submit Application
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowApplicationForm(false)}
+                  className="flex-1 bg-gray-300 text-gray-900 px-6 py-3 rounded-lg font-semibold hover:bg-gray-400 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+
+          {applicationSubmitted && (
+            <div className="bg-white text-center p-8 rounded-2xl">
+              <div className="flex justify-center mb-4">
+                <CheckCircle size={64} className="text-green-500" />
+              </div>
+              <h2 className="text-2xl font-bold text-[#011F5B] mb-2">
+                Application Submitted!
+              </h2>
+              <p className="text-gray-700">
+                Thank you for applying to TimmyLux Academy. We will review your application and contact you shortly.
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </div>

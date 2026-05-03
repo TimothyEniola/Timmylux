@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
-import { Save, Edit3, Plus, Trash2 } from "lucide-react";
+import { Save, Edit3, Plus, Trash2, CheckCircle, Clock, X } from "lucide-react";
 
 export default function AdminAcademy() {
+  const [activeTab, setActiveTab] = useState("content");
   const [isEditing, setIsEditing] = useState(false);
+  const [applications, setApplications] = useState([]);
+  const [selectedApp, setSelectedApp] = useState(null);
   const [content, setContent] = useState({
     heroTitle: "TimmyLux Academy",
     heroSubtitle: "Become a skilled furniture designer and interior craftsman. Learn practical, real-world skills and build a career in luxury furniture.",
@@ -74,6 +77,12 @@ export default function AdminAcademy() {
     if (saved) {
       setContent(JSON.parse(saved));
     }
+    
+    // Load applications
+    const savedApps = localStorage.getItem('academyApplications');
+    if (savedApps) {
+      setApplications(JSON.parse(savedApps));
+    }
   }, []);
 
   const handleSave = () => {
@@ -118,12 +127,30 @@ export default function AdminAcademy() {
     }));
   };
 
+  // Application Management Functions
+  const updateApplicationStatus = (appId, newStatus) => {
+    const updatedApps = applications.map(app =>
+      app.id === appId ? { ...app, status: newStatus } : app
+    );
+    setApplications(updatedApps);
+    localStorage.setItem('academyApplications', JSON.stringify(updatedApps));
+  };
+
+  const deleteApplication = (appId) => {
+    if (confirm('Are you sure you want to delete this application?')) {
+      const updatedApps = applications.filter(app => app.id !== appId);
+      setApplications(updatedApps);
+      localStorage.setItem('academyApplications', JSON.stringify(updatedApps));
+      setSelectedApp(null);
+    }
+  };
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[#011F5B]">Academy Content Editor</h1>
+        <h1 className="text-2xl font-bold text-[#011F5B]">Academy Management</h1>
         <div className="flex gap-2">
-          {!isEditing ? (
+          {activeTab === "content" && !isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
               className="flex items-center gap-2 bg-[#D4AF37] hover:bg-[#b8942a] text-white px-4 py-2 rounded-lg transition"
@@ -131,7 +158,7 @@ export default function AdminAcademy() {
               <Edit3 size={18} />
               Edit Content
             </button>
-          ) : (
+          ) : activeTab === "content" && isEditing ? (
             <button
               onClick={handleSave}
               className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
@@ -139,11 +166,37 @@ export default function AdminAcademy() {
               <Save size={18} />
               Save Changes
             </button>
-          )}
+          ) : null}
         </div>
       </div>
 
-      <div className="space-y-6">
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200 mb-6">
+        <button
+          onClick={() => setActiveTab("content")}
+          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+            activeTab === "content"
+              ? "border-[#011F5B] text-[#011F5B]"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Content Editor
+        </button>
+        <button
+          onClick={() => setActiveTab("applications")}
+          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+            activeTab === "applications"
+              ? "border-[#011F5B] text-[#011F5B]"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Applications ({applications.length})
+        </button>
+      </div>
+
+      {/* Content Tab */}
+      {activeTab === "content" && (
+        <div className="space-y-6">
         {/* Hero Section */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Hero Section</h2>
@@ -390,7 +443,171 @@ export default function AdminAcademy() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      )}
+
+      {/* Applications Tab */}
+      {activeTab === "applications" && (
+        <div className="space-y-6">
+          {selectedApp ? (
+            // Application Detail View
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <button
+                onClick={() => setSelectedApp(null)}
+                className="mb-4 text-blue-600 hover:text-blue-800 flex items-center gap-2"
+              >
+                ← Back to Applications
+              </button>
+
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-2xl font-bold text-[#011F5B]">
+                      {selectedApp.fullName}
+                    </h2>
+                    <p className="text-gray-600 text-sm">
+                      Applied on: {new Date(selectedApp.submittedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <select
+                      value={selectedApp.status}
+                      onChange={(e) => {
+                        updateApplicationStatus(selectedApp.id, e.target.value);
+                        setSelectedApp({
+                          ...selectedApp,
+                          status: e.target.value,
+                        });
+                      }}
+                      className={`px-4 py-2 rounded-lg font-medium ${
+                        selectedApp.status === "approved"
+                          ? "bg-green-100 text-green-700"
+                          : selectedApp.status === "rejected"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="approved">Approved</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                    <button
+                      onClick={() => deleteApplication(selectedApp.id)}
+                      className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+                    >
+                      <Trash2 size={18} />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4 grid grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-semibold text-gray-700 mb-2">Email</h3>
+                    <p className="text-gray-900">{selectedApp.email}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-700 mb-2">Phone</h3>
+                    <p className="text-gray-900">{selectedApp.phone}</p>
+                  </div>
+                  {selectedApp.availability && (
+                    <div>
+                      <h3 className="font-semibold text-gray-700 mb-2">
+                        Availability
+                      </h3>
+                      <p className="text-gray-900 capitalize">
+                        {selectedApp.availability}
+                      </p>
+                    </div>
+                  )}
+                  {selectedApp.experience && (
+                    <div>
+                      <h3 className="font-semibold text-gray-700 mb-2">
+                        Experience
+                      </h3>
+                      <p className="text-gray-900">{selectedApp.experience}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t pt-4">
+                  <h3 className="font-semibold text-gray-700 mb-2">
+                    Motivation
+                  </h3>
+                  <p className="text-gray-900 whitespace-pre-wrap">
+                    {selectedApp.motivation}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Applications List
+            <div className="space-y-4">
+              {applications.length === 0 ? (
+                <div className="bg-white p-8 rounded-lg shadow-md text-center">
+                  <p className="text-gray-600 mb-2">No applications yet</p>
+                  <p className="text-sm text-gray-400">
+                    Applications will appear here when customers submit them
+                  </p>
+                </div>
+              ) : (
+                applications.map((app) => (
+                  <div
+                    key={app.id}
+                    className="bg-white p-4 rounded-lg shadow-md border-l-4 border-[#011F5B] hover:shadow-lg transition"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div
+                        className="flex-1 cursor-pointer"
+                        onClick={() => setSelectedApp(app)}
+                      >
+                        <h3 className="font-semibold text-lg text-[#011F5B]">
+                          {app.fullName}
+                        </h3>
+                        <p className="text-sm text-gray-600">{app.email}</p>
+                        <p className="text-sm text-gray-600">{app.phone}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          Applied:{" "}
+                          {new Date(app.submittedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${
+                            app.status === "approved"
+                              ? "bg-green-100 text-green-700"
+                              : app.status === "rejected"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {app.status === "approved" && (
+                            <CheckCircle size={16} />
+                          )}
+                          {app.status === "pending" && (
+                            <Clock size={16} />
+                          )}
+                          {app.status === "rejected" && (
+                            <X size={16} />
+                          )}
+                          {app.status.charAt(0).toUpperCase() +
+                            app.status.slice(1)}
+                        </span>
+                        <button
+                          onClick={() => setSelectedApp(app)}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

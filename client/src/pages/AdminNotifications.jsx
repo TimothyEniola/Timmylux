@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Plus, Trash2, Send, ShoppingCart, AlertCircle, Share2 } from "lucide-react";
+import { Bell, Plus, Trash2, Send, ShoppingCart, AlertCircle, Share2, Calendar, Package, Sparkles } from "lucide-react";
 import useNotificationStore from "../store/notificationStore";
 
 export default function AdminNotifications() {
@@ -8,14 +8,18 @@ export default function AdminNotifications() {
     title: "",
     message: "",
     type: "info",
+    category: "update",
   });
   const [activeTab, setActiveTab] = useState("received");
 
   const unreadCount = getUnreadCount();
 
-  // Filter notifications by type
-  const sentNotifications = notifications.filter(notif => !notif.type || notif.type !== "order");
-  const receivedNotifications = notifications.filter(notif => notif.type === "order");
+  // Filter notifications by category
+  const receivedNotifications = notifications.filter(notif => notif.category === "order" || !notif.category);
+  const eventNotifications = notifications.filter(notif => notif.category === "event");
+  const productNotifications = notifications.filter(notif => notif.category === "product");
+  const updateNotifications = notifications.filter(notif => notif.category === "update" || notif.category === "info");
+  const sentNotifications = notifications.filter(notif => notif.isSent);
 
   const handleAddNotification = (e) => {
     e.preventDefault();
@@ -23,8 +27,11 @@ export default function AdminNotifications() {
       alert("Please fill in both title and message");
       return;
     }
-    addNotification(newNotification);
-    setNewNotification({ title: "", message: "", type: "info" });
+    addNotification({
+      ...newNotification,
+      isSent: true,
+    });
+    setNewNotification({ title: "", message: "", type: "info", category: "update" });
     alert("Notification sent to all users!");
   };
 
@@ -65,16 +72,16 @@ export default function AdminNotifications() {
         </h1>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 mb-8">
+        <div className="flex border-b border-gray-200 mb-8 overflow-x-auto">
           <button
             onClick={() => setActiveTab("received")}
-            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
               activeTab === "received"
                 ? "border-[#011F5B] text-[#011F5B]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
-            Received ({receivedNotifications.length})
+            Orders ({receivedNotifications.length})
             {unreadCount > 0 && (
               <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
                 {unreadCount}
@@ -82,20 +89,50 @@ export default function AdminNotifications() {
             )}
           </button>
           <button
+            onClick={() => setActiveTab("events")}
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
+              activeTab === "events"
+                ? "border-[#011F5B] text-[#011F5B]"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Events ({eventNotifications.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("products")}
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
+              activeTab === "products"
+                ? "border-[#011F5B] text-[#011F5B]"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Products ({productNotifications.length})
+          </button>
+          <button
+            onClick={() => setActiveTab("updates")}
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
+              activeTab === "updates"
+                ? "border-[#011F5B] text-[#011F5B]"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            Updates ({updateNotifications.length})
+          </button>
+          <button
             onClick={() => setActiveTab("sent")}
-            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+            className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors whitespace-nowrap ${
               activeTab === "sent"
                 ? "border-[#011F5B] text-[#011F5B]"
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
-            Sent ({sentNotifications.length})
+            Send New
           </button>
         </div>
 
         <div className="space-y-8">
 
-          {/* Received Notifications Tab */}
+          {/* Received/Orders Tab */}
           {activeTab === "received" && (
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
@@ -165,14 +202,155 @@ export default function AdminNotifications() {
             </div>
           )}
 
-          {/* Sent Notifications Tab */}
+          {/* Events Tab */}
+          {activeTab === "events" && (
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Calendar size={18} className="text-purple-600" />
+                Events & Announcements
+              </h2>
+
+              {eventNotifications.length === 0 ? (
+                <p className="text-gray-500">No event notifications yet. Create one from the "Send New" tab to notify customers about upcoming events.</p>
+              ) : (
+                <div className="space-y-4">
+                  {eventNotifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={`border-l-4 border-purple-600 rounded-lg p-4 bg-purple-50`}
+                    >
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Calendar size={16} className="text-purple-600" />
+                            <span className="inline-flex rounded-full px-2 py-1 text-[11px] font-semibold bg-purple-100 text-purple-700">
+                              EVENT
+                            </span>
+                          </div>
+                          <h3 className="font-semibold">{notif.title}</h3>
+                          <p className="text-gray-600 mt-1">{notif.message}</p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            Sent: {new Date(notif.date).toLocaleString()}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => deleteNotification(notif.id)}
+                          className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          title="Delete Notification"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Products Tab */}
+          {activeTab === "products" && (
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Package size={18} className="text-blue-600" />
+                Product Updates
+              </h2>
+
+              {productNotifications.length === 0 ? (
+                <p className="text-gray-500">No product notifications yet. Create one from the "Send New" tab to announce new products or updates.</p>
+              ) : (
+                <div className="space-y-4">
+                  {productNotifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={`border-l-4 border-blue-600 rounded-lg p-4 bg-blue-50`}
+                    >
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Package size={16} className="text-blue-600" />
+                            <span className="inline-flex rounded-full px-2 py-1 text-[11px] font-semibold bg-blue-100 text-blue-700">
+                              PRODUCT
+                            </span>
+                          </div>
+                          <h3 className="font-semibold">{notif.title}</h3>
+                          <p className="text-gray-600 mt-1">{notif.message}</p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            Sent: {new Date(notif.date).toLocaleString()}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => deleteNotification(notif.id)}
+                          className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          title="Delete Notification"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Updates Tab */}
+          {activeTab === "updates" && (
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Sparkles size={18} className="text-amber-600" />
+                General Updates
+              </h2>
+
+              {updateNotifications.length === 0 ? (
+                <p className="text-gray-500">No general updates yet. Create one from the "Send New" tab to share news and updates with customers.</p>
+              ) : (
+                <div className="space-y-4">
+                  {updateNotifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={`border-l-4 border-amber-600 rounded-lg p-4 bg-amber-50`}
+                    >
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Sparkles size={16} className="text-amber-600" />
+                            <span className="inline-flex rounded-full px-2 py-1 text-[11px] font-semibold bg-amber-100 text-amber-700">
+                              UPDATE
+                            </span>
+                          </div>
+                          <h3 className="font-semibold">{notif.title}</h3>
+                          <p className="text-gray-600 mt-1">{notif.message}</p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            Sent: {new Date(notif.date).toLocaleString()}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => deleteNotification(notif.id)}
+                          className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                          title="Delete Notification"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Send New Notification Tab */}
           {activeTab === "sent" && (
             <>
               {/* Add New Notification */}
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <Plus size={18} />
-                  Send New Notification
+                  Send New Notification to Customers
                 </h2>
 
                 <form onSubmit={handleAddNotification} className="space-y-4">
@@ -183,101 +361,65 @@ export default function AdminNotifications() {
                     onChange={(e) =>
                       setNewNotification({ ...newNotification, title: e.target.value })
                     }
-                    className="w-full border p-3 rounded-lg"
+                    className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
                     required
                   />
 
                   <textarea
-                    placeholder="Notification Message"
+                    placeholder="Notification Message - Tell customers what's new or important"
                     value={newNotification.message}
                     onChange={(e) =>
                       setNewNotification({ ...newNotification, message: e.target.value })
                     }
-                    className="w-full border p-3 rounded-lg h-24 resize-none"
+                    className="w-full border p-3 rounded-lg h-24 resize-none focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
                     required
                   />
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Notification Type
-                    </label>
-                    <select
-                      value={newNotification.type}
-                      onChange={(e) =>
-                        setNewNotification({ ...newNotification, type: e.target.value })
-                      }
-                      className="w-full border p-3 rounded-lg"
-                    >
-                      <option value="info">Info</option>
-                      <option value="success">Success</option>
-                      <option value="warning">Warning</option>
-                    </select>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Category
+                      </label>
+                      <select
+                        value={newNotification.category}
+                        onChange={(e) =>
+                          setNewNotification({ ...newNotification, category: e.target.value })
+                        }
+                        className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
+                      >
+                        <option value="update">General Update</option>
+                        <option value="event">Event</option>
+                        <option value="product">Product Update</option>
+                        <option value="info">Information</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Notification Type
+                      </label>
+                      <select
+                        value={newNotification.type}
+                        onChange={(e) =>
+                          setNewNotification({ ...newNotification, type: e.target.value })
+                        }
+                        className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
+                      >
+                        <option value="info">Information</option>
+                        <option value="success">Success</option>
+                        <option value="warning">Warning</option>
+                      </select>
+                    </div>
                   </div>
 
-                  <button type="submit" className="btn-primary flex items-center gap-2">
+                  <button
+                    type="submit"
+                    className="w-full bg-[#011F5B] text-white px-6 py-3 rounded-lg font-semibold hover:bg-[#0e2c5b] transition flex items-center justify-center gap-2"
+                  >
                     <Send size={16} />
-                    Send Notification
+                    Send Notification to All Users
                   </button>
                 </form>
-              </div>
-
-              {/* Existing Sent Notifications */}
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <Bell size={18} />
-                  Sent Notifications ({sentNotifications.length})
-                </h2>
-
-                {sentNotifications.length === 0 ? (
-                  <p className="text-gray-500">No notifications sent yet.</p>
-                ) : (
-                  <div className="space-y-4">
-                    {sentNotifications.map((notif) => {
-                      const labelStyles = {
-                        info: "bg-blue-100 text-blue-700",
-                        success: "bg-emerald-100 text-emerald-700",
-                        warning: "bg-amber-100 text-amber-700",
-                      };
-
-                      return (
-                        <div key={notif.id} className="border rounded-lg p-4">
-                          <div className="flex justify-between items-start gap-3">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className={`inline-flex rounded-full px-2 py-1 text-[11px] font-semibold ${labelStyles[notif.type || "info"]}`}>
-                                  {notif.type?.toUpperCase() || "INFO"}
-                                </span>
-                              </div>
-                              <h3 className="font-semibold">{notif.title}</h3>
-                              <p className="text-gray-600 mt-1">{notif.message}</p>
-                              <p className="text-xs text-gray-400 mt-2">
-                                Sent: {new Date(notif.date).toLocaleString()}
-                              </p>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                              <button
-                                onClick={() => deleteNotification(notif.id)}
-                                className="text-red-500 hover:text-red-700 p-1"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                              <div className="flex flex-wrap gap-1">
-                                <button
-                                  onClick={() => shareNotification(notif)}
-                                  className="p-2 bg-[#011F5B] text-white rounded-lg hover:bg-[#003366] transition-colors"
-                                  title="Share Notification"
-                                >
-                                  <Share2 size={14} />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
               </div>
             </>
           )}
