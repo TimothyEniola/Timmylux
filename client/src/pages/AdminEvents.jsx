@@ -41,6 +41,11 @@ export default function AdminEvents() {
     targetUrl: "",
     maxAttendees: "",
     contactInfo: "",
+    // Worker fields
+    position: "",
+    requirements: "",
+    salary: "",
+    jobType: "full-time",
   });
 
   useEffect(() => {
@@ -72,6 +77,10 @@ export default function AdminEvents() {
       targetUrl: "",
       maxAttendees: "",
       contactInfo: "",
+      position: "",
+      requirements: "",
+      salary: "",
+      jobType: "full-time",
     });
     setEditingEvent(null);
     setShowForm(false);
@@ -168,6 +177,8 @@ export default function AdminEvents() {
         return "bg-orange-100 text-orange-800";
       case "customer_year":
         return "bg-teal-100 text-teal-800";
+      case "worker":
+        return "bg-red-100 text-red-800";
       case "promo_season":
         return "bg-gray-200 text-gray-800";
       default:
@@ -439,6 +450,7 @@ Status: ${event.isActive ? 'Active' : 'Inactive'}
                         <option value="compensation">Compensation</option>
                         <option value="customer_year">Customer of the Year</option>
                         <option value="promo_season">Promo Season</option>
+                        <option value="worker">Worker Broadcasting</option>
                       </select>
                     </div>
                   </div>
@@ -620,6 +632,80 @@ Status: ${event.isActive ? 'Active' : 'Inactive'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
                         placeholder="100"
                       />
+                    </div>
+                  )}
+
+                  {formData.type === "worker" && (
+                    <div className="border-t pt-6 mt-6 space-y-4">
+                      <h3 className="text-lg font-semibold text-[#011F5B] mb-4">Worker Broadcast Details</h3>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Job Position *
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.position}
+                          onChange={(e) =>
+                            setFormData({ ...formData, position: e.target.value })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                          placeholder="e.g., Receptionist, Secretary, Manager, etc."
+                          required={formData.type === "worker"}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Job Requirements *
+                        </label>
+                        <textarea
+                          value={formData.requirements}
+                          onChange={(e) =>
+                            setFormData({ ...formData, requirements: e.target.value })
+                          }
+                          rows={3}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                          placeholder="List job requirements, qualifications, experience needed..."
+                          required={formData.type === "worker"}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Salary Range
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.salary}
+                            onChange={(e) =>
+                              setFormData({ ...formData, salary: e.target.value })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                            placeholder="e.g., ₦50,000 - ₦80,000"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Job Type
+                          </label>
+                          <select
+                            value={formData.jobType}
+                            onChange={(e) =>
+                              setFormData({ ...formData, jobType: e.target.value })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
+                          >
+                            <option value="full-time">Full-time</option>
+                            <option value="part-time">Part-time</option>
+                            <option value="contract">Contract</option>
+                            <option value="freelance">Freelance</option>
+                            <option value="seasonal">Seasonal</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   )}
 

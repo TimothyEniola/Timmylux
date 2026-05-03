@@ -1,0 +1,396 @@
+import { useState, useEffect } from "react";
+import { Save, Edit3, Plus, Trash2 } from "lucide-react";
+
+export default function AdminAcademy() {
+  const [isEditing, setIsEditing] = useState(false);
+  const [content, setContent] = useState({
+    heroTitle: "TimmyLux Academy",
+    heroSubtitle: "Become a skilled furniture designer and interior craftsman. Learn practical, real-world skills and build a career in luxury furniture.",
+    requirementsTitle: "Admission Requirements",
+    requirements: [
+      {
+        title: "Basic Education",
+        description: "Applicants should have at least a secondary school education and basic understanding of English."
+      },
+      {
+        title: "Passion for Craft",
+        description: "You must have a strong interest in furniture design, woodworking, or interior styling."
+      },
+      {
+        title: "Commitment",
+        description: "Willingness to complete the full training program and participate in hands-on sessions."
+      },
+      {
+        title: "Acceptance Fee",
+        description: "A non-refundable acceptance fee of ₦30,000 is required upon admission."
+      }
+    ],
+    programTitle: "Program Structure",
+    program: [
+      {
+        title: "Duration",
+        description: "3 - 6 months intensive training (practical & theory)."
+      },
+      {
+        title: "Hands-on Training",
+        description: "Work directly with tools, materials, and real client projects."
+      },
+      {
+        title: "Mentorship",
+        description: "Learn directly from experienced craftsmen and designers."
+      },
+      {
+        title: "Certification",
+        description: "Receive a TimmyLux Academy certificate upon successful completion."
+      }
+    ],
+    sectionTitle: "What You Will Learn",
+    offerings: [
+      {
+        title: "Furniture Design",
+        description: "Understand modern and luxury furniture design principles and concepts."
+      },
+      {
+        title: "Woodworking Skills",
+        description: "Learn cutting, shaping, polishing, and finishing techniques."
+      },
+      {
+        title: "Interior Design Basics",
+        description: "Understand how furniture fits into complete interior spaces."
+      },
+      {
+        title: "Business & Client Work",
+        description: "Learn how to work with clients, pricing, and running your own furniture business."
+      }
+    ],
+    ctaTitle: "Start Your Journey Today",
+    ctaSubtitle: "Take the first step into a profitable and creative career in furniture design.",
+    ctaButtonText: "Apply Now"
+  });
+
+  // Load content from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('academyContent');
+    if (saved) {
+      setContent(JSON.parse(saved));
+    }
+  }, []);
+
+  const handleSave = () => {
+    localStorage.setItem('academyContent', JSON.stringify(content));
+    setIsEditing(false);
+    alert('Academy content saved successfully!');
+  };
+
+  const updateContent = (field, value) => {
+    setContent(prev => ({ ...prev, [field]: value }));
+  };
+
+  const updateOffering = (index, field, value) => {
+    const newOfferings = [...content.offerings];
+    newOfferings[index][field] = value;
+    setContent(prev => ({ ...prev, offerings: newOfferings }));
+  };
+
+  const updateRequirement = (index, field, value) => {
+    const newRequirements = [...content.requirements];
+    newRequirements[index][field] = value;
+    setContent(prev => ({ ...prev, requirements: newRequirements }));
+  };
+
+  const updateProgram = (index, field, value) => {
+    const newProgram = [...content.program];
+    newProgram[index][field] = value;
+    setContent(prev => ({ ...prev, program: newProgram }));
+  };
+
+  const addRequirement = () => {
+    setContent(prev => ({
+      ...prev,
+      requirements: [...prev.requirements, { title: "", description: "" }]
+    }));
+  };
+
+  const removeRequirement = (index) => {
+    setContent(prev => ({
+      ...prev,
+      requirements: prev.requirements.filter((_, i) => i !== index)
+    }));
+  };
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-[#011F5B]">Academy Content Editor</h1>
+        <div className="flex gap-2">
+          {!isEditing ? (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-2 bg-[#D4AF37] hover:bg-[#b8942a] text-white px-4 py-2 rounded-lg transition"
+            >
+              <Edit3 size={18} />
+              Edit Content
+            </button>
+          ) : (
+            <button
+              onClick={handleSave}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition"
+            >
+              <Save size={18} />
+              Save Changes
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* Hero Section */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Hero Section</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Title</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={content.heroTitle}
+                  onChange={(e) => updateContent('heroTitle', e.target.value)}
+                  className="w-full p-2 border rounded"
+                />
+              ) : (
+                <p className="p-2 bg-gray-50 rounded">{content.heroTitle}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Subtitle</label>
+              {isEditing ? (
+                <textarea
+                  value={content.heroSubtitle}
+                  onChange={(e) => updateContent('heroSubtitle', e.target.value)}
+                  className="w-full p-2 border rounded h-20"
+                />
+              ) : (
+                <p className="p-2 bg-gray-50 rounded">{content.heroSubtitle}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Requirements Section */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Requirements Section</h2>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Section Title</label>
+            {isEditing ? (
+              <input
+                type="text"
+                value={content.requirementsTitle}
+                onChange={(e) => updateContent('requirementsTitle', e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <p className="p-2 bg-gray-50 rounded">{content.requirementsTitle}</p>
+            )}
+          </div>
+          <div className="space-y-4">
+            {content.requirements.map((requirement, index) => (
+              <div key={index} className="border p-4 rounded">
+                <div className="flex justify-between items-start gap-3">
+                  <div className="w-full space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Requirement Title</label>
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={requirement.title}
+                          onChange={(e) => updateRequirement(index, 'title', e.target.value)}
+                          className="w-full p-2 border rounded"
+                        />
+                      ) : (
+                        <p className="p-2 bg-gray-50 rounded">{requirement.title}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Requirement Description</label>
+                      {isEditing ? (
+                        <textarea
+                          value={requirement.description}
+                          onChange={(e) => updateRequirement(index, 'description', e.target.value)}
+                          className="w-full p-2 border rounded h-24"
+                        />
+                      ) : (
+                        <p className="p-2 bg-gray-50 rounded">{requirement.description}</p>
+                      )}
+                    </div>
+                  </div>
+                  {isEditing && content.requirements.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeRequirement(index)}
+                      className="mt-1 p-2 text-red-600 hover:text-red-800 rounded-full border border-red-200"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          {isEditing && (
+            <button
+              type="button"
+              onClick={addRequirement}
+              className="inline-flex items-center gap-2 bg-[#011F5B] text-white px-4 py-2 rounded-lg hover:bg-[#0b2b65] transition"
+            >
+              <Plus size={16} />
+              Add Requirement
+            </button>
+          )}
+        </div>
+
+        {/* Program Section */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Program Section</h2>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Section Title</label>
+            {isEditing ? (
+              <input
+                type="text"
+                value={content.programTitle}
+                onChange={(e) => updateContent('programTitle', e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <p className="p-2 bg-gray-50 rounded">{content.programTitle}</p>
+            )}
+          </div>
+          <div className="space-y-4">
+            {content.program.map((prog, index) => (
+              <div key={index} className="border p-4 rounded">
+                <div className="mb-2">
+                  <label className="block text-sm font-medium mb-1">Program Title</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={prog.title}
+                      onChange={(e) => updateProgram(index, 'title', e.target.value)}
+                      className="w-full p-2 border rounded"
+                    />
+                  ) : (
+                    <p className="p-2 bg-gray-50 rounded">{prog.title}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Program Description</label>
+                  {isEditing ? (
+                    <textarea
+                      value={prog.description}
+                      onChange={(e) => updateProgram(index, 'description', e.target.value)}
+                      className="w-full p-2 border rounded h-20"
+                    />
+                  ) : (
+                    <p className="p-2 bg-gray-50 rounded">{prog.description}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Offerings Section */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Offerings Section</h2>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Section Title</label>
+            {isEditing ? (
+              <input
+                type="text"
+                value={content.sectionTitle}
+                onChange={(e) => updateContent('sectionTitle', e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <p className="p-2 bg-gray-50 rounded">{content.sectionTitle}</p>
+            )}
+          </div>
+          <div className="space-y-4">
+            {content.offerings.map((offering, index) => (
+              <div key={index} className="border p-4 rounded">
+                <div className="mb-2">
+                  <label className="block text-sm font-medium mb-1">Title</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={offering.title}
+                      onChange={(e) => updateOffering(index, 'title', e.target.value)}
+                      className="w-full p-2 border rounded"
+                    />
+                  ) : (
+                    <p className="p-2 bg-gray-50 rounded">{offering.title}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description</label>
+                  {isEditing ? (
+                    <textarea
+                      value={offering.description}
+                      onChange={(e) => updateOffering(index, 'description', e.target.value)}
+                      className="w-full p-2 border rounded h-20"
+                    />
+                  ) : (
+                    <p className="p-2 bg-gray-50 rounded">{offering.description}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA Section */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Call to Action Section</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Title</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={content.ctaTitle}
+                  onChange={(e) => updateContent('ctaTitle', e.target.value)}
+                  className="w-full p-2 border rounded"
+                />
+              ) : (
+                <p className="p-2 bg-gray-50 rounded">{content.ctaTitle}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Subtitle</label>
+              {isEditing ? (
+                <textarea
+                  value={content.ctaSubtitle}
+                  onChange={(e) => updateContent('ctaSubtitle', e.target.value)}
+                  className="w-full p-2 border rounded h-20"
+                />
+              ) : (
+                <p className="p-2 bg-gray-50 rounded">{content.ctaSubtitle}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Button Text</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={content.ctaButtonText}
+                  onChange={(e) => updateContent('ctaButtonText', e.target.value)}
+                  className="w-full p-2 border rounded"
+                />
+              ) : (
+                <p className="p-2 bg-gray-50 rounded">{content.ctaButtonText}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

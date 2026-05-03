@@ -1,5 +1,12 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin } from "lucide-react";
+import {
+  FaFacebook,
+  FaInstagram,
+  FaXTwitter,
+  FaLinkedin,
+  FaWhatsapp,
+} from "react-icons/fa6";
 
 export default function Footer() {
   return (
@@ -31,9 +38,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <span className="text-gray-300 hover:text-[#D4AF37] transition-colors">
-                  View Cart
-                </span>
+                <Link
+                  to="/academy"
+                  className="text-gray-300 hover:text-[#D4AF37] transition-colors">
+                  TimmyLux Academy
+                </Link>
               </li>
               <li>
                 <Link
@@ -71,6 +80,52 @@ export default function Footer() {
                 <span>Ogun, Nigeria</span>
               </li>
             </ul>
+          </div>
+        </div>
+
+        {/* Social Media */}
+        <div className="border-t border-gray-700 mt-8 pt-6">
+          <div className="flex justify-center gap-6">
+            <a
+              href="https://facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-[#D4AF37] transition-colors"
+            >
+              <FaFacebook size={24} />
+            </a>
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-[#D4AF37] transition-colors"
+            >
+              <FaInstagram size={24} />
+            </a>
+            <a
+              href="https://whatsapp.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-[#D4AF37] transition-colors"
+            >
+              <FaWhatsapp size={24} />
+            </a>
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-[#D4AF37] transition-colors"
+            >
+              <FaXTwitter size={24} />
+            </a>
+            <a
+              href="https://linkedin.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-[#D4AF37] transition-colors"
+            >
+              <FaLinkedin size={24} />
+            </a>
           </div>
         </div>
 

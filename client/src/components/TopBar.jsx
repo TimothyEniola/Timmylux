@@ -13,7 +13,7 @@ import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
 import useNotificationStore from "../store/notificationStore";
 
-export default function TopBar() {
+export default function TopBar({ collapsed }) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
@@ -95,47 +95,11 @@ export default function TopBar() {
   );
 
   return (
-    <div className="bg-[#D4AF37] text-white px-4 py-3 xl:ml-64">
+    <div className={`hidden md:block bg-[#011F5B] text-white px-4 py-3 transition-all duration-300 ${collapsed ? 'xl:ml-16' : 'xl:ml-64'}`}>
       <div className="container-custom flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
         {/* LEFT SIDE (now only mobile icons) */}
         <div className="flex items-center justify-between md:justify-start gap-6 w-full md:w-auto">
-
-          {/* MOBILE ICONS */}
-          <div className="flex items-center gap-5 md:hidden">
-            <Link to="/wishlist" className="relative">
-              <Heart size={20} />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
-
-            <Link to="/cart" className="relative">
-              <ShoppingCart size={20} />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-
-            <div className="relative">
-              <button
-                onClick={() => setNotificationsOpen((prev) => !prev)}
-                className="relative"
-              >
-                <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-              {notificationsOpen && <NotificationDropdown />}
-            </div>
-          </div>
         </div>
 
         {/* SEARCH BAR */}
@@ -156,7 +120,7 @@ export default function TopBar() {
           />
           <button
             type="submit"
-            className="bg-[#011F5B] px-6 hover:bg-[#0a2a7a] transition-colors"
+            className="bg-[#D4AF37] px-6 hover:bg-[#0a2a7a] transition-colors"
           >
             <Search size={20} />
           </button>

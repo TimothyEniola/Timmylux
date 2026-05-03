@@ -98,6 +98,11 @@ export default function Help() {
                 <p className="text-sm text-gray-600">Find products, manage your cart, and complete checkout with clear steps.</p>
               </article>
               <article className="rounded-3xl border border-gray-200 p-5 hover:border-[#011F5B] transition">
+                <h4 className="font-semibold mb-2">Academy Programs</h4>
+                <p className="text-sm text-gray-600">Learn about our furniture design and craftsmanship training programs.</p>
+                <Link to="/academy" className="text-sm text-[#011F5B] font-medium mt-2 inline-block">Explore Academy →</Link>
+              </article>
+              <article className="rounded-3xl border border-gray-200 p-5 hover:border-[#011F5B] transition">
                 <h4 className="font-semibold mb-2">Account Management</h4>
                 <p className="text-sm text-gray-600">Update your profile, reset passwords, and manage saved addresses from your account area.</p>
               </article>

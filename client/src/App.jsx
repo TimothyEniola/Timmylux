@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from "react-router-dom";
+import { useState } from "react";
 import TopBar from "./components/TopBar";
 import Navbar from "./components/Navbar";
 import AdminSidebar from "./components/AdminSidebar";
@@ -34,16 +35,20 @@ import AdminEvents from "./pages/AdminEvents";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminCoupons from "./pages/AdminCoupons";
 import AdminProfile from "./pages/AdminProfile";
+import Academy from "./pages/Academy";
+import AdminAcademy from "./pages/AdminAcademy";
+import Notifications from "./pages/Notifications";
 export default function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div className="flex flex-col min-h-screen">
-      {!isAdminRoute && <TopBar />}
-      {isAdminRoute && <AdminTopBar />}
-      {isAdminRoute ? <AdminSidebar /> : <Navbar />}
-      <div className={`flex-grow ${isAdminRoute ? 'xl:ml-64' : 'xl:ml-64'}`}>
+      {!isAdminRoute && <TopBar collapsed={sidebarCollapsed} />}
+      {isAdminRoute && <AdminTopBar collapsed={sidebarCollapsed} />}
+      {isAdminRoute ? <AdminSidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} /> : <Navbar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />}
+      <div className={`flex-grow transition-all duration-300 ${sidebarCollapsed ? 'xl:ml-16' : 'xl:ml-64'}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -59,6 +64,8 @@ export default function App() {
           <Route path="/track-order" element={<ProtectedRoute><TrackOrder /></ProtectedRoute>} />
           <Route path="/custom-request" element={<CustomRequest />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/academy" element={<Academy />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/admin/content" element={<AdminRoute><AdminContentEditor /></AdminRoute>} />
           <Route path="/admin/events" element={<AdminRoute><AdminEvents /></AdminRoute>} />
@@ -73,9 +80,10 @@ export default function App() {
           <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
           <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
           <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
+          <Route path="/admin/academy" element={<AdminRoute><AdminAcademy /></AdminRoute>} />
         </Routes>
       </div>
-      <div className="xl:ml-64"><Footer /></div>
+      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'xl:ml-16' : 'xl:ml-64'}`}><Footer /></div>
     </div>
   );
 }

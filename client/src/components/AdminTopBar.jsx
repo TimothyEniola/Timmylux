@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import useNotificationStore from "../store/notificationStore";
 
-export default function AdminTopBar() {
+export default function AdminTopBar({ collapsed }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   // NOTIFICATIONS
@@ -17,7 +17,7 @@ export default function AdminTopBar() {
   const unreadCount = getUnreadCount();
 
   return (
-    <div className="bg-[#011F5B] text-white px-3 py-2 xl:ml-64">
+    <div className={`hidden md:block bg-[#011F5B] text-white px-3 py-2 transition-all duration-300 ${collapsed ? 'xl:ml-16' : 'xl:ml-64'}`}>
       <div className="container-custom flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
 
         {/* TOP ROW */}
