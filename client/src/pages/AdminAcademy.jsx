@@ -6,9 +6,17 @@ export default function AdminAcademy() {
   const [isEditing, setIsEditing] = useState(false);
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
+  const [academyStatus, setAcademyStatus] = useState("closed"); // "opened" or "closed"
+  const [graduationStudents, setGraduationStudents] = useState([]);
   const [content, setContent] = useState({
     heroTitle: "TimmyLux Academy",
     heroSubtitle: "Become a skilled furniture designer and interior craftsman. Learn practical, real-world skills and build a career in luxury furniture.",
+    heroStats: [
+      { num: "6mo", label: "Intensive program" },
+      { num: "4+", label: "Core skill areas" },
+      { num: "100%", label: "Hands-on training" },
+      { num: "₦100k", label: "Total fee (2 installments)" },
+    ],
     requirementsTitle: "Admission Requirements",
     requirements: [
       {
@@ -68,7 +76,21 @@ export default function AdminAcademy() {
     ],
     ctaTitle: "Start Your Journey Today",
     ctaSubtitle: "Take the first step into a profitable and creative career in furniture design.",
-    ctaButtonText: "Apply Now"
+    ctaButtonText: "Apply Now",
+    rulesTitle: "Academy Rules",
+    rulesDescription: "A safe and focused environment is essential. All students must follow academy rules before admission.",
+    rules: [
+      { title: "No Smoking", description: "Smoking is strictly prohibited anywhere on academy premises." },
+      { title: "No Drinking", description: "Alcohol and intoxicants are not allowed in the academy environment." },
+      { title: "No Fighting", description: "Physical fights or disorderly conduct will result in immediate removal." },
+      { title: "No Cultist Activity", description: "Any cult-related behavior, symbols, or gatherings are banned." },
+      { title: "Respect Instructors", description: "Listen to trainers, arrive on time, and stay focused during sessions." },
+    ],
+    disciplineTitle: "Discipline Guidelines",
+    disciplineText: "Students must maintain professionalism, respect instructors and peers, keep the learning space clean, and follow all training schedules. Failure to comply may lead to dismissal from the program.",
+    statusOpenText: "The academy is open for applications. Students can apply, view the program details, and complete the admission process.",
+    statusClosedText: "The academy is currently closed. Students will see a notification that it is not open yet and will be notified when applications reopen.",
+    graduationNote: "Final year students will complete graduation after finishing the academy program and paying the required fees." 
   });
 
   // Load content from localStorage on mount
@@ -82,6 +104,18 @@ export default function AdminAcademy() {
     const savedApps = localStorage.getItem('academyApplications');
     if (savedApps) {
       setApplications(JSON.parse(savedApps));
+    }
+
+    // Load academy status
+    const savedStatus = localStorage.getItem('academyStatus');
+    if (savedStatus) {
+      setAcademyStatus(savedStatus);
+    }
+
+    // Load graduation students
+    const savedGraduates = localStorage.getItem('graduationStudents');
+    if (savedGraduates) {
+      setGraduationStudents(JSON.parse(savedGraduates));
     }
   }, []);
 
@@ -113,6 +147,12 @@ export default function AdminAcademy() {
     setContent(prev => ({ ...prev, program: newProgram }));
   };
 
+  const updateRule = (index, field, value) => {
+    const newRules = [...content.rules];
+    newRules[index][field] = value;
+    setContent(prev => ({ ...prev, rules: newRules }));
+  };
+
   const addRequirement = () => {
     setContent(prev => ({
       ...prev,
@@ -124,6 +164,20 @@ export default function AdminAcademy() {
     setContent(prev => ({
       ...prev,
       requirements: prev.requirements.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addRule = () => {
+    setContent(prev => ({
+      ...prev,
+      rules: [...prev.rules, { title: "", description: "" }]
+    }));
+  };
+
+  const removeRule = (index) => {
+    setContent(prev => ({
+      ...prev,
+      rules: prev.rules.filter((_, i) => i !== index)
     }));
   };
 
@@ -143,6 +197,31 @@ export default function AdminAcademy() {
       localStorage.setItem('academyApplications', JSON.stringify(updatedApps));
       setSelectedApp(null);
     }
+  };
+
+  // Academy Status Management
+  const toggleAcademyStatus = () => {
+    const newStatus = academyStatus === "opened" ? "closed" : "opened";
+    setAcademyStatus(newStatus);
+    localStorage.setItem('academyStatus', newStatus);
+    alert(`Academy is now ${newStatus}`);
+  };
+
+  // Graduation Management
+  const addToGraduation = (appId) => {
+    const app = applications.find(a => a.id === appId);
+    if (app) {
+      const newGraduates = [...graduationStudents, { ...app, graduationDate: new Date().toISOString() }];
+      setGraduationStudents(newGraduates);
+      localStorage.setItem('graduationStudents', JSON.stringify(newGraduates));
+      alert(`${app.fullName} has been added to graduation list`);
+    }
+  };
+
+  const removeFromGraduation = (appId) => {
+    const newGraduates = graduationStudents.filter(g => g.id !== appId);
+    setGraduationStudents(newGraduates);
+    localStorage.setItem('graduationStudents', JSON.stringify(newGraduates));
   };
 
   return (
@@ -191,6 +270,26 @@ export default function AdminAcademy() {
           }`}
         >
           Applications ({applications.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("status")}
+          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+            activeTab === "status"
+              ? "border-[#011F5B] text-[#011F5B]"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Academy Status
+        </button>
+        <button
+          onClick={() => setActiveTab("graduation")}
+          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+            activeTab === "graduation"
+              ? "border-[#011F5B] text-[#011F5B]"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Graduation ({graduationStudents.length})
         </button>
       </div>
 
@@ -399,6 +498,116 @@ export default function AdminAcademy() {
           </div>
         </div>
 
+        {/* Rules Section */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Rules Section</h2>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Section Title</label>
+            {isEditing ? (
+              <input
+                type="text"
+                value={content.rulesTitle}
+                onChange={(e) => updateContent('rulesTitle', e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <p className="p-2 bg-gray-50 rounded">{content.rulesTitle}</p>
+            )}
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Section Description</label>
+            {isEditing ? (
+              <textarea
+                value={content.rulesDescription}
+                onChange={(e) => updateContent('rulesDescription', e.target.value)}
+                className="w-full p-2 border rounded h-20"
+              />
+            ) : (
+              <p className="p-2 bg-gray-50 rounded">{content.rulesDescription}</p>
+            )}
+          </div>
+          <div className="space-y-4">
+            {content.rules.map((rule, index) => (
+              <div key={index} className="border p-4 rounded">
+                <div className="mb-2">
+                  <label className="block text-sm font-medium mb-1">Rule Title</label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={rule.title}
+                      onChange={(e) => updateRule(index, 'title', e.target.value)}
+                      className="w-full p-2 border rounded"
+                    />
+                  ) : (
+                    <p className="p-2 bg-gray-50 rounded">{rule.title}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Rule Description</label>
+                  {isEditing ? (
+                    <textarea
+                      value={rule.description}
+                      onChange={(e) => updateRule(index, 'description', e.target.value)}
+                      className="w-full p-2 border rounded h-20"
+                    />
+                  ) : (
+                    <p className="p-2 bg-gray-50 rounded">{rule.description}</p>
+                  )}
+                </div>
+                {isEditing && content.rules.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeRule(index)}
+                    className="mt-3 text-red-600 hover:text-red-800 text-sm"
+                  >
+                    Remove rule
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          {isEditing && (
+            <button
+              type="button"
+              onClick={addRule}
+              className="inline-flex items-center gap-2 bg-[#011F5B] text-white px-4 py-2 rounded-lg hover:bg-[#0b2b65] transition"
+            >
+              <Plus size={16} />
+              Add Rule
+            </button>
+          )}
+        </div>
+
+        {/* Discipline Section */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Discipline Section</h2>
+          <div>
+            <label className="block text-sm font-medium mb-1">Section Title</label>
+            {isEditing ? (
+              <input
+                type="text"
+                value={content.disciplineTitle}
+                onChange={(e) => updateContent('disciplineTitle', e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+            ) : (
+              <p className="p-2 bg-gray-50 rounded">{content.disciplineTitle}</p>
+            )}
+          </div>
+          <div className="mt-4">
+            <label className="block text-sm font-medium mb-1">Discipline Text</label>
+            {isEditing ? (
+              <textarea
+                value={content.disciplineText}
+                onChange={(e) => updateContent('disciplineText', e.target.value)}
+                className="w-full p-2 border rounded h-24"
+              />
+            ) : (
+              <p className="p-2 bg-gray-50 rounded">{content.disciplineText}</p>
+            )}
+          </div>
+        </div>
+
         {/* CTA Section */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Call to Action Section</h2>
@@ -439,6 +648,49 @@ export default function AdminAcademy() {
                 />
               ) : (
                 <p className="p-2 bg-gray-50 rounded">{content.ctaButtonText}</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Status Notices Section */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Status Notices</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Open Status Message</label>
+              {isEditing ? (
+                <textarea
+                  value={content.statusOpenText}
+                  onChange={(e) => updateContent('statusOpenText', e.target.value)}
+                  className="w-full p-2 border rounded h-20"
+                />
+              ) : (
+                <p className="p-2 bg-gray-50 rounded">{content.statusOpenText}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Closed Status Message</label>
+              {isEditing ? (
+                <textarea
+                  value={content.statusClosedText}
+                  onChange={(e) => updateContent('statusClosedText', e.target.value)}
+                  className="w-full p-2 border rounded h-20"
+                />
+              ) : (
+                <p className="p-2 bg-gray-50 rounded">{content.statusClosedText}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Graduation Note</label>
+              {isEditing ? (
+                <textarea
+                  value={content.graduationNote}
+                  onChange={(e) => updateContent('graduationNote', e.target.value)}
+                  className="w-full p-2 border rounded h-20"
+                />
+              ) : (
+                <p className="p-2 bg-gray-50 rounded">{content.graduationNote}</p>
               )}
             </div>
           </div>
@@ -606,6 +858,115 @@ export default function AdminAcademy() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Status Tab */}
+      {activeTab === "status" && (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Academy Status Management</h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold">Current Status</h3>
+                  <p className="text-gray-600">
+                    Academy is currently <span className={`font-semibold ${academyStatus === "opened" ? "text-green-600" : "text-red-600"}`}>
+                      {academyStatus.toUpperCase()}
+                    </span>
+                  </p>
+                </div>
+                <button
+                  onClick={toggleAcademyStatus}
+                  className={`px-6 py-3 rounded-lg font-semibold text-white transition ${
+                    academyStatus === "opened"
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
+                >
+                  {academyStatus === "opened" ? "Close Academy" : "Open Academy"}
+                </button>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">Status Information</h4>
+                <p className="text-sm text-gray-600">
+                  {academyStatus === "opened"
+                    ? "The academy is open for applications. Students can submit their applications and view the academy content."
+                    : "The academy is closed. Students will see a notification that the academy is not currently accepting applications."
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Graduation Tab */}
+      {activeTab === "graduation" && (
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-4 text-[#011F5B]">Graduation Management</h2>
+            <p className="text-gray-600 mb-6">
+              Manage final year students who are ready for graduation. Add approved students here for their graduation ceremony.
+            </p>
+
+            {graduationStudents.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No students scheduled for graduation</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {graduationStudents.map((student) => (
+                  <div key={student.id} className="border p-4 rounded-lg bg-green-50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold text-[#011F5B]">{student.fullName}</h3>
+                        <p className="text-sm text-gray-600">{student.email}</p>
+                        <p className="text-xs text-gray-500">
+                          Graduation Date: {new Date(student.graduationDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => removeFromGraduation(student.id)}
+                        className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add to Graduation Section */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-semibold mb-4 text-[#011F5B]">Add Student to Graduation</h3>
+            <div className="space-y-4">
+              {applications
+                .filter(app => app.status === "approved")
+                .filter(app => !graduationStudents.find(g => g.id === app.id))
+                .map((app) => (
+                  <div key={app.id} className="border p-4 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h4 className="font-semibold">{app.fullName}</h4>
+                        <p className="text-sm text-gray-600">{app.email}</p>
+                      </div>
+                      <button
+                        onClick={() => addToGraduation(app.id)}
+                        className="bg-[#D4AF37] text-white px-4 py-2 rounded hover:bg-[#b8942a]"
+                      >
+                        Add to Graduation
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              {applications.filter(app => app.status === "approved").length === 0 && (
+                <p className="text-gray-500 text-center">No approved students available</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>

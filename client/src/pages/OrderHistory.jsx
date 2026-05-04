@@ -169,7 +169,7 @@ export default function OrderHistory() {
                       className="flex items-center gap-2 px-4 py-2 bg-[#D4AF37] text-white rounded-lg hover:bg-[#B8952A] transition-colors whitespace-nowrap"
                     >
                       <Eye size={16} />
-                      Track Order
+                      View
                     </button>
 
                     {/* Share Button */}

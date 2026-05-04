@@ -75,10 +75,6 @@ const ProductCard = memo(function ProductCard({
   const handleAddToCart = (e) => {
     e.preventDefault();
     addToCart(product);
-    addNotification({
-      title: "Added to Cart",
-      message: `${product.name} has been added to your cart.`,
-    });
     alert(`${product.name} added to cart!`);
   };
 

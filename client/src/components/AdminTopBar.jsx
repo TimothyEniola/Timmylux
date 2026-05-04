@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, Check, Search, Settings, User } from "lucide-react";
+import { Bell, Check, Settings, User } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import useNotificationStore from "../store/notificationStore";
@@ -109,21 +109,6 @@ export default function AdminTopBar({ collapsed }) {
             </Link>
           </div>
         </div>
-
-        {/* SEARCH */}
-        <form
-          onSubmit={(e) => e.preventDefault()}
-          className="flex w-full md:max-w-xl bg-white rounded-full overflow-hidden"
-        >
-          <input
-            type="text"
-            placeholder="Search admin panel..."
-            className="flex-1 px-4 py-2 text-black text-sm outline-none"
-          />
-          <button className="bg-[#D4AF37] px-4 text-white">
-            <Search size={18} />
-          </button>
-        </form>
 
         {/* DESKTOP RIGHT */}
         <div className="hidden md:flex items-center gap-4">

@@ -165,11 +165,11 @@ export default function TopBar({ collapsed }) {
 
           {/* Social Icons */}
           <div className="flex items-center gap-4 text-lg">
-            <FaFacebook className="hover:text-[#011F5B] cursor-pointer" />
-            <FaInstagram className="hover:text-[#011F5B] cursor-pointer" />
-            <FaWhatsapp className="hover:text-[#011F5B] cursor-pointer" />
-            <FaXTwitter className="hover:text-[#011F5B] cursor-pointer" />
-            <FaLinkedin className="hover:text-[#011F5B] cursor-pointer" />
+            <FaFacebook className="hover:text-[#D4AF37] transition-colors cursor-pointer" />
+            <FaInstagram className="hover:text-[#D4AF37] transition-colors cursor-pointer" />
+            <FaWhatsapp className="hover:text-[#D4AF37] transition-colors cursor-pointer" />
+            <FaXTwitter className="hover:text-[#D4AF37] transition-colors cursor-pointer" />
+            <FaLinkedin className="hover:text-[#D4AF37] transition-colors cursor-pointer" />
           </div>
         </div>
       </div>

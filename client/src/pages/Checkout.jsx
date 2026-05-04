@@ -101,38 +101,51 @@ export default function Checkout() {
     return true;
   };
 
+  const resetCheckoutForm = () => {
+    setFormData({
+      fullName: "",
+      phone: "",
+      email: "",
+      address: "",
+      city: "",
+      state: "",
+    });
+    setPaymentMethod("cod");
+    setCouponCode("");
+    setAppliedCoupon(null);
+  };
+
+  const finishOrder = (message) => {
+    clearCart();
+    resetCheckoutForm();
+    alert(message);
+    window.location.reload();
+  };
+
   const handlePaystack = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    // Send notification to admin
     addNotification({
       title: "New Order Placed",
       message: `${formData.fullName} placed an order for ₦${finalTotal.toLocaleString()} via Paystack. Items: ${items.length} product(s). Delivery to: ${formData.city}, ${formData.state}.`,
       type: "order",
     });
 
-    // Clear cart after successful order
-    clearCart();
-
-    alert(`Paystack checkout simulated for ₦${finalTotal.toFixed(2)}. This is a frontend-only demo.`);
+    finishOrder(`Paystack checkout simulated for ₦${finalTotal.toFixed(2)}. This is a frontend-only demo.`);
   };
 
   const handleCodOrder = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    // Send notification to admin
     addNotification({
       title: "New Cash on Delivery Order",
       message: `${formData.fullName} placed a COD order for ₦${finalTotal.toLocaleString()}. Items: ${items.length} product(s). Delivery to: ${formData.city}, ${formData.state}. Phone: ${formData.phone}.`,
       type: "order",
     });
 
-    // Clear cart after successful order
-    clearCart();
-
-    alert("Cash on Delivery order placed successfully! This is a frontend-only demo.");
+    finishOrder("Cash on Delivery order placed successfully! This is a frontend-only demo.");
   };
 
   const handleContinuePayment = (e) => {

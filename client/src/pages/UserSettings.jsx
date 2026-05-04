@@ -5,7 +5,7 @@ import useNotificationStore from "../store/notificationStore";
 export default function UserSettings() {
   const [activeTab, setActiveTab] = useState("profile");
 
-  const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotificationStore();
+  const { notifications, markAsRead, markAllAsRead } = useNotificationStore();
   const [notificationPrefs, setNotificationPrefs] = useState({
     email: true,
     push: true,
@@ -301,12 +301,6 @@ export default function UserSettings() {
                               <p className="text-sm text-gray-600 mt-1">{notif.message}</p>
                               <p className="text-xs text-gray-400 mt-2">{new Date(notif.date).toLocaleString()}</p>
                             </div>
-                            <button
-                              onClick={() => deleteNotification(notif.id)}
-                              className="text-red-500 hover:text-red-700 text-sm"
-                            >
-                              Remove
-                            </button>
                           </div>
                           {!notif.read && (
                             <button

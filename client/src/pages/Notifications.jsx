@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Calendar, Package, Sparkles, ShoppingCart, Trash2, Archive } from "lucide-react";
+import { Check, Calendar, Package, Sparkles, ShoppingCart, Archive } from "lucide-react";
 import useNotificationStore from "../store/notificationStore";
 
 export default function Notifications() {
@@ -7,7 +7,6 @@ export default function Notifications() {
     notifications,
     markAsRead,
     markAllAsRead,
-    deleteNotification,
     getUnreadCount,
   } = useNotificationStore();
 
@@ -224,13 +223,7 @@ export default function Notifications() {
                             <Check size={18} />
                           </button>
                         )}
-                        <button
-                          onClick={() => deleteNotification(notif.id)}
-                          className="p-2 hover:bg-red-100 rounded-lg transition text-red-600 hover:text-red-700"
-                          title="Delete notification"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+
                       </div>
                     </div>
                   </div>

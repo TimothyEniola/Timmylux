@@ -4,8 +4,8 @@ import { X, Share2 } from "lucide-react";
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Mock data (FIXED status values)
   useEffect(() => {
     const mockOrders = [
       {
@@ -34,9 +34,7 @@ export default function AdminOrders() {
         total: 75000,
         status: "Shipped",
         date: "2024-01-02",
-        items: [
-          { name: "Dining Chair", quantity: 4, price: 18750 }
-        ],
+        items: [{ name: "Dining Chair", quantity: 4, price: 18750 }],
         shippingAddress: {
           fullName: "Jane Smith",
           phone: "+2340987654321",
@@ -52,9 +50,7 @@ export default function AdminOrders() {
         total: 200000,
         status: "Delivered",
         date: "2024-01-03",
-        items: [
-          { name: "King Size Bed", quantity: 1, price: 200000 }
-        ],
+        items: [{ name: "King Size Bed", quantity: 1, price: 200000 }],
         shippingAddress: {
           fullName: "Bob Johnson",
           phone: "+2345678901234",
@@ -67,7 +63,6 @@ export default function AdminOrders() {
     setOrders(mockOrders);
   }, []);
 
-  // STRICT status progression
   const statusFlow = {
     Pending: "Shipped",
     Shipped: "Delivered",
@@ -75,17 +70,12 @@ export default function AdminOrders() {
   };
 
   const updateOrderStatus = (orderId) => {
-    setOrders(prev =>
-      prev.map(order => {
+    setOrders((prev) =>
+      prev.map((order) => {
         if (order.id !== orderId) return order;
-
-        // If already delivered → do nothing
         if (order.status === "Delivered") return order;
 
-        return {
-          ...order,
-          status: statusFlow[order.status]
-        };
+        return { ...order, status: statusFlow[order.status] };
       })
     );
   };
@@ -103,28 +93,61 @@ export default function AdminOrders() {
     }
   };
 
-  // SHARE FUNCTION
+  const filteredOrders = orders.filter((order) => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+
+    const searchableFields = [
+      order.id,
+      order.customerName,
+      order.email,
+      order.status,
+      order.date,
+      order.shippingAddress?.address,
+      order.shippingAddress?.city,
+      order.shippingAddress?.state
+    ];
+
+    const matchesText = searchableFields.some((field) =>
+      field?.toLowerCase?.().includes(query)
+    );
+
+    const matchesItem = order.items.some((item) =>
+      item.name?.toLowerCase?.().includes(query)
+    );
+
+    return matchesText || matchesItem;
+  });
+
   const shareOrder = async (order) => {
     const itemsList = order.items
-      .map((item) => `${item.name} (x${item.quantity}) - ₦${item.price.toLocaleString()}`)
+      .map(
+        (item) =>
+          `${item.name} (x${item.quantity}) - ₦${item.price.toLocaleString()}`
+      )
       .join("\n");
 
-    const shareData = {
-      title: `Order #${order.id} - Timmy Lux Furniture`,
-      text: `Order #${order.id}\nDate: ${order.date}\nStatus: ${order.status}\nTotal: ₦${order.total.toLocaleString()}\n\nItems:\n${itemsList}`,
-      url: window.location.href,
-    };
+    const text = `Order #${order.id}
+Date: ${order.date}
+Status: ${order.status}
+Total: ₦${order.total.toLocaleString()}
+
+Items:
+${itemsList}`;
 
     try {
       if (navigator.share) {
-        await navigator.share(shareData);
+        await navigator.share({
+          title: `Order #${order.id}`,
+          text,
+          url: window.location.href
+        });
       } else {
-        // Fallback for browsers that don't support Web Share API
-        navigator.clipboard.writeText(shareData.text);
+        await navigator.clipboard.writeText(text);
         alert("Order details copied to clipboard!");
       }
-    } catch (error) {
-      console.log("Error sharing:", error);
+    } catch (err) {
+      console.error("Share failed:", err);
     }
   };
 
@@ -134,77 +157,59 @@ export default function AdminOrders() {
         Recent Orders
       </h1>
 
+      {/* SEARCH */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search orders..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full rounded-lg border px-4 py-3"
+        />
+      </div>
+
+      {/* ORDERS */}
       <div className="space-y-6">
-        {orders.map((order) => (
+        {filteredOrders.map((order) => (
           <div key={order.id} className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-[#011F5B]">
-                  Order #{order.id}
-                </h3>
-                <p className="text-gray-600">{order.customerName}</p>
-                <p className="text-sm text-gray-500">{order.email}</p>
+                <h3 className="font-semibold">#{order.id}</h3>
+                <p>{order.customerName}</p>
               </div>
-              <div className="text-right">
-                <p className="text-xl font-bold text-[#D4AF37]">
-                  ₦{order.total.toLocaleString()}
-                </p>
-                <p className="text-sm text-gray-500">{order.date}</p>
-              </div>
+
+              <p className="font-bold">
+                ₦{order.total.toLocaleString()}
+              </p>
             </div>
 
-            {/* ITEMS */}
-            <div className="mb-4">
-              <h4 className="font-medium mb-2">Items:</h4>
-              <div className="space-y-1">
-                {order.items.map((item, index) => (
-                  <div key={index} className="flex justify-between text-sm">
-                    <span>{item.name} (x{item.quantity})</span>
-                    <span>₦{item.price.toLocaleString()}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <div className="mt-3 flex justify-between items-center">
+              <span className={`px-3 py-1 rounded ${getStatusColor(order.status)}`}>
+                {order.status}
+              </span>
 
-            {/* STATUS */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Status:</span>
-
-                <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(order.status)}`}>
-                  {order.status}
-                </span>
-
+              <div className="flex gap-2">
                 {order.status !== "Delivered" && (
                   <button
                     onClick={() => updateOrderStatus(order.id)}
-                    className="ml-2 text-xs bg-[#011F5B] text-white px-2 py-1 rounded hover:bg-[#0a1539]"
+                    className="bg-blue-600 text-white px-2 py-1 rounded"
                   >
                     Move to {statusFlow[order.status]}
                   </button>
                 )}
 
-                {order.status === "Delivered" && (
-                  <span className="text-xs text-gray-500 italic">(Locked)</span>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                {/* Share Button */}
                 <button
                   onClick={() => shareOrder(order)}
-                  className="flex items-center gap-2 px-3 py-2 bg-[#011F5B] text-white rounded-lg hover:bg-[#003366] transition-colors"
-                  title="Share Order"
+                  className="bg-black text-white px-2 py-1 rounded flex items-center gap-1"
                 >
-                  <Share2 size={16} />
-                  Share
+                  <Share2 size={14} /> Share
                 </button>
 
                 <button
                   onClick={() => setSelectedOrder(order)}
-                  className="btn-secondary text-sm text-white hover:opacity-90 transition-opacity"
+                  className="bg-gray-800 text-white px-2 py-1 rounded"
                 >
-                  View Details
+                  View
                 </button>
               </div>
             </div>
@@ -212,52 +217,39 @@ export default function AdminOrders() {
         ))}
       </div>
 
-      {orders.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500">No orders found.</p>
-        </div>
+      {/* EMPTY */}
+      {filteredOrders.length === 0 && (
+        <p className="text-center mt-10 text-gray-500">
+          No results found
+        </p>
       )}
 
       {/* MODAL */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-6">
-                <h2 className="text-2xl font-bold text-[#011F5B]">
-                  Order #{selectedOrder.id}
-                </h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setSelectedOrder(null)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
-              </div>
-
-              {/* CUSTOMER */}
-              <div className="border-b pb-4">
-                <h3 className="font-semibold mb-3">Customer Info</h3>
-                <p>{selectedOrder.customerName}</p>
-                <p>{selectedOrder.email}</p>
-              </div>
-
-              {/* STATUS */}
-              <div className="mt-4">
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(selectedOrder.status)}`}>
-                  {selectedOrder.status}
-                </span>
-              </div>
-
-              <button
-                onClick={() => setSelectedOrder(null)}
-                className="w-full mt-6 bg-[#011F5B] text-white py-2 rounded-lg hover:bg-[#0a1539]"
-              >
-                Close
+        <div
+          className="fixed inset-0 bg-black/50 flex justify-center items-center"
+          onClick={() => setSelectedOrder(null)}
+        >
+          <div
+            className="bg-white p-6 rounded w-full max-w-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between">
+              <h2 className="font-bold">Order #{selectedOrder.id}</h2>
+              <button onClick={() => setSelectedOrder(null)}>
+                <X />
               </button>
             </div>
+
+            <p className="mt-4">{selectedOrder.customerName}</p>
+            <p>{selectedOrder.email}</p>
+
+            <button
+              onClick={() => setSelectedOrder(null)}
+              className="mt-4 w-full bg-black text-white py-2 rounded"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
