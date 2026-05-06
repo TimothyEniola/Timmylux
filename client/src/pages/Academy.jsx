@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, User, Mail, Phone, Briefcase, ChevronRight, Award, Clock, Users, BookOpen } from "lucide-react";
+import { CheckCircle, User, Mail, Phone, Briefcase, ChevronRight, Award, Clock, Users, BookOpen, AlertTriangle, MapPin } from "lucide-react";
 
 const Academy = () => {
   const [showApplicationForm, setShowApplicationForm] = useState(false);
@@ -12,6 +12,29 @@ const Academy = () => {
     motivation: "",
     availability: "",
   });
+  const defaultLocations = [
+    {
+      id: "loc1",
+      name: "TimmyLux Academy – Main Campus",
+      address: "Victoria Island, Lagos",
+      city: "Lagos",
+      state: "Lagos State",
+      phone: "+234 801 234 5678",
+      hours: "Mon – Sat: 8:00 AM – 5:00 PM",
+    },
+    {
+      id: "loc2",
+      name: "TimmyLux Academy – Abuja Branch",
+      address: "Wuse Zone 4, Abuja",
+      city: "Abuja",
+      state: "FCT",
+      phone: "+234 802 345 6789",
+      hours: "Mon – Fri: 9:00 AM – 4:00 PM",
+    },
+  ];
+
+  const [academyStatus, setAcademyStatus] = useState("closed");
+  const [locations, setLocations] = useState(defaultLocations);
   const [content, setContent] = useState({
     heroTitle: "TimmyLux Academy",
     heroSubtitle:
@@ -76,6 +99,15 @@ const Academy = () => {
   useEffect(() => {
     const saved = localStorage.getItem("academyContent");
     if (saved) setContent(JSON.parse(saved));
+
+    const savedStatus = localStorage.getItem("academyStatus");
+    if (savedStatus) setAcademyStatus(savedStatus);
+
+    const savedLocations = localStorage.getItem("academyLocations");
+    if (savedLocations) {
+      const parsed = JSON.parse(savedLocations);
+      if (parsed.length > 0) setLocations(parsed);
+    }
   }, []);
 
   const handleInputChange = (e) => {
@@ -156,6 +188,22 @@ const Academy = () => {
           </div>
         </div>
       </section>
+
+      {/* ── PAYMENT WARNING BANNER ── */}
+      <div className="bg-amber-50 border-y-2 border-amber-400 py-4 px-6">
+        <div className="max-w-5xl mx-auto flex items-start gap-3">
+          <AlertTriangle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-amber-900 font-bold text-sm mb-0.5">⚠ Important Payment Notice</p>
+            <p className="text-amber-800 text-sm leading-relaxed">
+              All academy fee payments must be made <span className="font-bold">physically in school</span> to
+              the authorised fee collector only. Do <span className="font-bold">not</span> transfer money to any
+              individual or third-party account. TimmyLux Academy takes no responsibility for payments made
+              outside this official process.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* ── WHAT YOU WILL LEARN ── */}
       <section className="py-20 px-6 bg-white">
@@ -307,6 +355,65 @@ const Academy = () => {
         </div>
       </section>
 
+      {/* ── LOCATIONS ── */}
+      <section className="py-20 px-6 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "#D4AF37" }}>
+            Find Us
+          </p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3" style={{ color: "#011F5B" }}>
+            Our Academy Locations
+          </h2>
+          <p className="text-gray-500 mb-10 max-w-xl">
+            Visit any of our branches to begin your journey. Our instructors are available during training hours.
+          </p>
+
+          {locations.length === 0 ? (
+            <p className="text-gray-500 text-sm">Location details coming soon. Please check back later.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {locations.map((loc) => (
+                <div
+                  key={loc.id}
+                  className="rounded-2xl p-6 border"
+                  style={{ background: "#F8F9FC", borderColor: "#e5e7eb" }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: "#011F5B" }}
+                    >
+                      <MapPin size={16} style={{ color: "#D4AF37" }} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-base mb-1" style={{ color: "#011F5B" }}>
+                        {loc.name}
+                      </h3>
+                      <p className="text-gray-600 text-sm">{loc.address}</p>
+                      <p className="text-gray-600 text-sm">
+                        {loc.city}{loc.state ? `, ${loc.state}` : ""}
+                      </p>
+                      {loc.phone && (
+                        <a
+                          href={`tel:${loc.phone}`}
+                          className="text-sm font-medium mt-2 inline-block hover:underline"
+                          style={{ color: "#D4AF37" }}
+                        >
+                          {loc.phone}
+                        </a>
+                      )}
+                      {loc.hours && (
+                        <p className="text-xs text-gray-400 mt-1">{loc.hours}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* ── CTA / APPLICATION ── */}
       <section
         className="relative overflow-hidden py-24 px-6 text-center"
@@ -329,20 +436,36 @@ const Academy = () => {
           {!showApplicationForm && !applicationSubmitted && (
             <>
               <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "#D4AF37" }}>
-                Enrol today
+                {academyStatus === "opened" ? "Enrol today" : "Applications closed"}
               </p>
               <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-5">
                 {content.ctaTitle}
               </h2>
               <p className="text-white/65 text-lg mb-10 leading-relaxed">{content.ctaSubtitle}</p>
-              <button
-                onClick={() => setShowApplicationForm(true)}
-                className="inline-flex items-center gap-2 px-10 py-4 rounded-full font-bold text-sm transition-opacity hover:opacity-90"
-                style={{ background: "#D4AF37", color: "#3B1A00" }}
-              >
-                {content.ctaButtonText} <ChevronRight size={16} />
-              </button>
-              <p className="mt-5 text-xs text-white/40">Acceptance Fee: ₦30,000 · Non-refundable</p>
+
+              {academyStatus === "opened" ? (
+                <>
+                  <button
+                    onClick={() => setShowApplicationForm(true)}
+                    className="inline-flex items-center gap-2 px-10 py-4 rounded-full font-bold text-sm transition-opacity hover:opacity-90"
+                    style={{ background: "#D4AF37", color: "#3B1A00" }}
+                  >
+                    {content.ctaButtonText} <ChevronRight size={16} />
+                  </button>
+                  <p className="mt-5 text-xs text-white/40">Acceptance Fee: ₦30,000 · Non-refundable</p>
+                </>
+              ) : (
+                <div
+                  className="inline-flex flex-col items-center gap-3 px-10 py-6 rounded-2xl"
+                  style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)" }}
+                >
+                  <span style={{ fontSize: 32 }}>🔒</span>
+                  <p className="text-white/80 font-semibold text-base">Academy is currently closed</p>
+                  <p className="text-white/50 text-sm max-w-xs text-center leading-relaxed">
+                    We are not accepting applications at this time. Check back soon or contact us for more information.
+                  </p>
+                </div>
+              )}
             </>
           )}
 

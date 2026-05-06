@@ -1,23 +1,29 @@
 import { Link } from "react-router-dom";
 import { Heart, Trash2, ShoppingCart } from "lucide-react";
+import { toast } from "react-toastify";
 import useWishlistStore from "../store/wishlistStore";
 import useCartStore from "../store/cartStore";
-import useNotificationStore from "../store/notificationStore";
 
 export default function Wishlist() {
   const { items = [], removeItem } = useWishlistStore();
   const { addItem } = useCartStore();
-  const { addNotification } = useNotificationStore();
 
   const handleAddToCart = (product) => {
     addItem(product);
     removeItem(product.id);
-    addNotification({
-      title: "Moved to Cart",
-      message: `${product.name} has been moved from wishlist to cart.`,
+    toast.success(`${product.name} moved to cart!`, {
+      position: "top-right",
+      autoClose: 3000,
     });
-    alert(`${product.name} added to cart and removed from wishlist.`);
-  }; 
+  };
+
+  const handleRemove = (product) => {
+    removeItem(product.id);
+    toast.error(`${product.name} removed from wishlist.`, {
+      position: "top-right",
+      autoClose: 3000,
+    });
+  };
 
   if (!items || items.length === 0) {
     return (
@@ -65,7 +71,7 @@ export default function Wishlist() {
 
                 {/* DELETE BUTTON */}
                 <button
-                  onClick={() => removeItem(product.id)}
+                  onClick={() => handleRemove(product)}
                   className="absolute top-3 right-3 p-2 bg-white rounded-full text-red-500 shadow-md hover:bg-red-50 transition"
                 >
                   <Trash2 size={18} />

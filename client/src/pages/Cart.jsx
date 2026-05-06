@@ -1,9 +1,26 @@
 import { Link } from "react-router-dom";
 import { ShoppingBag, Minus, Plus, Trash2 } from "lucide-react";
+import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 
 export default function Cart() {
   const { items, removeItem, updateQuantity, getTotal } = useCartStore();
+
+  const handleRemoveItem = (item) => {
+    removeItem(item.id);
+    toast.error(`${item.name} removed from cart.`, {
+      position: "top-right",
+      autoClose: 3000,
+    });
+  };
+
+  const handleUpdateQuantity = (item, newQty) => {
+    if (newQty <= 0) {
+      handleRemoveItem(item);
+    } else {
+      updateQuantity(item.id, newQty);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -62,9 +79,7 @@ export default function Cart() {
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-2 bg-gray-100 rounded-lg">
                       <button
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
-                        }
+                        onClick={() => handleUpdateQuantity(item, item.quantity - 1)}
                         className="p-2 hover:bg-gray-200 rounded-lg transition"
                       >
                         <Minus size={16} />
@@ -75,9 +90,7 @@ export default function Cart() {
                       </span>
 
                       <button
-                        onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
-                        }
+                        onClick={() => handleUpdateQuantity(item, item.quantity + 1)}
                         className="p-2 hover:bg-gray-200 rounded-lg transition"
                       >
                         <Plus size={16} />
@@ -85,7 +98,7 @@ export default function Cart() {
                     </div>
 
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() => handleRemoveItem(item)}
                       className="text-red-500 hover:text-red-700 transition p-2"
                     >
                       <Trash2 size={20} />

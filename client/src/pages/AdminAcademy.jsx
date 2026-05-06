@@ -1,13 +1,22 @@
 import { useState, useEffect } from "react";
 import { Save, Edit3, Plus, Trash2, CheckCircle, Clock, X } from "lucide-react";
+import { toast } from "react-toastify";
+import useNotificationStore from "../store/notificationStore";
 
 export default function AdminAcademy() {
+  const { addNotification } = useNotificationStore();
   const [activeTab, setActiveTab] = useState("content");
   const [isEditing, setIsEditing] = useState(false);
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
   const [academyStatus, setAcademyStatus] = useState("closed"); // "opened" or "closed"
   const [graduationStudents, setGraduationStudents] = useState([]);
+
+  // Locations state
+  const emptyLocationForm = { name: "", address: "", city: "", state: "", phone: "", hours: "" };
+  const [locations, setLocations] = useState([]);
+  const [locationForm, setLocationForm] = useState(emptyLocationForm);
+  const [editingLocationId, setEditingLocationId] = useState(null);
   const [content, setContent] = useState({
     heroTitle: "TimmyLux Academy",
     heroSubtitle: "Become a skilled furniture designer and interior craftsman. Learn practical, real-world skills and build a career in luxury furniture.",
@@ -117,12 +126,18 @@ export default function AdminAcademy() {
     if (savedGraduates) {
       setGraduationStudents(JSON.parse(savedGraduates));
     }
+
+    // Load locations
+    const savedLocations = localStorage.getItem('academyLocations');
+    if (savedLocations) {
+      setLocations(JSON.parse(savedLocations));
+    }
   }, []);
 
   const handleSave = () => {
     localStorage.setItem('academyContent', JSON.stringify(content));
     setIsEditing(false);
-    alert('Academy content saved successfully!');
+    toast.success('Academy content saved successfully!');
   };
 
   const updateContent = (field, value) => {
@@ -204,7 +219,15 @@ export default function AdminAcademy() {
     const newStatus = academyStatus === "opened" ? "closed" : "opened";
     setAcademyStatus(newStatus);
     localStorage.setItem('academyStatus', newStatus);
-    alert(`Academy is now ${newStatus}`);
+    toast.success(`Academy is now ${newStatus === "opened" ? "Open" : "Closed"}`);
+    addNotification({
+      title: newStatus === "opened" ? "🎓 Academy is Now Open!" : "🔒 Academy is Now Closed",
+      message:
+        newStatus === "opened"
+          ? "TimmyLux Academy is now accepting applications. Visit the Academy page to apply today."
+          : "TimmyLux Academy has closed applications. We will notify you when they reopen.",
+      category: "update",
+    });
   };
 
   // Graduation Management
@@ -214,7 +237,7 @@ export default function AdminAcademy() {
       const newGraduates = [...graduationStudents, { ...app, graduationDate: new Date().toISOString() }];
       setGraduationStudents(newGraduates);
       localStorage.setItem('graduationStudents', JSON.stringify(newGraduates));
-      alert(`${app.fullName} has been added to graduation list`);
+      toast.success(`${app.fullName} added to graduation list`);
     }
   };
 
@@ -223,6 +246,59 @@ export default function AdminAcademy() {
     setGraduationStudents(newGraduates);
     localStorage.setItem('graduationStudents', JSON.stringify(newGraduates));
   };
+
+  // ── Location Management ──
+  const saveLocation = () => {
+    if (!locationForm.name.trim() || !locationForm.address.trim() || !locationForm.city.trim()) {
+      alert("Please fill in Location Name, Address, and City.");
+      return;
+    }
+    let updated;
+    if (editingLocationId) {
+      updated = locations.map(l =>
+        l.id === editingLocationId ? { ...locationForm, id: editingLocationId } : l
+      );
+    } else {
+      updated = [...locations, { ...locationForm, id: Date.now().toString() }];
+    }
+    setLocations(updated);
+    localStorage.setItem('academyLocations', JSON.stringify(updated));
+    setLocationForm(emptyLocationForm);
+    setEditingLocationId(null);
+  };
+
+  const deleteLocation = (id) => {
+    if (!confirm('Delete this location?')) return;
+    const updated = locations.filter(l => l.id !== id);
+    setLocations(updated);
+    localStorage.setItem('academyLocations', JSON.stringify(updated));
+  };
+
+  const startEditLocation = (loc) => {
+    setEditingLocationId(loc.id);
+    setLocationForm({
+      name: loc.name,
+      address: loc.address,
+      city: loc.city,
+      state: loc.state || "",
+      phone: loc.phone || "",
+      hours: loc.hours || "",
+    });
+  };
+
+  const cancelEditLocation = () => {
+    setEditingLocationId(null);
+    setLocationForm(emptyLocationForm);
+  };
+
+  const locationFields = [
+    { key: "name", label: "Location Name *", placeholder: "e.g. Main Campus" },
+    { key: "phone", label: "Phone Number", placeholder: "e.g. +234 801 234 5678" },
+    { key: "address", label: "Street Address *", placeholder: "e.g. 123 Furniture St, Victoria Island" },
+    { key: "hours", label: "Opening Hours", placeholder: "e.g. Mon – Sat: 8:00 AM – 5:00 PM" },
+    { key: "city", label: "City *", placeholder: "e.g. Lagos" },
+    { key: "state", label: "State", placeholder: "e.g. Lagos State" },
+  ];
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -250,10 +326,10 @@ export default function AdminAcademy() {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 mb-6">
+      <div className="flex border-b border-gray-200 mb-6 overflow-x-auto">
         <button
           onClick={() => setActiveTab("content")}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+          className={`whitespace-nowrap px-6 py-3 font-medium border-b-2 transition-colors ${
             activeTab === "content"
               ? "border-[#011F5B] text-[#011F5B]"
               : "border-transparent text-gray-500 hover:text-gray-700"
@@ -263,7 +339,7 @@ export default function AdminAcademy() {
         </button>
         <button
           onClick={() => setActiveTab("applications")}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+          className={`whitespace-nowrap px-6 py-3 font-medium border-b-2 transition-colors ${
             activeTab === "applications"
               ? "border-[#011F5B] text-[#011F5B]"
               : "border-transparent text-gray-500 hover:text-gray-700"
@@ -273,7 +349,7 @@ export default function AdminAcademy() {
         </button>
         <button
           onClick={() => setActiveTab("status")}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+          className={`whitespace-nowrap px-6 py-3 font-medium border-b-2 transition-colors ${
             activeTab === "status"
               ? "border-[#011F5B] text-[#011F5B]"
               : "border-transparent text-gray-500 hover:text-gray-700"
@@ -283,13 +359,23 @@ export default function AdminAcademy() {
         </button>
         <button
           onClick={() => setActiveTab("graduation")}
-          className={`px-6 py-3 font-medium border-b-2 transition-colors ${
+          className={`whitespace-nowrap px-6 py-3 font-medium border-b-2 transition-colors ${
             activeTab === "graduation"
               ? "border-[#011F5B] text-[#011F5B]"
               : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
           Graduation ({graduationStudents.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("locations")}
+          className={`whitespace-nowrap px-6 py-3 font-medium border-b-2 transition-colors ${
+            activeTab === "locations"
+              ? "border-[#011F5B] text-[#011F5B]"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          Locations ({locations.length})
         </button>
       </div>
 
@@ -962,11 +1048,128 @@ export default function AdminAcademy() {
                     </div>
                   </div>
                 ))}
-              {applications.filter(app => app.status === "approved").length === 0 && (
+          {applications.filter(app => app.status === "approved").length === 0 && (
                 <p className="text-gray-500 text-center">No approved students available</p>
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Locations Tab */}
+      {activeTab === "locations" && (
+        <div className="space-y-6">
+          {/* Existing Locations */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-2 text-[#011F5B]">Academy Branch Locations</h2>
+            <p className="text-gray-500 text-sm mb-5">
+              These locations are shown publicly on the Academy page. Add or edit branches as needed.
+            </p>
+
+            {locations.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                No locations added yet. Use the form below to add your first branch.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {locations.map((loc) =>
+                  editingLocationId === loc.id ? (
+                    <div key={loc.id} className="border-2 border-[#011F5B] rounded-lg p-4">
+                      <h4 className="font-semibold text-[#011F5B] mb-3 text-sm">Editing: {loc.name}</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {locationFields.map(({ key, label, placeholder }) => (
+                          <div key={key}>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+                            <input
+                              type="text"
+                              value={locationForm[key]}
+                              onChange={(e) => setLocationForm(prev => ({ ...prev, [key]: e.target.value }))}
+                              placeholder={placeholder}
+                              className="w-full p-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <button
+                          onClick={saveLocation}
+                          className="flex items-center gap-1.5 bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition"
+                        >
+                          <Save size={14} /> Save Changes
+                        </button>
+                        <button
+                          onClick={cancelEditLocation}
+                          className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div key={loc.id} className="border rounded-lg p-4 flex justify-between items-start gap-3">
+                      <div>
+                        <h4 className="font-semibold text-[#011F5B] mb-0.5">{loc.name}</h4>
+                        <p className="text-sm text-gray-600">{loc.address}</p>
+                        <p className="text-sm text-gray-600">
+                          {loc.city}{loc.state ? `, ${loc.state}` : ""}
+                        </p>
+                        {loc.phone && (
+                          <p className="text-sm font-medium mt-1" style={{ color: "#D4AF37" }}>{loc.phone}</p>
+                        )}
+                        {loc.hours && <p className="text-xs text-gray-400 mt-0.5">{loc.hours}</p>}
+                      </div>
+                      <div className="flex gap-1 flex-shrink-0">
+                        <button
+                          onClick={() => startEditLocation(loc)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          title="Edit location"
+                        >
+                          <Edit3 size={16} />
+                        </button>
+                        <button
+                          onClick={() => deleteLocation(loc.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                          title="Delete location"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Add New Location Form */}
+          {!editingLocationId && (
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-lg font-semibold mb-1 text-[#011F5B] flex items-center gap-2">
+                <Plus size={18} /> Add New Location
+              </h3>
+              <p className="text-gray-500 text-sm mb-4">Fill in the details for the new branch.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {locationFields.map(({ key, label, placeholder }) => (
+                  <div key={key}>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+                    <input
+                      type="text"
+                      value={locationForm[key]}
+                      onChange={(e) => setLocationForm(prev => ({ ...prev, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      className="w-full p-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-[#011F5B]"
+                    />
+                  </div>
+                ))}
+              </div>
+              <button
+                onClick={saveLocation}
+                className="mt-4 inline-flex items-center gap-2 bg-[#011F5B] text-white px-5 py-2.5 rounded-lg hover:bg-[#0b2b65] transition text-sm font-medium"
+              >
+                <Plus size={16} /> Add Location
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

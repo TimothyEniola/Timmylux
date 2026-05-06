@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Save, Plus, Trash2 } from "lucide-react";
+import { toast } from "react-toastify";
+import useNotificationStore from "../store/notificationStore";
 
 export default function AdminAddProduct() {
+  const { addNotification } = useNotificationStore();
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -54,7 +57,12 @@ export default function AdminAddProduct() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert("Product added successfully! (Frontend only)");
+    addNotification({
+      title: `🛋️ New Product: ${formData.name}`,
+      message: `A new product "${formData.name}" has been added to the ${formData.category || "store"} collection. Check it out now!`,
+      category: "product",
+    });
+    toast.success(`"${formData.name}" added successfully!`);
   };
 
   return (

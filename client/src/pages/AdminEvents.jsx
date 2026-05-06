@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+import useNotificationStore from "../store/notificationStore";
 import {
   Plus,
   Edit3,
@@ -20,6 +22,7 @@ import {
 import { FaWhatsapp } from "react-icons/fa6";
 
 export default function AdminEvents() {
+  const { addNotification } = useNotificationStore();
   const [events, setEvents] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
@@ -105,8 +108,16 @@ export default function AdminEvents() {
       saveEvents([...events, newEvent]);
     }
 
+    // Notify users about new event
+    if (!editingEvent) {
+      addNotification({
+        title: `🎉 New Event: ${formData.title}`,
+        message: `A new ${formData.type.replace("_", " ")} event has been posted: ${formData.description.slice(0, 120)}${formData.description.length > 120 ? "…" : ""}`,
+        category: "event",
+      });
+    }
     resetForm();
-    alert("Event saved successfully!");
+    toast.success(editingEvent ? "Event updated!" : "New event created!");
   };
 
   const handleEdit = (event) => {
@@ -117,11 +128,9 @@ export default function AdminEvents() {
 
   const handleDelete = (eventId) => {
     if (window.confirm("Are you sure you want to delete this event?")) {
-      const updatedEvents = events.filter(
-        (event) => event.id !== eventId
-      );
+      const updatedEvents = events.filter((event) => event.id !== eventId);
       saveEvents(updatedEvents);
-      alert("Event deleted successfully!");
+      toast.success("Event deleted.");
     }
   };
 

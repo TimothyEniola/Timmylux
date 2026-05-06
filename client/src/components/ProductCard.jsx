@@ -1,8 +1,8 @@
 import { Star, Eye, EyeOff, Heart, ShoppingCart } from "lucide-react";
 import { memo, useState, useEffect, useRef } from "react";
+import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
-import useNotificationStore from "../store/notificationStore";
 
 const ProductCard = memo(function ProductCard({
   product,
@@ -15,7 +15,6 @@ const ProductCard = memo(function ProductCard({
   const addToWishlist = useWishlistStore((state) => state.addItem);
   const removeFromWishlist = useWishlistStore((state) => state.removeItem);
   const isInWishlist = useWishlistStore((state) => state.isInWishlist);
-  const { addNotification } = useNotificationStore();
 
   // For card timer
   const [cardCountdown, setCardCountdown] = useState("07:00:00");
@@ -75,25 +74,26 @@ const ProductCard = memo(function ProductCard({
   const handleAddToCart = (e) => {
     e.preventDefault();
     addToCart(product);
-    alert(`${product.name} added to cart!`);
+    toast.success(`${product.name} added to cart!`, {
+      position: "top-right",
+      autoClose: 3000,
+    });
   };
 
   const handleWishlistToggle = (e) => {
     e.preventDefault();
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
-      addNotification({
-        title: "Removed from Wishlist",
-        message: `${product.name} has been removed from your wishlist.`,
+      toast.error(`${product.name} removed from wishlist.`, {
+        position: "top-right",
+        autoClose: 3000,
       });
-      alert(`${product.name} removed from wishlist!`);
     } else {
       addToWishlist(product);
-      addNotification({
-        title: "Added to Wishlist",
-        message: `${product.name} has been added to your wishlist.`,
+      toast.success(`${product.name} added to wishlist!`, {
+        position: "top-right",
+        autoClose: 3000,
       });
-      alert(`${product.name} added to wishlist!`);
     }
   };
 
