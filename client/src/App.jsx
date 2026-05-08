@@ -40,6 +40,8 @@ import AdminProfile from "./pages/AdminProfile";
 import Academy from "./pages/Academy";
 import AdminAcademy from "./pages/AdminAcademy";
 import Notifications from "./pages/Notifications";
+import Gallery from "./pages/Gallery";
+import AdminGallery from "./pages/AdminGallery";
 export default function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
@@ -83,6 +85,8 @@ export default function App() {
           <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
           <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
           <Route path="/admin/academy" element={<AdminRoute><AdminAcademy /></AdminRoute>} />
+          <Route path="/admin/gallery" element={<AdminRoute><AdminGallery /></AdminRoute>} />
+          <Route path="/gallery" element={<Gallery />} />
         </Routes>
       </div>
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'xl:ml-16' : 'xl:ml-64'}`}><Footer /></div>

@@ -18,6 +18,7 @@ import {
   ChevronRight,
   User,
   Settings,
+  Images,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import useNotificationStore from "../store/notificationStore";
@@ -60,6 +61,7 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
     { path: "/admin/featured", label: "Featured", icon: Star },
     { path: "/admin/add-product", label: "Add Product", icon: Plus },
     { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
+    { path: "/admin/gallery", label: "Gallery", icon: Images },
   ];
 
   return (

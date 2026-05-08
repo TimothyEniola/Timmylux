@@ -15,18 +15,25 @@ import {
   Bell,
   Store,
   Search,
+  Images,
 } from "lucide-react";
+
 import { useState, useEffect } from "react";
+
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
 import useNotificationStore from "../store/notificationStore";
+
 import logo from "../assets/reallogo.png";
+
 import ProfileDropdown from "./ProfileDropdown";
 
 export default function UserSidebar({ collapsed, setCollapsed }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { items: cartItems } = useCartStore();
   const { items: wishlistItems } = useWishlistStore();
@@ -36,21 +43,21 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
     cartItems?.reduce((total, item) => total + (item.quantity || 1), 0) || 0;
 
   const wishlistCount = wishlistItems?.length || 0;
-  const unreadCount = getUnreadCount();
 
-  const location = useLocation();
+  const unreadCount = getUnreadCount();
 
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
 
-  // Lock body scroll when mobile sidebar is open
+  // Lock body scroll on mobile sidebar open
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
+
     return () => {
       document.body.style.overflow = "";
     };
@@ -58,9 +65,16 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
 
   const handleMobileSearch = (e) => {
     e.preventDefault();
+
     const query = search.trim();
+
     setOpen(false);
-    navigate(query ? `/products?q=${encodeURIComponent(query)}` : "/products");
+
+    navigate(
+      query
+        ? `/products?q=${encodeURIComponent(query)}`
+        : "/products"
+    );
   };
 
   const navItems = [
@@ -68,8 +82,13 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
     { path: "/products", label: "Shop", icon: Store },
     { path: "/academy", label: "Academy", icon: GraduationCap },
     { path: "/about", label: "About", icon: Info },
-    { path: "/custom-request", label: "Custom Request", icon: ClipboardList },
+    {
+      path: "/custom-request",
+      label: "Custom Request",
+      icon: ClipboardList,
+    },
     { path: "/track-order", label: "Track Order", icon: Package },
+    { path: "/gallery", label: "Gallery", icon: Images },
   ];
 
   return (
@@ -77,6 +96,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
       {/* MOBILE TOP BAR */}
       <div className="xl:hidden flex items-center justify-between bg-[#011F5B] text-white px-4 h-16">
         <img src={logo} alt="Logo" className="h-9" />
+
         <button onClick={() => setOpen(true)}>
           <Menu size={24} />
         </button>
@@ -93,13 +113,17 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
       {/* SIDEBAR */}
       <aside
         className={`fixed top-0 left-0 h-full bg-[#011F5B] text-white z-50 transform transition-all duration-300
-        ${open ? "translate-x-0" : "-translate-x-full"} xl:translate-x-0
+        ${open ? "translate-x-0" : "-translate-x-full"}
+        xl:translate-x-0
         ${collapsed ? "xl:w-16" : "xl:w-64"}`}
       >
         <div className="flex h-full flex-col">
           {/* HEADER */}
           <div className="flex items-center justify-between px-4 h-16 border-b border-[#D4AF37]/30">
-            {!collapsed && <img src={logo} alt="Logo" className="h-9" />}
+            {!collapsed && (
+              <img src={logo} alt="Logo" className="h-9" />
+            )}
+
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setCollapsed(!collapsed)}
@@ -111,7 +135,11 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
                   <ChevronLeft size={20} />
                 )}
               </button>
-              <button className="xl:hidden" onClick={() => setOpen(false)}>
+
+              <button
+                className="xl:hidden"
+                onClick={() => setOpen(false)}
+              >
                 <X size={22} />
               </button>
             </div>
@@ -119,7 +147,10 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
 
           {/* MOBILE SEARCH */}
           <div className="xl:hidden px-4 py-3 border-b border-white/10">
-            <form onSubmit={handleMobileSearch} className="flex items-center bg-white rounded-lg overflow-hidden">
+            <form
+              onSubmit={handleMobileSearch}
+              className="flex items-center bg-white rounded-lg overflow-hidden"
+            >
               <input
                 type="text"
                 placeholder="Search products..."
@@ -127,6 +158,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
                 onChange={(e) => setSearch(e.target.value)}
                 className="flex-1 pl-3 pr-1 py-2 outline-none text-sm text-black placeholder:text-gray-400"
               />
+
               <button
                 type="submit"
                 className="bg-[#D4AF37] px-3 py-2 flex items-center justify-center hover:bg-[#c09c2f] transition-colors"
@@ -141,6 +173,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
             {/* Notifications */}
             <Link to="/notifications" className="relative">
               <Bell size={20} />
+
               {unreadCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
                   {unreadCount}
@@ -151,6 +184,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
             {/* Wishlist */}
             <Link to="/wishlist" className="relative">
               <Heart size={20} />
+
               {wishlistCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-[#D4AF37] text-black text-[10px] px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
                   {wishlistCount}
@@ -161,6 +195,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
             {/* Cart */}
             <Link to="/cart" className="relative">
               <ShoppingCart size={20} />
+
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-[#D4AF37] text-black text-[10px] px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
                   {cartCount}
@@ -173,7 +208,9 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
           <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-2 pb-4">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path;
+
+              const isActive =
+                location.pathname === item.path;
 
               return (
                 <Link
@@ -188,6 +225,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
                   }`}
                 >
                   <Icon size={18} />
+
                   {!collapsed && item.label}
                 </Link>
               );
@@ -196,11 +234,12 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
 
           {/* PROFILE */}
           <div className="border-t border-[#D4AF37]/30 p-4 flex-shrink-0">
-            {/* Mobile: always show ProfileDropdown regardless of collapsed state */}
+            {/* MOBILE */}
             <div className="xl:hidden">
               <ProfileDropdown />
             </div>
-            {/* Desktop: respect collapsed state */}
+
+            {/* DESKTOP */}
             <div className="hidden xl:block">
               {!collapsed ? (
                 <ProfileDropdown />
