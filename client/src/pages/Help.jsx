@@ -251,7 +251,7 @@ export default function Help() {
               { label: "Shop", to: "/products", icon: ShoppingCart },
               { label: "Track Order", to: "/track-order", icon: Truck },
               { label: "Academy", to: "/academy", icon: GraduationCap },
-              { label: "Contact Us", to: "#contact", icon: MessageSquare },
+              { label: "Contact Us", to: "/custom-request", icon: MessageSquare },
             ].map(({ label, to, icon: Icon }) => (
               <Link
                 key={label}
