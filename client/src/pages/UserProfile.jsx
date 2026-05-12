@@ -193,7 +193,7 @@ export default function UserProfile() {
 
           {/* Navigation */}
           <div className="grid md:grid-cols-2 gap-4 mt-10">
-            <Link to="/order-history">
+            <Link to="/orders">
               <div className="bg-gray-50 p-6 rounded-lg hover:bg-[#011F5B] hover:text-white transition">
                 Order History
               </div>

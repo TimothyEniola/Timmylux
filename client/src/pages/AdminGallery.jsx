@@ -1,51 +1,17 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
+/* ─── Fonts ─── */
+const injectFonts = () => {
+  if (document.getElementById("gf-gallery")) return;
+  const l = document.createElement("link");
+  l.id = "gf-gallery";
+  l.rel = "stylesheet";
+  l.href = "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap";
+  document.head.appendChild(l);
+};
+
+/* ─── Constants ─── */
 const CATEGORIES = ["All", "Events", "Best Customer", "Best Student", "Awards", "Team", "Milestones"];
-
-const INITIAL_IMAGES = [
-  {
-    id: 1, title: "Annual Gala 2024", category: "Events",
-    badge: null, featured: true, date: "2024-12-15",
-    description: "Our yearly company celebration with staff and partners.",
-    url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&q=80",
-    uploader: "Admin"
-  },
-  {
-    id: 2, title: "Customer of the Year – Mrs. Adaeze Obi", category: "Best Customer",
-    badge: "⭐ Best Customer", featured: true, date: "2024-11-20",
-    description: "Loyal partner for 5+ years and our top client of 2024.",
-    url: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&q=80",
-    uploader: "Admin"
-  },
-  {
-    id: 3, title: "Student of the Quarter – Emeka Chukwu", category: "Best Student",
-    badge: "🎓 Best Student", featured: false, date: "2024-10-05",
-    description: "Top performer in our professional training program.",
-    url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80",
-    uploader: "Admin"
-  },
-  {
-    id: 4, title: "Product Launch Event", category: "Events",
-    badge: null, featured: false, date: "2024-09-18",
-    description: "Launch of our flagship product line to the market.",
-    url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80",
-    uploader: "Admin"
-  },
-  {
-    id: 5, title: "Excellence Award – CEO Recognition", category: "Awards",
-    badge: "🏆 Award", featured: true, date: "2024-08-30",
-    description: "CEO presented awards to top performers across all departments.",
-    url: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=800&q=80",
-    uploader: "Admin"
-  },
-  {
-    id: 6, title: "Team Building Retreat", category: "Team",
-    badge: null, featured: false, date: "2024-07-12",
-    description: "Annual team retreat focused on collaboration and growth.",
-    url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&q=80",
-    uploader: "Admin"
-  },
-];
 
 const BADGE_OPTIONS = [
   { label: "None", value: "" },
@@ -59,60 +25,243 @@ const BADGE_OPTIONS = [
 
 const ADMIN_PASS = "admin123";
 
+const INITIAL_IMAGES = [
+  { id: 1, title: "Annual Gala 2024", category: "Events", badge: null, featured: true, date: "2024-12-15", description: "A night of celebration with our staff, partners and stakeholders.", thumb: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=40&q=20", url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=900&q=80" },
+  { id: 2, title: "Mrs. Adaeze Obi", category: "Best Customer", badge: "⭐ Best Customer", featured: true, date: "2024-11-20", description: "Loyal partner for 5+ years and our top client of 2024.", thumb: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=40&q=20", url: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=900&q=80" },
+  { id: 3, title: "Emeka Chukwu", category: "Best Student", badge: "🎓 Best Student", featured: true, date: "2024-10-05", description: "Top performer across all modules in our professional training cohort.", thumb: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=40&q=20", url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=900&q=80" },
+  { id: 4, title: "Product Launch Event", category: "Events", badge: null, featured: false, date: "2024-09-18", description: "Unveiling our flagship product line to media and early adopters.", thumb: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=40&q=20", url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=900&q=80" },
+  { id: 5, title: "CEO Excellence Award", category: "Awards", badge: "🏆 Award", featured: true, date: "2024-08-30", description: "Top performers recognised across all departments by the CEO.", thumb: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=40&q=20", url: "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=900&q=80" },
+  { id: 6, title: "Team Building Retreat", category: "Team", badge: null, featured: false, date: "2024-07-12", description: "Annual retreat focused on collaboration, trust and growth.", thumb: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=40&q=20", url: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=900&q=80" },
+  { id: 7, title: "Community Outreach Day", category: "Milestones", badge: null, featured: false, date: "2024-06-03", description: "Giving back — staff volunteered across local community projects.", thumb: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=40&q=20", url: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=900&q=80" },
+  { id: 8, title: "Mr. Tunde Alausa", category: "Best Customer", badge: "⭐ Best Customer", featured: false, date: "2024-05-14", description: "Recognised for consistent patronage and business referrals.", thumb: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&q=20", url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80" },
+  { id: 9, title: "5-Year Milestone Celebration", category: "Milestones", badge: null, featured: true, date: "2024-04-01", description: "Marking five years of excellence, growth and impact.", thumb: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=40&q=20", url: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=900&q=80" },
+  { id: 10, title: "Amaka Nwosu", category: "Best Student", badge: "🎓 Best Student", featured: false, date: "2024-03-22", description: "Graduated with distinction from our advanced leadership programme.", thumb: "https://images.unsplash.com/photo-1580894742597-87bc8789db3d?w=40&q=20", url: "https://images.unsplash.com/photo-1580894742597-87bc8789db3d?w=900&q=80" },
+  { id: 11, title: "Innovation Summit 2024", category: "Events", badge: null, featured: false, date: "2024-02-10", description: "Industry leaders gathered for a day of ideas, panels and networking.", thumb: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=40&q=20", url: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=900&q=80" },
+  { id: 12, title: "Directors' Award Night", category: "Awards", badge: "🏆 Award", featured: false, date: "2024-01-25", description: "Annual directors' recognition ceremony for staff excellence.", thumb: "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?w=40&q=20", url: "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?w=900&q=80" },
+];
+
+/* ─── Shared styles ─── */
+const S = {
+  input: {
+    width: "100%", boxSizing: "border-box",
+    background: "rgba(255,255,255,0.06)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: 10, padding: "10px 14px",
+    color: "white", fontSize: 13, outline: "none",
+    fontFamily: "'DM Sans', sans-serif",
+    transition: "border-color 0.2s",
+  },
+  label: {
+    display: "block", color: "rgba(255,255,255,0.4)",
+    fontSize: 10, textTransform: "uppercase",
+    letterSpacing: "0.12em", fontWeight: 500, marginBottom: 5,
+  },
+  btn: (active) => ({
+    padding: "10px 20px", borderRadius: 10, fontWeight: 700,
+    fontSize: 13, cursor: "pointer", border: "none",
+    fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
+    background: active ? "#FCD34D" : "rgba(255,255,255,0.07)",
+    color: active ? "#78350F" : "rgba(255,255,255,0.6)",
+  }),
+  goldBtn: {
+    background: "#FCD34D", color: "#78350F", border: "none",
+    borderRadius: 10, padding: "11px 22px", fontWeight: 700,
+    fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+    transition: "background 0.2s",
+  },
+  ghostBtn: {
+    background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.6)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    borderRadius: 10, padding: "10px 18px", fontWeight: 500,
+    fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+    transition: "all 0.2s",
+  },
+};
+
+/* ─── Lazy Image ─── */
+function LazyImg({ thumb, src, alt, style = {} }) {
+  const [loaded, setLoaded] = useState(false);
+  const [fullSrc, setFullSrc] = useState(null);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    // If no thumb, just load directly
+    if (!thumb) { setFullSrc(src); setLoaded(true); return; }
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        const hi = new Image();
+        hi.onload = () => { setFullSrc(src); setLoaded(true); };
+        hi.onerror = () => { setFullSrc(src); setLoaded(true); };
+        hi.src = src;
+        obs.unobserve(el);
+      }
+    }, { rootMargin: "100px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [src, thumb]);
+
+  return (
+    <img ref={ref} src={fullSrc || thumb || src} alt={alt}
+      style={{
+        ...style,
+        filter: loaded ? "none" : "blur(8px)",
+        transform: loaded ? "scale(1)" : "scale(1.04)",
+        transition: "filter 0.45s ease, transform 0.45s ease",
+      }}
+      onError={e => { e.target.src = `https://picsum.photos/seed/${encodeURIComponent(alt)}/600/400`; }}
+    />
+  );
+}
+
+/* ─── Gallery Card ─── */
 function GalleryCard({ img, onView }) {
+  const [hovered, setHovered] = useState(false);
   return (
     <div
       onClick={() => onView(img)}
-      className="group relative overflow-hidden rounded-2xl cursor-pointer bg-gray-900 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: "relative", overflow: "hidden", borderRadius: 16,
+        cursor: "pointer", background: "#111",
+        transform: hovered ? "translateY(-5px)" : "none",
+        boxShadow: hovered ? "0 20px 40px rgba(0,0,0,0.7)" : "none",
+        transition: "transform 0.3s ease, box-shadow 0.3s ease",
+      }}
     >
-      <div className="aspect-[4/3] overflow-hidden">
-        <img
+      <div style={{ aspectRatio: "4/3", overflow: "hidden" }}>
+        <LazyImg
+          thumb={img.thumb}
           src={img.url}
           alt={img.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={(e) => { e.target.src = `https://picsum.photos/seed/${img.id}/600/400`; }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
         />
       </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-        <p className="text-white font-semibold text-sm truncate">{img.title}</p>
-        <p className="text-gray-300 text-xs mt-1">{img.date}</p>
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)",
+        display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: 12,
+      }}>
+        {img.badge && (
+          <span style={{
+            display: "inline-block", fontSize: 9, fontWeight: 700,
+            padding: "3px 8px", borderRadius: 999, marginBottom: 5,
+            background: "#FCD34D", color: "#78350F",
+            textTransform: "uppercase", letterSpacing: "0.07em",
+          }}>{img.badge}</span>
+        )}
+        <p style={{ color: "#fff", fontSize: 12, fontWeight: 600, lineHeight: 1.3, margin: 0 }}>{img.title}</p>
+        <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, marginTop: 3 }}>{img.date}</p>
       </div>
-      {img.badge && (
-        <div className="absolute top-3 left-3 bg-amber-400 text-amber-900 text-xs font-bold px-2 py-1 rounded-full shadow">
-          {img.badge}
-        </div>
-      )}
       {img.featured && (
-        <div className="absolute top-3 right-3 w-2 h-2 bg-green-400 rounded-full shadow-lg shadow-green-400/50" />
+        <div style={{
+          position: "absolute", top: 10, right: 10,
+          width: 8, height: 8, borderRadius: "50%",
+          background: "#34d399", boxShadow: "0 0 7px #34d399",
+        }} />
       )}
     </div>
   );
 }
 
-function Modal({ img, onClose, onNext, onPrev }) {
-  if (!img) return null;
+/* ─── Lightbox ─── */
+function Lightbox({ img, all, onClose }) {
+  const [idx, setIdx] = useState(all.findIndex(i => i.id === img.id));
+  const current = all[idx] || img;
+
+  const go = useCallback((d) => setIdx(i => (i + d + all.length) % all.length), [all]);
+
+  useEffect(() => {
+    const fn = e => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowRight") go(1);
+      if (e.key === "ArrowLeft") go(-1);
+    };
+    window.addEventListener("keydown", fn);
+    return () => window.removeEventListener("keydown", fn);
+  }, [go, onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm" onClick={onClose}>
-      <div className="relative max-w-4xl w-full bg-gray-900 rounded-3xl overflow-hidden shadow-2xl" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-black/80 text-white rounded-full flex items-center justify-center text-xl transition-colors">×</button>
-        <button onClick={onPrev} className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/50 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors">‹</button>
-        <button onClick={onNext} className="absolute right-14 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-black/50 hover:bg-black/80 text-white rounded-full flex items-center justify-center transition-colors">›</button>
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          <img
-            src={img.url}
-            alt={img.title}
-            className="w-full h-72 md:h-full object-cover"
-            onError={(e) => { e.target.src = `https://picsum.photos/seed/${img.id}/600/400`; }}
-          />
-          <div className="p-8 flex flex-col justify-center">
-            {img.badge && <span className="self-start bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full mb-4">{img.badge}</span>}
-            <h2 className="text-white text-2xl font-bold mb-2">{img.title}</h2>
-            <p className="text-gray-400 text-sm mb-4">{img.description}</p>
-            <div className="space-y-2 text-sm text-gray-500">
-              <div className="flex items-center gap-2"><span className="text-gray-400">Category:</span><span className="bg-gray-800 text-gray-200 px-2 py-0.5 rounded-md">{img.category}</span></div>
-              <div className="flex items-center gap-2"><span className="text-gray-400">Date:</span><span className="text-gray-300">{img.date}</span></div>
-              {img.featured && <div className="flex items-center gap-2"><span className="w-2 h-2 bg-green-400 rounded-full inline-block" /><span className="text-green-400">Featured</span></div>}
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "center", fontFamily: "'DM Sans', sans-serif" }}
+      onClick={onClose}
+    >
+      <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.96)" }} />
+      <div
+        style={{
+          position: "relative", zIndex: 1, width: "100%",
+          background: "#0F0F0F", display: "flex", flexDirection: "column",
+          maxHeight: "92vh", overflow: "hidden",
+          borderRadius: "20px 20px 0 0",
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* On wider screens, side-by-side */}
+        <div style={{ display: "flex", flexDirection: "row", height: "100%", overflow: "hidden" }}>
+          {/* Image */}
+          <div style={{ position: "relative", flexShrink: 0, background: "#000", width: "58%", minHeight: 260 }}>
+            <img src={current.url} alt={current.title}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              onError={e => { e.target.src = `https://picsum.photos/seed/${current.id}/700/500`; }}
+            />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5), transparent)" }} />
+            {["←", "→"].map((a, i) => (
+              <button key={a} onClick={() => go(i === 0 ? -1 : 1)}
+                style={{
+                  position: "absolute", top: "50%", transform: "translateY(-50%)",
+                  [i === 0 ? "left" : "right"]: 10,
+                  width: 36, height: 36, borderRadius: "50%",
+                  background: "rgba(255,255,255,0.12)", color: "#fff",
+                  fontSize: 16, border: "none", cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>{a}</button>
+            ))}
+            <div style={{
+              position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)",
+              background: "rgba(0,0,0,0.5)", color: "rgba(255,255,255,0.6)",
+              fontSize: 11, padding: "3px 10px", borderRadius: 999,
+            }}>{idx + 1} / {all.length}</div>
+          </div>
+
+          {/* Info */}
+          <div style={{ flex: 1, padding: "20px 24px 24px", overflowY: "auto", display: "flex", flexDirection: "column" }}>
+            <button onClick={onClose}
+              style={{
+                alignSelf: "flex-end", width: 30, height: 30, borderRadius: "50%",
+                background: "rgba(255,255,255,0.1)", color: "#fff", fontSize: 18,
+                border: "none", cursor: "pointer", marginBottom: 16, flexShrink: 0,
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>×</button>
+
+            {current.badge && (
+              <span style={{
+                display: "inline-block", fontSize: 10, fontWeight: 700,
+                padding: "4px 10px", borderRadius: 999, marginBottom: 14,
+                background: "#FCD34D", color: "#78350F",
+                alignSelf: "flex-start", textTransform: "uppercase", letterSpacing: "0.08em",
+              }}>{current.badge}</span>
+            )}
+
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.35rem", fontWeight: 700, color: "#fff", marginBottom: 8 }}>
+              {current.title}
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, lineHeight: 1.7, marginBottom: 16 }}>{current.description}</p>
+
+            <div style={{ marginTop: "auto", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 14 }}>
+              {[{ label: "Category", value: current.category }, { label: "Date", value: current.date }].map(r => (
+                <div key={r.label} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 8 }}>
+                  <span style={{ color: "rgba(255,255,255,0.35)" }}>{r.label}</span>
+                  <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500 }}>{r.value}</span>
+                </div>
+              ))}
+              {current.featured && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#34d399" }}>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#34d399" }} />
+                  Featured photo
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -121,7 +270,8 @@ function Modal({ img, onClose, onNext, onPrev }) {
   );
 }
 
-function AdminLogin({ onLogin }) {
+/* ─── Admin Login ─── */
+function AdminLogin({ onLogin, onBack }) {
   const [pass, setPass] = useState("");
   const [err, setErr] = useState(false);
   const submit = () => {
@@ -129,41 +279,63 @@ function AdminLogin({ onLogin }) {
     else setErr(true);
   };
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-gray-900 rounded-3xl p-8 border border-gray-800 shadow-2xl">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">🔐</div>
-          <h2 className="text-white text-2xl font-bold">Admin Panel</h2>
-          <p className="text-gray-500 text-sm mt-1">Enter your admin password to continue</p>
+    <div style={{ minHeight: "100vh", background: "#080808", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "'DM Sans', sans-serif" }}>
+      <div style={{ width: "100%", maxWidth: 380, background: "#111", borderRadius: 20, padding: 36, border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: 16, margin: "0 auto 14px",
+            background: "linear-gradient(135deg, #FCD34D, #F97316)",
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
+          }}>🔐</div>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: "1.4rem", fontWeight: 700, marginBottom: 4 }}>Admin Panel</h2>
+          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Enter your password to manage the gallery</p>
         </div>
-        <input
-          type="password" value={pass} onChange={e => setPass(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && submit()}
-          placeholder="Password (hint: admin123)"
-          className="w-full bg-gray-800 text-white border border-gray-700 rounded-xl px-4 py-3 mb-3 outline-none focus:border-amber-400 transition-colors placeholder-gray-600"
-        />
-        {err && <p className="text-red-400 text-sm mb-3">Incorrect password. Try again.</p>}
-        <button onClick={submit} className="w-full bg-amber-400 hover:bg-amber-300 text-amber-900 font-bold py-3 rounded-xl transition-colors">
+
+        <div style={{ marginBottom: 12 }}>
+          <input type="password" value={pass}
+            onChange={e => setPass(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && submit()}
+            placeholder="Password (hint: admin123)"
+            style={{ ...S.input }}
+            onFocus={e => e.target.style.borderColor = "#FCD34D"}
+            onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.12)"}
+          />
+        </div>
+
+        {err && <p style={{ color: "#F87171", fontSize: 12, marginBottom: 10 }}>Incorrect password. Try again.</p>}
+
+        <button onClick={submit} style={{ ...S.goldBtn, width: "100%", marginBottom: 10 }}>
           Login to Admin
+        </button>
+        <button onClick={onBack} style={{ ...S.ghostBtn, width: "100%", textAlign: "center" }}>
+          ← Back to Gallery
         </button>
       </div>
     </div>
   );
 }
 
+/* ─── Admin Panel ─── */
 function AdminPanel({ images, setImages, onBack }) {
   const [tab, setTab] = useState("upload");
-  const [form, setForm] = useState({ title: "", category: "Events", badge: "", description: "", date: new Date().toISOString().slice(0,10), featured: false, url: "" });
+  const blankForm = () => ({ title: "", category: "Events", badge: "", description: "", date: new Date().toISOString().slice(0, 10), featured: false, url: "", thumb: "" });
+  const [form, setForm] = useState(blankForm());
   const [preview, setPreview] = useState(null);
   const [success, setSuccess] = useState("");
   const [editId, setEditId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
   const fileRef = useRef();
+
+  const notify = (msg) => { setSuccess(msg); setTimeout(() => setSuccess(""), 4000); };
 
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => { setPreview(ev.target.result); setForm(f => ({ ...f, url: ev.target.result })); };
+    reader.onload = (ev) => {
+      setPreview(ev.target.result);
+      setForm(f => ({ ...f, url: ev.target.result, thumb: ev.target.result }));
+    };
     reader.readAsDataURL(file);
   };
 
@@ -172,444 +344,638 @@ function AdminPanel({ images, setImages, onBack }) {
     const file = e.dataTransfer.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => { setPreview(ev.target.result); setForm(f => ({ ...f, url: ev.target.result })); };
+    reader.onload = (ev) => {
+      setPreview(ev.target.result);
+      setForm(f => ({ ...f, url: ev.target.result, thumb: ev.target.result }));
+    };
     reader.readAsDataURL(file);
   }, []);
 
   const submitUpload = () => {
-    if (!form.title || !form.url) { setSuccess("❌ Please provide a title and image."); return; }
+    if (!form.title.trim()) { notify("❌ Please enter a title."); return; }
+    if (!form.url.trim()) { notify("❌ Please provide an image (upload or URL)."); return; }
+
     if (editId) {
-      setImages(imgs => imgs.map(img => img.id === editId ? { ...img, ...form, badge: form.badge || null } : img));
-      setSuccess("✅ Image updated successfully!");
+      setImages(imgs => imgs.map(img =>
+        img.id === editId
+          ? { ...img, ...form, badge: form.badge || null, thumb: form.thumb || form.url }
+          : img
+      ));
+      notify("✅ Image updated successfully!");
       setEditId(null);
     } else {
-      const newImg = { ...form, id: Date.now(), badge: form.badge || null, uploader: "Admin" };
+      const newImg = { ...form, id: Date.now(), badge: form.badge || null, thumb: form.thumb || form.url };
       setImages(imgs => [...imgs, newImg]);
-      setSuccess("✅ Image uploaded successfully!");
+      notify("✅ Image uploaded successfully!");
     }
-    setForm({ title: "", category: "Events", badge: "", description: "", date: new Date().toISOString().slice(0,10), featured: false, url: "" });
+    setForm(blankForm());
     setPreview(null);
-    setTimeout(() => setSuccess(""), 4000);
   };
 
-  const deleteImg = (id) => {
-    if (window.confirm("Delete this image?")) setImages(imgs => imgs.filter(i => i.id !== id));
-  };
-
-  const editImg = (img) => {
-    setForm({ title: img.title, category: img.category, badge: img.badge || "", description: img.description, date: img.date, featured: img.featured, url: img.url });
+  const startEdit = (img) => {
+    setForm({
+      title: img.title, category: img.category,
+      badge: img.badge || "", description: img.description,
+      date: img.date, featured: img.featured,
+      url: img.url, thumb: img.thumb || "",
+    });
     setPreview(img.url);
     setEditId(img.id);
     setTab("upload");
     window.scrollTo(0, 0);
   };
 
-  const toggleFeatured = (id) => setImages(imgs => imgs.map(i => i.id === id ? { ...i, featured: !i.featured } : i));
+  const deleteImg = (id) => {
+    setImages(imgs => imgs.filter(i => i.id !== id));
+    setConfirmDelete(null);
+    notify("🗑️ Image deleted.");
+  };
+
+  const toggleFeatured = (id) =>
+    setImages(imgs => imgs.map(i => i.id === id ? { ...i, featured: !i.featured } : i));
+
+  const field = (label, children) => (
+    <div style={{ marginBottom: 16 }}>
+      <label style={S.label}>{label}</label>
+      {children}
+    </div>
+  );
+
+  const inputStyle = (focused) => ({
+    ...S.input,
+    borderColor: focused ? "#FCD34D" : "rgba(255,255,255,0.12)",
+  });
+
+  /* Focus tracking */
+  const [focused, setFocused] = useState({});
+  const fProps = (key) => ({
+    onFocus: () => setFocused(f => ({ ...f, [key]: true })),
+    onBlur: () => setFocused(f => ({ ...f, [key]: false })),
+    style: inputStyle(focused[key]),
+  });
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <div className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center text-sm">⚙️</div>
-          <span className="font-bold text-lg">Admin Panel</span>
+    <div style={{ minHeight: "100vh", background: "#080808", color: "#fff", fontFamily: "'DM Sans', sans-serif" }}>
+
+      {/* Admin nav — matches gallery nav style */}
+      <nav style={{
+        position: "sticky", top: 0, zIndex: 30,
+        background: "rgba(8,8,8,0.88)", backdropFilter: "blur(14px)",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 10,
+            background: "linear-gradient(135deg, #FCD34D, #F97316)",
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+          }}>⚙️</div>
+          <div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 15, lineHeight: 1.1 }}>Admin Panel</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", letterSpacing: "0.05em" }}>Manage Gallery</div>
+          </div>
         </div>
-        <button onClick={onBack} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm">
+        <button onClick={onBack} style={{ ...S.ghostBtn, display: "flex", alignItems: "center", gap: 6 }}>
           ← Back to Gallery
         </button>
-      </div>
+      </nav>
 
-      <div className="max-w-6xl mx-auto p-6">
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 20px 60px" }}>
+
+        {/* Success / Error toast */}
         {success && (
-          <div className={`mb-6 px-4 py-3 rounded-xl text-sm font-medium ${success.startsWith("✅") ? "bg-green-900/50 text-green-300 border border-green-800" : "bg-red-900/50 text-red-300 border border-red-800"}`}>
-            {success}
-          </div>
+          <div style={{
+            marginBottom: 20, padding: "12px 16px", borderRadius: 12, fontSize: 13, fontWeight: 500,
+            background: success.startsWith("✅") ? "rgba(52,211,153,0.12)" : success.startsWith("🗑️") ? "rgba(251,191,36,0.12)" : "rgba(248,113,113,0.12)",
+            border: `1px solid ${success.startsWith("✅") ? "rgba(52,211,153,0.3)" : success.startsWith("🗑️") ? "rgba(251,191,36,0.3)" : "rgba(248,113,113,0.3)"}`,
+            color: success.startsWith("✅") ? "#34d399" : success.startsWith("🗑️") ? "#FCD34D" : "#F87171",
+          }}>{success}</div>
         )}
 
-        <div className="flex gap-2 mb-8 bg-gray-900 p-1 rounded-2xl w-fit">
+        {/* Tab bar */}
+        <div style={{ display: "flex", gap: 6, marginBottom: 28, background: "rgba(255,255,255,0.05)", padding: 5, borderRadius: 14, width: "fit-content" }}>
           {[["upload", "📤 Upload"], ["manage", "🗂️ Manage"], ["featured", "⭐ Featured"]].map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
-              className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${tab === key ? "bg-amber-400 text-amber-900" : "text-gray-400 hover:text-white"}`}>
+              style={S.btn(tab === key)}>
               {label}
             </button>
           ))}
         </div>
 
+        {/* ── Upload / Edit Tab ── */}
         {tab === "upload" && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-5">
-              <h2 className="text-xl font-bold">{editId ? "✏️ Edit Image" : "📤 Upload New Image"}</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28 }}>
+            {/* Left — Form */}
+            <div>
+              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.2rem", fontWeight: 700, marginBottom: 20 }}>
+                {editId ? "✏️ Edit Image" : "📤 Upload New Image"}
+              </h2>
 
+              {/* Drop zone */}
               <div
                 onDrop={handleDrop} onDragOver={e => e.preventDefault()}
                 onClick={() => fileRef.current.click()}
-                className="border-2 border-dashed border-gray-700 hover:border-amber-400 rounded-2xl p-8 text-center cursor-pointer transition-colors group"
+                style={{
+                  border: "2px dashed rgba(255,255,255,0.15)", borderRadius: 14, padding: 24,
+                  textAlign: "center", cursor: "pointer", marginBottom: 14,
+                  transition: "border-color 0.2s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = "#FCD34D"}
+                onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"}
               >
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+                <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
                 {preview ? (
-                  <img src={preview} alt="preview" className="w-full h-48 object-cover rounded-xl" />
+                  <img src={preview} alt="preview" style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 10 }} />
                 ) : (
-                  <div>
-                    <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">🖼️</div>
-                    <p className="text-gray-400 text-sm">Drag & drop an image or <span className="text-amber-400">click to browse</span></p>
-                    <p className="text-gray-600 text-xs mt-1">PNG, JPG, WEBP up to 10MB</p>
-                  </div>
+                  <>
+                    <div style={{ fontSize: 32, marginBottom: 8 }}>🖼️</div>
+                    <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>
+                      Drag & drop or <span style={{ color: "#FCD34D" }}>click to browse</span>
+                    </p>
+                    <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 11, marginTop: 4 }}>PNG, JPG, WEBP up to 10MB</p>
+                  </>
                 )}
               </div>
 
-              <div>
-                <label className="text-gray-400 text-xs uppercase tracking-wide">Or paste image URL</label>
+              {field("Or paste image URL",
                 <input type="text" value={form.url.startsWith("data:") ? "" : form.url}
-                  onChange={e => { setForm(f => ({ ...f, url: e.target.value })); setPreview(e.target.value); }}
-                  placeholder="https://example.com/image.jpg"
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 mt-1 outline-none focus:border-amber-400 transition-colors placeholder-gray-600 text-sm"
+                  onChange={e => { setForm(f => ({ ...f, url: e.target.value, thumb: e.target.value })); setPreview(e.target.value); }}
+                  placeholder="https://example.com/photo.jpg"
+                  {...fProps("url")}
                 />
-              </div>
+              )}
 
-              <div>
-                <label className="text-gray-400 text-xs uppercase tracking-wide">Title *</label>
-                <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+              {field("Title *",
+                <input type="text" value={form.title}
+                  onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                   placeholder="e.g. Best Customer of the Month – John Doe"
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 mt-1 outline-none focus:border-amber-400 transition-colors placeholder-gray-600 text-sm"
+                  {...fProps("title")}
                 />
-              </div>
+              )}
 
-              <div className="grid grid-cols-2 gap-4">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
                 <div>
-                  <label className="text-gray-400 text-xs uppercase tracking-wide">Category</label>
+                  <label style={S.label}>Category</label>
                   <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 mt-1 outline-none focus:border-amber-400 transition-colors text-sm">
-                    {CATEGORIES.filter(c => c !== "All").map(c => <option key={c}>{c}</option>)}
+                    style={{ ...S.input }}>
+                    {CATEGORIES.filter(c => c !== "All").map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="text-gray-400 text-xs uppercase tracking-wide">Date</label>
-                  <input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
-                    className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 mt-1 outline-none focus:border-amber-400 transition-colors text-sm"
+                  <label style={S.label}>Date</label>
+                  <input type="date" value={form.date}
+                    onChange={e => setForm(f => ({ ...f, date: e.target.value }))}
+                    style={{ ...S.input }}
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="text-gray-400 text-xs uppercase tracking-wide">Badge / Recognition</label>
+              {field("Badge / Recognition",
                 <select value={form.badge} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 mt-1 outline-none focus:border-amber-400 transition-colors text-sm">
+                  style={{ ...S.input }}>
                   {BADGE_OPTIONS.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
                 </select>
-              </div>
+              )}
 
-              <div>
-                <label className="text-gray-400 text-xs uppercase tracking-wide">Description</label>
-                <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                  rows={3} placeholder="Brief description of this photo/event..."
-                  className="w-full bg-gray-800 border border-gray-700 text-white rounded-xl px-4 py-3 mt-1 outline-none focus:border-amber-400 transition-colors placeholder-gray-600 text-sm resize-none"
+              {field("Description",
+                <textarea value={form.description}
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  rows={3} placeholder="Brief description of this photo or event…"
+                  style={{ ...S.input, resize: "none" }}
                 />
+              )}
+
+              {/* Featured toggle */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                <div
+                  onClick={() => setForm(f => ({ ...f, featured: !f.featured }))}
+                  style={{
+                    width: 44, height: 24, borderRadius: 999, cursor: "pointer",
+                    background: form.featured ? "#FCD34D" : "rgba(255,255,255,0.1)",
+                    position: "relative", transition: "background 0.2s", flexShrink: 0,
+                  }}
+                >
+                  <div style={{
+                    position: "absolute", top: 3,
+                    left: form.featured ? 23 : 3,
+                    width: 18, height: 18, borderRadius: "50%",
+                    background: "#fff", transition: "left 0.2s",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.4)",
+                  }} />
+                </div>
+                <span style={{ fontSize: 13, color: "rgba(255,255,255,0.7)" }}>Mark as Featured</span>
               </div>
 
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className={`w-12 h-6 rounded-full transition-colors ${form.featured ? "bg-amber-400" : "bg-gray-700"} relative`}
-                  onClick={() => setForm(f => ({ ...f, featured: !f.featured }))}>
-                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow ${form.featured ? "translate-x-7" : "translate-x-1"}`} />
-                </div>
-                <span className="text-sm text-gray-300 group-hover:text-white transition-colors">Mark as Featured</span>
-              </label>
-
-              <div className="flex gap-3">
-                <button onClick={submitUpload}
-                  className="flex-1 bg-amber-400 hover:bg-amber-300 text-amber-900 font-bold py-3 rounded-xl transition-colors">
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={submitUpload} style={{ ...S.goldBtn, flex: 1 }}>
                   {editId ? "Update Image" : "Upload Image"}
                 </button>
                 {editId && (
-                  <button onClick={() => { setEditId(null); setForm({ title: "", category: "Events", badge: "", description: "", date: new Date().toISOString().slice(0,10), featured: false, url: "" }); setPreview(null); }}
-                    className="px-4 bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-3 rounded-xl transition-colors">
+                  <button onClick={() => { setEditId(null); setForm(blankForm()); setPreview(null); }}
+                    style={S.ghostBtn}>
                     Cancel
                   </button>
                 )}
               </div>
             </div>
 
-            <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 h-fit">
-              <h3 className="text-gray-400 text-sm uppercase tracking-wide mb-4">Preview</h3>
+            {/* Right — Live Preview (matches gallery card exactly) */}
+            <div>
+              <h3 style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(255,255,255,0.4)", fontWeight: 500, marginBottom: 14 }}>
+                Live Preview — how it looks in the gallery
+              </h3>
+
               {preview ? (
-                <div className="rounded-xl overflow-hidden">
-                  <div className="aspect-video overflow-hidden">
-                    <img src={preview} alt="preview" className="w-full h-full object-cover"
-                      onError={(e) => { e.target.src = "https://via.placeholder.com/400x225?text=Invalid+URL"; }} />
+                <div style={{ maxWidth: 320 }}>
+                  {/* Card preview */}
+                  <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", background: "#111", marginBottom: 16 }}>
+                    <div style={{ aspectRatio: "4/3", overflow: "hidden" }}>
+                      <img src={preview} alt="preview"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                        onError={e => { e.target.src = "https://via.placeholder.com/320x240?text=Invalid+URL"; }}
+                      />
+                    </div>
+                    <div style={{
+                      position: "absolute", inset: 0,
+                      background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.2) 55%, transparent 100%)",
+                      display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: 12,
+                    }}>
+                      {form.badge && (
+                        <span style={{
+                          display: "inline-block", fontSize: 9, fontWeight: 700,
+                          padding: "3px 8px", borderRadius: 999, marginBottom: 5,
+                          background: "#FCD34D", color: "#78350F",
+                          textTransform: "uppercase", letterSpacing: "0.07em", alignSelf: "flex-start",
+                        }}>{form.badge}</span>
+                      )}
+                      <p style={{ color: "#fff", fontSize: 12, fontWeight: 600, lineHeight: 1.3, margin: 0 }}>{form.title || "Untitled"}</p>
+                      <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, marginTop: 3 }}>{form.date || "No date"}</p>
+                    </div>
+                    {form.featured && (
+                      <div style={{ position: "absolute", top: 10, right: 10, width: 8, height: 8, borderRadius: "50%", background: "#34d399", boxShadow: "0 0 7px #34d399" }} />
+                    )}
                   </div>
-                  <div className="p-4 bg-gray-800 rounded-b-xl">
-                    {form.badge && <span className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-1 rounded-full">{form.badge}</span>}
-                    <h4 className="text-white font-semibold mt-2">{form.title || "Untitled"}</h4>
-                    <p className="text-gray-400 text-sm mt-1">{form.description || "No description"}</p>
-                    <div className="flex gap-3 mt-3 text-xs text-gray-500">
-                      <span>{form.category}</span>
-                      <span>{form.date}</span>
-                      {form.featured && <span className="text-green-400">● Featured</span>}
+
+                  {/* Lightbox info preview */}
+                  <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 16 }}>
+                    <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.3)", marginBottom: 8 }}>Lightbox info panel</p>
+                    {form.badge && (
+                      <span style={{ display: "inline-block", fontSize: 9, fontWeight: 700, padding: "3px 8px", borderRadius: 999, marginBottom: 8, background: "#FCD34D", color: "#78350F", textTransform: "uppercase" }}>{form.badge}</span>
+                    )}
+                    <p style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: "1rem", fontWeight: 700, marginBottom: 6 }}>{form.title || "Untitled"}</p>
+                    <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, lineHeight: 1.6, marginBottom: 10 }}>{form.description || "No description yet."}</p>
+                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 10, fontSize: 12, display: "flex", flexDirection: "column", gap: 6 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: "rgba(255,255,255,0.35)" }}>Category</span>
+                        <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500 }}>{form.category}</span>
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between" }}>
+                        <span style={{ color: "rgba(255,255,255,0.35)" }}>Date</span>
+                        <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500 }}>{form.date}</span>
+                      </div>
+                      {form.featured && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#34d399" }}>
+                          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#34d399" }} />
+                          Featured photo
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="aspect-video bg-gray-800 rounded-xl flex items-center justify-center text-gray-600">
-                  <div className="text-center">
-                    <div className="text-4xl mb-2">🖼️</div>
-                    <p className="text-sm">Image preview will appear here</p>
-                  </div>
+                <div style={{
+                  aspectRatio: "4/3", maxWidth: 320,
+                  background: "rgba(255,255,255,0.04)", borderRadius: 16,
+                  border: "1px dashed rgba(255,255,255,0.1)",
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  color: "rgba(255,255,255,0.25)",
+                }}>
+                  <div style={{ fontSize: 36, marginBottom: 10 }}>🖼️</div>
+                  <p style={{ fontSize: 12 }}>Preview appears here</p>
                 </div>
               )}
             </div>
           </div>
         )}
 
+        {/* ── Manage Tab ── */}
         {tab === "manage" && (
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold">🗂️ All Images ({images.length})</h2>
-            </div>
-            <div className="space-y-3">
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.2rem", fontWeight: 700, marginBottom: 20 }}>
+              🗂️ All Images ({images.length})
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {images.map(img => (
-                <div key={img.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center gap-4 hover:border-gray-600 transition-colors">
-                  <img src={img.url} alt={img.title} className="w-20 h-14 object-cover rounded-xl flex-shrink-0"
-                    onError={(e) => { e.target.src = `https://picsum.photos/seed/${img.id}/80/56`; }} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-white font-semibold text-sm truncate">{img.title}</h4>
-                      {img.badge && <span className="bg-amber-400/20 text-amber-400 text-xs px-2 py-0.5 rounded-full">{img.badge}</span>}
-                      {img.featured && <span className="bg-green-400/20 text-green-400 text-xs px-2 py-0.5 rounded-full">Featured</span>}
+                <div key={img.id} style={{
+                  display: "flex", alignItems: "center", gap: 14,
+                  background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: 14, padding: "12px 16px",
+                  transition: "border-color 0.2s",
+                }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"}
+                >
+                  {/* Thumbnail */}
+                  <img src={img.thumb || img.url} alt={img.title}
+                    style={{ width: 72, height: 52, objectFit: "cover", borderRadius: 10, flexShrink: 0 }}
+                    onError={e => { e.target.src = `https://picsum.photos/seed/${img.id}/72/52`; }}
+                  />
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+                      <span style={{ color: "#fff", fontWeight: 600, fontSize: 13 }}>{img.title}</span>
+                      {img.badge && (
+                        <span style={{ background: "rgba(252,211,77,0.15)", color: "#FCD34D", fontSize: 10, padding: "2px 8px", borderRadius: 999 }}>{img.badge}</span>
+                      )}
+                      {img.featured && (
+                        <span style={{ background: "rgba(52,211,153,0.12)", color: "#34d399", fontSize: 10, padding: "2px 8px", borderRadius: 999 }}>Featured</span>
+                      )}
                     </div>
-                    <div className="flex gap-3 text-xs text-gray-500 mt-1">
+                    <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, display: "flex", gap: 12 }}>
                       <span>{img.category}</span>
                       <span>{img.date}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <button onClick={() => toggleFeatured(img.id)}
-                      className={`p-2 rounded-lg text-sm transition-colors ${img.featured ? "bg-green-900/50 text-green-400 hover:bg-green-900" : "bg-gray-800 text-gray-500 hover:text-white"}`}
-                      title="Toggle featured">⭐</button>
-                    <button onClick={() => editImg(img)}
-                      className="p-2 bg-gray-800 hover:bg-blue-900/50 hover:text-blue-400 text-gray-400 rounded-lg text-sm transition-colors"
-                      title="Edit">✏️</button>
-                    <button onClick={() => deleteImg(img.id)}
-                      className="p-2 bg-gray-800 hover:bg-red-900/50 hover:text-red-400 text-gray-400 rounded-lg text-sm transition-colors"
-                      title="Delete">🗑️</button>
+
+                  {/* Actions */}
+                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                    <button onClick={() => toggleFeatured(img.id)} title="Toggle featured"
+                      style={{
+                        width: 34, height: 34, borderRadius: 9, border: "none", cursor: "pointer", fontSize: 14,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        background: img.featured ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.06)",
+                        color: img.featured ? "#34d399" : "rgba(255,255,255,0.4)",
+                        transition: "all 0.2s",
+                      }}>⭐</button>
+                    <button onClick={() => startEdit(img)} title="Edit"
+                      style={{
+                        width: 34, height: 34, borderRadius: 9, border: "none", cursor: "pointer", fontSize: 14,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = "rgba(59,130,246,0.15)"; e.currentTarget.style.color = "#60a5fa"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "rgba(255,255,255,0.4)"; }}
+                    >✏️</button>
+                    <button onClick={() => setConfirmDelete(img.id)} title="Delete"
+                      style={{
+                        width: 34, height: 34, borderRadius: 9, border: "none", cursor: "pointer", fontSize: 14,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = "rgba(248,113,113,0.15)"; e.currentTarget.style.color = "#F87171"; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "rgba(255,255,255,0.4)"; }}
+                    >🗑️</button>
                   </div>
                 </div>
               ))}
+
               {images.length === 0 && (
-                <div className="text-center text-gray-600 py-16">
-                  <div className="text-5xl mb-3">📂</div>
-                  <p>No images yet. Upload your first image!</p>
+                <div style={{ textAlign: "center", padding: "60px 0", color: "rgba(255,255,255,0.25)" }}>
+                  <div style={{ fontSize: 44, marginBottom: 12 }}>📂</div>
+                  <p style={{ fontSize: 15 }}>No images yet. Upload your first image!</p>
                 </div>
               )}
             </div>
           </div>
         )}
 
+        {/* ── Featured Tab ── */}
         {tab === "featured" && (
           <div>
-            <h2 className="text-xl font-bold mb-2">⭐ Featured & Highlighted</h2>
-            <p className="text-gray-500 text-sm mb-6">These images appear first in the gallery. Toggle from Manage tab.</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.2rem", fontWeight: 700, marginBottom: 6 }}>⭐ Featured & Highlighted</h2>
+            <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 13, marginBottom: 20 }}>
+              These images appear with a green dot in the gallery. Toggle from the Manage tab.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px,1fr))", gap: 12 }}>
               {images.filter(i => i.featured || i.badge).map(img => (
-                <div key={img.id} className="relative rounded-xl overflow-hidden">
-                  <img src={img.url} alt={img.title} className="w-full h-32 object-cover"
-                    onError={(e) => { e.target.src = `https://picsum.photos/seed/${img.id}/200/130`; }} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-2">
-                    <p className="text-white text-xs font-medium truncate">{img.title}</p>
+                <div key={img.id} style={{ position: "relative", borderRadius: 14, overflow: "hidden", cursor: "pointer" }}
+                  onClick={() => startEdit(img)} title="Click to edit">
+                  <img src={img.thumb || img.url} alt={img.title}
+                    style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", display: "block" }}
+                    onError={e => { e.target.src = `https://picsum.photos/seed/${img.id}/200/150`; }}
+                  />
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.75), transparent)", display: "flex", flexDirection: "column", justifyContent: "flex-end", padding: 10 }}>
+                    {img.badge && <span style={{ display: "inline-block", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 999, marginBottom: 5, background: "#FCD34D", color: "#78350F", alignSelf: "flex-start", textTransform: "uppercase" }}>{img.badge}</span>}
+                    <p style={{ color: "#fff", fontSize: 11, fontWeight: 600 }}>{img.title}</p>
                   </div>
-                  {img.badge && <div className="absolute top-2 left-2 bg-amber-400 text-amber-900 text-xs font-bold px-2 py-0.5 rounded-full">{img.badge}</div>}
+                  {img.featured && <div style={{ position: "absolute", top: 8, right: 8, width: 7, height: 7, borderRadius: "50%", background: "#34d399", boxShadow: "0 0 6px #34d399" }} />}
+                  <div style={{ position: "absolute", top: 8, left: 8, background: "rgba(0,0,0,0.6)", color: "rgba(255,255,255,0.7)", fontSize: 10, padding: "2px 8px", borderRadius: 999 }}>click to edit</div>
                 </div>
               ))}
               {images.filter(i => i.featured || i.badge).length === 0 && (
-                <div className="col-span-4 text-center text-gray-600 py-10">
-                  <div className="text-4xl mb-2">⭐</div>
-                  <p>No featured images yet.</p>
+                <div style={{ gridColumn: "1/-1", textAlign: "center", padding: "50px 0", color: "rgba(255,255,255,0.25)" }}>
+                  <div style={{ fontSize: 40, marginBottom: 10 }}>⭐</div>
+                  <p>No featured images yet. Mark images as featured from the Manage tab.</p>
                 </div>
               )}
             </div>
           </div>
         )}
       </div>
+
+      {/* Delete confirmation overlay */}
+      {confirmDelete && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+          <div style={{ background: "#111", borderRadius: 18, padding: 28, maxWidth: 340, width: "100%", border: "1px solid rgba(255,255,255,0.1)", textAlign: "center" }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>🗑️</div>
+            <h3 style={{ color: "#fff", fontWeight: 700, marginBottom: 8 }}>Delete this image?</h3>
+            <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginBottom: 20 }}>This action cannot be undone.</p>
+            <div style={{ display: "flex", gap: 10 }}>
+              <button onClick={() => setConfirmDelete(null)} style={{ ...S.ghostBtn, flex: 1 }}>Cancel</button>
+              <button onClick={() => deleteImg(confirmDelete)} style={{ flex: 1, background: "#F87171", color: "#7F1D1D", border: "none", borderRadius: 10, padding: "10px 0", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
+/* ─── Main App ─── */
 export default function GalleryApp() {
+  useEffect(() => { injectFonts(); }, []);
+
   const [images, setImages] = useState(INITIAL_IMAGES);
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [cat, setCat] = useState("All");
   const [search, setSearch] = useState("");
-  const [selectedImg, setSelectedImg] = useState(null);
+  const [lightbox, setLightbox] = useState(null);
   const [view, setView] = useState("gallery"); // gallery | admin-login | admin
-  const [layout, setLayout] = useState("grid"); // grid | masonry
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
 
   const filtered = images.filter(img =>
-    (activeCategory === "All" || img.category === activeCategory) &&
-    (img.title.toLowerCase().includes(search.toLowerCase()) || img.description.toLowerCase().includes(search.toLowerCase()))
+    (cat === "All" || img.category === cat) &&
+    (img.title.toLowerCase().includes(search.toLowerCase()) ||
+      img.description.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const featuredFirst = [...filtered.filter(i => i.featured), ...filtered.filter(i => !i.featured)];
-
-  const currentIdx = selectedImg ? featuredFirst.findIndex(i => i.id === selectedImg.id) : -1;
-
-  if (view === "admin-login") return <AdminLogin onLogin={() => setView("admin")} />;
+  if (view === "admin-login") return <AdminLogin onLogin={() => setView("admin")} onBack={() => setView("gallery")} />;
   if (view === "admin") return <AdminPanel images={images} setImages={setImages} onBack={() => setView("gallery")} />;
 
-  const stats = {
-    total: images.length,
-    events: images.filter(i => i.category === "Events").length,
-    customers: images.filter(i => i.category === "Best Customer").length,
-    students: images.filter(i => i.category === "Best Student").length,
-  };
+  const counts = CATEGORIES.reduce((acc, c) => {
+    acc[c] = c === "All" ? images.length : images.filter(i => i.category === c).length;
+    return acc;
+  }, {});
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Header */}
-      <div className="bg-gray-900/80 backdrop-blur border-b border-gray-800 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center text-lg">📸</div>
-            <div>
-              <h1 className="font-bold text-base sm:text-lg leading-tight">Company Gallery</h1>
-              <p className="text-gray-500 text-xs hidden sm:block">Events & Recognitions</p>
-            </div>
-          </div>
-          <button onClick={() => setView("admin-login")}
-            className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-amber-900 font-bold px-4 py-2 rounded-xl text-sm transition-colors">
-            ⚙️ <span className="hidden sm:inline">Admin</span>
-          </button>
-        </div>
-      </div>
+    <div style={{ minHeight: "100vh", background: "#080808", fontFamily: "'DM Sans', sans-serif", color: "#fff" }}>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-          {[
-            { label: "Total Photos", value: stats.total, icon: "🖼️", color: "from-blue-900/50 to-blue-800/30 border-blue-800/50" },
-            { label: "Events", value: stats.events, icon: "🎉", color: "from-purple-900/50 to-purple-800/30 border-purple-800/50" },
-            { label: "Best Customers", value: stats.customers, icon: "⭐", color: "from-amber-900/50 to-amber-800/30 border-amber-800/50" },
-            { label: "Best Students", value: stats.students, icon: "🎓", color: "from-green-900/50 to-green-800/30 border-green-800/50" },
-          ].map(s => (
-            <div key={s.label} className={`bg-gradient-to-br ${s.color} border rounded-2xl p-4`}>
-              <div className="text-2xl mb-1">{s.icon}</div>
-              <div className="text-2xl font-bold">{s.value}</div>
-              <div className="text-gray-400 text-xs mt-0.5">{s.label}</div>
-            </div>
-          ))}
+      {/* Nav */}
+      <nav style={{
+        position: "sticky", top: 0, zIndex: 30,
+        background: "rgba(8,8,8,0.88)", backdropFilter: "blur(14px)",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        padding: "12px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+            background: "linear-gradient(135deg, #FCD34D, #F97316)",
+            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+          }}>📸</div>
+          <div>
+            <div style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 15, lineHeight: 1.1 }}>Company Gallery</div>
+            <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", letterSpacing: "0.05em" }}>Events & Recognitions</div>
+          </div>
         </div>
 
-        {/* Hero Featured */}
-        {images.some(i => i.featured && i.category === "Best Customer") && (
-          <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {["Best Customer", "Best Student"].map(cat => {
-              const img = images.find(i => i.category === cat && i.featured);
-              if (!img) return null;
-              return (
-                <div key={cat} onClick={() => setSelectedImg(img)}
-                  className="relative overflow-hidden rounded-2xl cursor-pointer group border border-amber-500/30 bg-gray-900">
-                  <img src={img.url} alt={img.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={(e) => { e.target.src = `https://picsum.photos/seed/${img.id}/400/200`; }} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <div className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-1 rounded-full inline-block mb-2">{img.badge}</div>
-                    <p className="text-white font-bold">{img.title}</p>
-                  </div>
-                </div>
-              );
-            })}
-            {images.filter(i => i.category === "Awards" && i.featured).slice(0, 1).map(img => (
-              <div key={img.id} onClick={() => setSelectedImg(img)}
-                className="relative overflow-hidden rounded-2xl cursor-pointer group border border-amber-500/30 bg-gray-900">
-                <img src={img.url} alt={img.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => { e.target.src = `https://picsum.photos/seed/${img.id}/400/200`; }} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4">
-                  {img.badge && <div className="bg-amber-400 text-amber-900 text-xs font-bold px-2 py-1 rounded-full inline-block mb-2">{img.badge}</div>}
-                  <p className="text-white font-bold">{img.title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Search & Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
-            <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search photos..."
-              className="w-full bg-gray-900 border border-gray-700 text-white rounded-xl pl-10 pr-4 py-3 outline-none focus:border-amber-400 transition-colors placeholder-gray-600"
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Search */}
+          <div style={{ position: "relative" }}>
+            <span style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "rgba(255,255,255,0.3)", fontSize: 12 }}>🔍</span>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search…"
+              style={{
+                background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 10, padding: "8px 14px 8px 28px", color: "#fff", fontSize: 12,
+                outline: "none", width: 170, fontFamily: "'DM Sans', sans-serif",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={e => e.target.style.borderColor = "#FCD34D"}
+              onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
             />
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => setLayout("grid")}
-              className={`px-4 py-2 rounded-xl text-sm transition-colors ${layout === "grid" ? "bg-amber-400 text-amber-900" : "bg-gray-800 text-gray-400 hover:text-white"}`}>
-              ⊞ Grid
-            </button>
-            <button onClick={() => setLayout("list")}
-              className={`px-4 py-2 rounded-xl text-sm transition-colors ${layout === "list" ? "bg-amber-400 text-amber-900" : "bg-gray-800 text-gray-400 hover:text-white"}`}>
-              ≡ List
-            </button>
-          </div>
+
+          {/* Admin button */}
+          <button onClick={() => setView("admin-login")}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              background: "#FCD34D", color: "#78350F",
+              border: "none", borderRadius: 10, padding: "8px 16px",
+              fontWeight: 700, fontSize: 12, cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif",
+            }}>
+            ⚙️ Admin
+          </button>
+        </div>
+      </nav>
+
+      <div style={{
+        maxWidth: 1100, margin: "0 auto", padding: "28px 20px 60px",
+        opacity: loaded ? 1 : 0, transform: loaded ? "none" : "translateY(14px)",
+        transition: "opacity 0.5s ease, transform 0.5s ease",
+      }}>
+
+        {/* Page title */}
+        <div style={{ marginBottom: 28 }}>
+          <p style={{ color: "#FCD34D", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 500, marginBottom: 6 }}>Our Moments</p>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem,4.5vw,3rem)", fontWeight: 900, lineHeight: 1.1 }}>
+            Gallery of <span style={{ color: "#FCD34D" }}>Excellence</span>
+          </h1>
+          <p style={{ color: "rgba(255,255,255,0.4)", marginTop: 10, maxWidth: 460, lineHeight: 1.7, fontSize: 13 }}>
+            Relive our events, celebrate our best students and customers, and witness the milestones that define us.
+          </p>
         </div>
 
-        {/* Category Tabs */}
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-          {CATEGORIES.map(cat => (
-            <button key={cat} onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${activeCategory === cat ? "bg-amber-400 text-amber-900" : "bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700"}`}>
-              {cat}
-              <span className={`ml-2 text-xs ${activeCategory === cat ? "text-amber-900/60" : "text-gray-600"}`}>
-                {cat === "All" ? images.length : images.filter(i => i.category === cat).length}
-              </span>
+        {/* Category pills */}
+        <div style={{ display: "flex", gap: 8, marginBottom: 18, overflowX: "auto", paddingBottom: 4, scrollbarWidth: "none" }}>
+          {CATEGORIES.map(c => (
+            <button key={c} onClick={() => setCat(c)}
+              style={{
+                flexShrink: 0, padding: "6px 14px", borderRadius: 999,
+                fontSize: 12, fontWeight: 500, border: "1px solid", cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif", transition: "all 0.18s",
+                background: cat === c ? "#FCD34D" : "transparent",
+                borderColor: cat === c ? "#FCD34D" : "rgba(255,255,255,0.15)",
+                color: cat === c ? "#78350F" : "rgba(255,255,255,0.55)",
+              }}>
+              {c}
+              <span style={{ marginLeft: 5, fontSize: 10, opacity: 0.6 }}>({counts[c]})</span>
             </button>
           ))}
         </div>
 
-        {/* Gallery Grid */}
-        {layout === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {featuredFirst.map(img => (
-              <GalleryCard key={img.id} img={img} onView={setSelectedImg} />
+        {/* Stats */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginBottom: 28 }}>
+          {[
+            { n: images.length, label: "Photos" },
+            { n: images.filter(i => i.category === "Events").length, label: "Events" },
+            { n: images.filter(i => i.badge && i.badge.includes("Customer")).length, label: "Top Customers" },
+            { n: images.filter(i => i.badge && i.badge.includes("Student")).length, label: "Top Students" },
+          ].map(s => (
+            <div key={s.label} style={{
+              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 12, padding: "12px 8px", textAlign: "center",
+            }}>
+              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.1rem,2.5vw,1.7rem)", fontWeight: 900, color: "#FCD34D", lineHeight: 1 }}>{s.n}</p>
+              <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 3, textTransform: "uppercase", letterSpacing: "0.07em" }}>{s.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Section header */}
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 16 }}>
+          <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.15rem", fontWeight: 700 }}>
+            {cat === "All" ? "All Photos" : cat}
+          </h2>
+          <p style={{ fontSize: 12, color: "rgba(255,255,255,0.35)" }}>
+            {filtered.length} {filtered.length === 1 ? "photo" : "photos"} found
+          </p>
+        </div>
+
+        {/* Grid */}
+        {filtered.length > 0 ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 12 }}>
+            {filtered.map(img => (
+              <GalleryCard key={img.id} img={img} onView={setLightbox} />
             ))}
           </div>
         ) : (
-          <div className="space-y-3">
-            {featuredFirst.map(img => (
-              <div key={img.id} onClick={() => setSelectedImg(img)}
-                className="flex gap-4 bg-gray-900 border border-gray-800 rounded-2xl p-4 cursor-pointer hover:border-gray-600 transition-colors group">
-                <img src={img.url} alt={img.title} className="w-24 h-16 object-cover rounded-xl flex-shrink-0"
-                  onError={(e) => { e.target.src = `https://picsum.photos/seed/${img.id}/96/64`; }} />
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <h3 className="text-white font-semibold text-sm truncate">{img.title}</h3>
-                    {img.badge && <span className="bg-amber-400/20 text-amber-400 text-xs px-2 py-0.5 rounded-full">{img.badge}</span>}
-                  </div>
-                  <p className="text-gray-500 text-xs truncate">{img.description}</p>
-                  <div className="flex gap-3 text-xs text-gray-600 mt-1">
-                    <span>{img.category}</span>
-                    <span>{img.date}</span>
-                  </div>
-                </div>
-                <div className="text-gray-600 group-hover:text-gray-400 transition-colors self-center">›</div>
-              </div>
-            ))}
+          <div style={{ textAlign: "center", padding: "70px 0", color: "rgba(255,255,255,0.3)" }}>
+            <div style={{ fontSize: 48, marginBottom: 14 }}>📭</div>
+            <p style={{ fontSize: 16, fontWeight: 500 }}>No photos found</p>
+            <p style={{ fontSize: 13, marginTop: 6 }}>Try a different category or search term</p>
+            <button onClick={() => { setCat("All"); setSearch(""); }}
+              style={{ ...S.goldBtn, marginTop: 20 }}>
+              Show all photos
+            </button>
           </div>
         )}
 
-        {featuredFirst.length === 0 && (
-          <div className="text-center py-20 text-gray-600">
-            <div className="text-6xl mb-4">📭</div>
-            <p className="text-lg">No photos found</p>
-            <p className="text-sm mt-1">Try adjusting your search or category filter</p>
+        {/* Footer */}
+        <div style={{
+          marginTop: 70, paddingTop: 28,
+          borderTop: "1px solid rgba(255,255,255,0.07)",
+          display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 10,
+        }}>
+          <div>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontWeight: 900, fontSize: 15 }}>Company Gallery</p>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 3 }}>
+              © {new Date().getFullYear()} · All rights reserved
+            </p>
           </div>
-        )}
+          <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)" }}>
+            {images.length} photos · {CATEGORIES.length - 1} categories
+          </p>
+        </div>
       </div>
 
-      {/* Lightbox Modal */}
-      {selectedImg && (
-        <Modal
-          img={selectedImg}
-          onClose={() => setSelectedImg(null)}
-          onNext={() => setSelectedImg(featuredFirst[(currentIdx + 1) % featuredFirst.length])}
-          onPrev={() => setSelectedImg(featuredFirst[(currentIdx - 1 + featuredFirst.length) % featuredFirst.length])}
-        />
+      {/* Lightbox */}
+      {lightbox && (
+        <Lightbox img={lightbox} all={filtered.length ? filtered : images} onClose={() => setLightbox(null)} />
       )}
     </div>
   );
