@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
 import { products, categories } from "../data/Products";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+// import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 
 export default function Products() {
   const [searchParams] = useSearchParams();
@@ -114,41 +115,13 @@ export default function Products() {
                         product={product}
                         showDiscount={product.featured}
                       />
-
-                      {/* Variations */}
-                      {product.variations && product.variations.length > 0 && (
-                        <div className="bg-gray-50 rounded-xl p-3 sm:p-4">
-                          <h4 className="text-xs sm:text-sm font-semibold text-gray-900 mb-3">
-                            Design Variations
-                          </h4>
-                          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                            {product.variations.map((variation) => (
-                              <div
-                                key={variation.id}
-                                className="group cursor-pointer"
-                                title={`${variation.name} - ₦${variation.price.toLocaleString()}`}
-                              >
-                                <div className="aspect-square rounded-lg overflow-hidden bg-white border border-gray-200 group-hover:border-[#D4AF37] transition-colors">
-                                  <img
-                                    src={variation.image}
-                                    alt={variation.name}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                                    loading="lazy"
-                                  />
-                                </div>
-                                <div className="mt-2 text-center">
-                                  <p className="text-xs font-medium text-gray-900 truncate">
-                                    {variation.name}
-                                  </p>
-                                  <p className="text-xs text-[#D4AF37] font-semibold">
-                                    ₦{variation.price.toLocaleString()}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
+                      
+                      <Link 
+                        to={`/product/${product.id}#variations`}
+                        className="block w-full text-center py-2 px-4 rounded-xl border border-gray-200 text-sm font-semibold text-[#011F5B] hover:bg-[#011F5B] hover:text-white hover:border-[#011F5B] transition-all"
+                      >
+                        {product.variations?.length > 0 ? "View Design Variations" : "View Details"}
+                      </Link>
                     </div>
                   ))}
                 </div>

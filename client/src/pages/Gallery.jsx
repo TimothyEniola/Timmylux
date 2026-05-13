@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { Download } from 'lucide-react';
 
-/* ─── Google Fonts ─── */
+/* --- Google Fonts --- */
 const injectFonts = () => {
   if (document.getElementById("gf-gallery")) return;
   const l = document.createElement("link");
@@ -11,7 +12,7 @@ const injectFonts = () => {
   document.head.appendChild(l);
 };
 
-/* ─── Data ─── */
+/* --- Data --- */
 // Each image has a `thumb` (tiny, ~40px wide, blurry placeholder) and
 // a `url` (full quality, only loaded when user clicks or card is in view).
 const IMAGES = [
@@ -102,11 +103,10 @@ const IMAGES = [
 ];
 
 const CATS = ["All", "Events", "Best Customer", "Best Student", "Awards", "Team", "Milestones"];
-
 const BADGE_META = {
-  "Best Customer": { icon: "⭐", bg: "#FCD34D", text: "#78350F" },
-  "Best Student": { icon: "🎓", bg: "#6EE7B7", text: "#065F46" },
-  "Award": { icon: "🏆", bg: "#FCA5A5", text: "#7F1D1D" },
+  "Best Customer": { icon: "⭐", bg: "#D4AF37", text: "#011F5B" },
+  "Best Student": { icon: "🎓", bg: "#D4AF37", text: "#011F5B" },
+  "Award": { icon: "🏆", bg: "#D4AF37", text: "#011F5B" },
 };
 
 /* ─── Lazy Image — shows blurry thumb, swaps to full only when in viewport ─── */
@@ -152,8 +152,8 @@ function LazyImg({ thumb, src, alt, style = {}, className = "" }) {
   );
 }
 
-/* ─── Lightbox — loads full-res only when opened ─── */
-function Lightbox({ img, all, onClose }) {
+/* --- Lightbox — loads full-res only when opened --- */
+function Lightbox({ img, all, onClose }) { // Added onDownload prop
   const [currentIdx, setCurrentIdx] = useState(all.findIndex(i => i.id === img.id));
   const current = all[currentIdx];
   const bm = BADGE_META[current.badge];
@@ -170,6 +170,18 @@ function Lightbox({ img, all, onClose }) {
     };
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
+  }, [go, onClose]);
+
+  const handleDownload = useCallback(() => {
+    fetch(current.url)
+      .then(response => response.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${current.title.replace(/\s/g, '_')}.jpg`);
+        document.body.appendChild(link); link.click(); link.remove();
+      }).catch(err => console.error("Download failed", err));
   }, [go, onClose]);
 
   return (
@@ -211,12 +223,20 @@ function Lightbox({ img, all, onClose }) {
         </div>
 
         {/* Info side */}
-        <div className="flex-1 flex flex-col p-6 overflow-y-auto">
-          <button onClick={onClose}
-            className="self-end w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white text-lg flex items-center justify-center mb-5 transition-all flex-shrink-0">
-            ×
-          </button>
-
+          <div className="flex-1 flex flex-col p-6 overflow-y-auto"> {/* Download button added */}
+            <div className="flex justify-end gap-2 mb-5">
+              <button onClick={handleDownload}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all"
+                title="Download Image"
+              >
+                <Download size={16} />
+              </button>
+              <button onClick={onClose}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white text-lg flex items-center justify-center transition-all">
+                ×
+              </button>
+            </div>
+            
           {bm && (
             <span
               className="self-start text-xs font-bold px-3 py-1.5 rounded-full mb-4 uppercase tracking-widest"
@@ -249,7 +269,7 @@ function Lightbox({ img, all, onClose }) {
   );
 }
 
-/* ─── Gallery Card ─── */
+/* --- Gallery Card --- */
 function Card({ img, onClick }) {
   const bm = BADGE_META[img.badge];
   return (
@@ -303,7 +323,7 @@ function Card({ img, onClick }) {
   );
 }
 
-/* ─── Main Component ─── */
+/* --- Main Component --- */
 export default function PublicGallery() {
   useEffect(() => { injectFonts(); }, []);
 
@@ -325,20 +345,20 @@ export default function PublicGallery() {
     return acc;
   }, {});
 
-  return (
+  return ( // Nav color and logo gradient
     <div style={{ minHeight: "100vh", background: "#080808", fontFamily: "'DM Sans', sans-serif", color: "white" }}>
 
-      {/* Nav */}
+      {/* Nav */} 
       <nav style={{
         position: "sticky", top: 0, zIndex: 30,
-        background: "rgba(8,8,8,0.88)", backdropFilter: "blur(14px)",
+        background: "rgba(8,8,8,0.88)", backdropFilter: "blur(14px)", // Dark background
         borderBottom: "1px solid rgba(255,255,255,0.07)",
       }}>
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div style={{
               width: 36, height: 36, borderRadius: 10,
-              background: "linear-gradient(135deg, #FCD34D, #F97316)",
+              background: "linear-gradient(135deg, #D4AF37, #011F5B)", // Logo gradient
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 16, flexShrink: 0,
             }}>📸</div>
@@ -364,8 +384,8 @@ export default function PublicGallery() {
                 border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: 10, padding: "8px 14px 8px 30px",
                 color: "white", fontSize: 12, outline: "none", width: 200,
-              }}
-              onFocus={e => e.target.style.borderColor = "#FCD34D"}
+              }} // Search input focus border
+              onFocus={e => e.target.style.borderColor = "#D4AF37"}
               onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
             />
           </div>
@@ -382,11 +402,11 @@ export default function PublicGallery() {
       >
         {/* Page title */}
         <div className="mb-8">
-          <p style={{ color: "#FCD34D", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 500, marginBottom: 6 }}>
+          <p style={{ color: "#D4AF37", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 500, marginBottom: 6 }}> {/* Eyebrow color */}
             Our Moments
           </p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4.5vw, 3rem)", fontWeight: 900, lineHeight: 1.1 }}>
-            Gallery of <span style={{ color: "#FCD34D" }}>Excellence</span>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4.5vw, 3rem)", fontWeight: 900, lineHeight: 1.1 }}> {/* H1 span color */}
+            Gallery of <span style={{ color: "#D4AF37" }}>Excellence</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.4)", marginTop: 12, maxWidth: 460, lineHeight: 1.7, fontSize: 13 }}>
             Relive our events, celebrate our best students and customers, and witness the milestones that define us.
@@ -398,12 +418,12 @@ export default function PublicGallery() {
           {CATS.map(c => (
             <button key={c} onClick={() => setCat(c)}
               style={{
-                flexShrink: 0, padding: "6px 14px", borderRadius: 999,
+                flexShrink: 0, padding: "6px 14px", borderRadius: 999, // Category pills active state
                 fontSize: 12, fontWeight: 500, border: "1px solid", cursor: "pointer",
                 transition: "all 0.18s",
-                background: cat === c ? "#FCD34D" : "transparent",
-                borderColor: cat === c ? "#FCD34D" : "rgba(255,255,255,0.15)",
-                color: cat === c ? "#78350F" : "rgba(255,255,255,0.55)",
+                background: cat === c ? "#D4AF37" : "transparent",
+                borderColor: cat === c ? "#D4AF37" : "rgba(255,255,255,0.15)",
+                color: cat === c ? "#011F5B" : "rgba(255,255,255,0.55)",
               }}
             >
               {c}
@@ -441,8 +461,8 @@ export default function PublicGallery() {
               background: "rgba(255,255,255,0.04)",
               border: "1px solid rgba(255,255,255,0.07)",
               borderRadius: 12, padding: "12px 8px", textAlign: "center",
-            }}>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.2rem,2.5vw,1.8rem)", fontWeight: 900, color: "#FCD34D", lineHeight: 1 }}>{s.n}</p>
+            }}> {/* Stats section color */}
+              <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.1rem,2.5vw,1.7rem)", fontWeight: 900, color: "#D4AF37", lineHeight: 1 }}>{s.n}</p>
               <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 3, textTransform: "uppercase", letterSpacing: "0.07em" }}>{s.label}</p>
             </div>
           ))}
@@ -475,10 +495,10 @@ export default function PublicGallery() {
             <p style={{ fontSize: 16, fontWeight: 500 }}>No photos found</p>
             <p style={{ fontSize: 13, marginTop: 6 }}>Try a different category or search term</p>
             <button
-              onClick={() => { setCat("All"); setSearch(""); }}
+              onClick={() => { setCat("All"); setSearch(""); }} // "Show all photos" button
               style={{
                 marginTop: 20, padding: "9px 22px", borderRadius: 999,
-                background: "#FCD34D", color: "#78350F", fontWeight: 700,
+                background: "#D4AF37", color: "#011F5B",
                 border: "none", cursor: "pointer", fontSize: 13,
               }}
             >
