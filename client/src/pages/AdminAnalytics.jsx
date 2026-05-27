@@ -85,6 +85,7 @@ export default function AdminAnalytics() {
     .reduce((sum, o) => sum + o.amount, 0);
   const pendingOrders = orders.filter((o) => o.status === "Pending").length;
   const deliveredOrders = orders.filter((o) => o.status === "Delivered").length;
+  const cancelledOrders = orders.filter((o) => o.status === "Cancelled").length;
   const totalOrders = orders.length;
 
   // Data for charts
@@ -115,12 +116,16 @@ export default function AdminAnalytics() {
   ];
 
   const formatAnalyticsSummary = () => {
+    const cancelledAmount = orders
+      .filter((o) => o.status === "Cancelled")
+      .reduce((sum, o) => sum + o.amount, 0);
     const summary = `
 Store Analytics Summary:
 📊 Total Sales: ₦${(totalSales / 1000000).toFixed(1)}M (+12.5% from last month)
 📦 Total Orders: ${totalOrders} (+8% from last month)
 ⏰ Pending Orders: ${pendingOrders}
 ✅ Delivered Orders: ${deliveredOrders}
+❌ Cancelled Orders: ${cancelledOrders} (₦${(cancelledAmount / 1000).toFixed(0)}K)
 
 Sales by Category:
 🏠 Bedroom: ₦${(2850000 / 1000000).toFixed(1)}M (${8} sales)
@@ -204,7 +209,7 @@ ${orders.slice(0, 5).map(order => `- ${order.customer}: ${order.product} (₦${(
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#fbbf24]">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-gray-600 text-sm font-medium">Total Sales</h3>
@@ -245,6 +250,17 @@ ${orders.slice(0, 5).map(order => `- ${order.customer}: ${order.product} (₦${(
               {deliveredOrders}
             </p>
             <p className="text-xs text-gray-500 mt-1">Successfully completed</p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-gray-600 text-sm font-medium">Cancelled</h3>
+              <div className="text-red-500">❌</div>
+            </div>
+            <p className="text-3xl font-bold text-red-600">
+              {cancelledOrders}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Orders cancelled</p>
           </div>
         </div>
 

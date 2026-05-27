@@ -11,7 +11,7 @@ const injectFonts = () => {
 };
 
 /* ─── Constants ─── */
-const CATEGORIES = ["All", "Events", "Best Customer", "Best Student", "Awards", "Team", "Milestones"];
+const CATEGORIES = ["All", "Events", "Workers", "Students", "Best Customer", "Best Student", "Awards", "Team", "Milestones"];
 
 const BADGE_OPTIONS = [
   { label: "None", value: "" },
@@ -21,6 +21,8 @@ const BADGE_OPTIONS = [
   { label: "🌟 Featured", value: "🌟 Featured" },
   { label: "🥇 Top Performer", value: "🥇 Top Performer" },
   { label: "💼 Partner", value: "💼 Partner" },
+  { label: "👔 Worker", value: "👔 Worker" },
+  { label: "📚 Student", value: "📚 Student" },
 ];
 
 const ADMIN_PASS = "admin123";
@@ -64,7 +66,7 @@ const S = {
     color: active ? "#78350F" : "rgba(255,255,255,0.6)",
   }),
   goldBtn: {
-    background: "#FCD34D", color: "#78350F", border: "none",
+    background: "#D4AF37", color: "#011F5B", border: "none",
     borderRadius: 10, padding: "11px 22px", fontWeight: 700,
     fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
     transition: "background 0.2s",
@@ -284,7 +286,7 @@ function AdminLogin({ onLogin, onBack }) {
         <div style={{ textAlign: "center", marginBottom: 28 }}>
           <div style={{
             width: 56, height: 56, borderRadius: 16, margin: "0 auto 14px",
-            background: "linear-gradient(135deg, #FCD34D, #F97316)",
+            background: "linear-gradient(135deg, #D4AF37, #011F5B)",
             display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
           }}>🔐</div>
           <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: "1.4rem", fontWeight: 700, marginBottom: 4 }}>Admin Panel</h2>
@@ -297,7 +299,7 @@ function AdminLogin({ onLogin, onBack }) {
             onKeyDown={e => e.key === "Enter" && submit()}
             placeholder="Password (hint: admin123)"
             style={{ ...S.input }}
-            onFocus={e => e.target.style.borderColor = "#FCD34D"}
+            onFocus={e => e.target.style.borderColor = "#D4AF37"}
             onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.12)"}
           />
         </div>
@@ -427,7 +429,7 @@ function AdminPanel({ images, setImages, onBack }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
-            background: "linear-gradient(135deg, #FCD34D, #F97316)",
+            background: "linear-gradient(135deg, #D4AF37, #011F5B)",
             display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
           }}>⚙️</div>
           <div>
@@ -480,7 +482,7 @@ function AdminPanel({ images, setImages, onBack }) {
                   textAlign: "center", cursor: "pointer", marginBottom: 14,
                   transition: "border-color 0.2s",
                 }}
-                onMouseEnter={e => e.currentTarget.style.borderColor = "#FCD34D"}
+                onMouseEnter={e => e.currentTarget.style.borderColor = "#D4AF37"}
                 onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"}
               >
                 <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
@@ -490,7 +492,7 @@ function AdminPanel({ images, setImages, onBack }) {
                   <>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🖼️</div>
                     <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>
-                      Drag & drop or <span style={{ color: "#FCD34D" }}>click to browse</span>
+                      Drag & drop or <span style={{ color: "#D4AF37" }}>click to browse</span>
                     </p>
                     <p style={{ color: "rgba(255,255,255,0.2)", fontSize: 11, marginTop: 4 }}>PNG, JPG, WEBP up to 10MB</p>
                   </>
@@ -604,7 +606,7 @@ function AdminPanel({ images, setImages, onBack }) {
                         <span style={{
                           display: "inline-block", fontSize: 9, fontWeight: 700,
                           padding: "3px 8px", borderRadius: 999, marginBottom: 5,
-                          background: "#FCD34D", color: "#78350F",
+                          background: "#D4AF37", color: "#011F5B",
                           textTransform: "uppercase", letterSpacing: "0.07em", alignSelf: "flex-start",
                         }}>{form.badge}</span>
                       )}
@@ -620,7 +622,7 @@ function AdminPanel({ images, setImages, onBack }) {
                   <div style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: 16 }}>
                     <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.3)", marginBottom: 8 }}>Lightbox info panel</p>
                     {form.badge && (
-                      <span style={{ display: "inline-block", fontSize: 9, fontWeight: 700, padding: "3px 8px", borderRadius: 999, marginBottom: 8, background: "#FCD34D", color: "#78350F", textTransform: "uppercase" }}>{form.badge}</span>
+                      <span style={{ display: "inline-block", fontSize: 9, fontWeight: 700, padding: "3px 8px", borderRadius: 999, marginBottom: 8, background: "#D4AF37", color: "#011F5B", textTransform: "uppercase" }}>{form.badge}</span>
                     )}
                     <p style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: "1rem", fontWeight: 700, marginBottom: 6 }}>{form.title || "Untitled"}</p>
                     <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 12, lineHeight: 1.6, marginBottom: 10 }}>{form.description || "No description yet."}</p>

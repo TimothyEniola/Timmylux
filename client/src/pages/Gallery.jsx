@@ -102,11 +102,13 @@ const IMAGES = [
   },
 ];
 
-const CATS = ["All", "Events", "Best Customer", "Best Student", "Awards", "Team", "Milestones"];
+const CATS = ["All", "Events", "Workers", "Students", "Best Customer", "Best Student", "Awards", "Team", "Milestones"];
 const BADGE_META = {
   "Best Customer": { icon: "⭐", bg: "#D4AF37", text: "#011F5B" },
   "Best Student": { icon: "🎓", bg: "#D4AF37", text: "#011F5B" },
   "Award": { icon: "🏆", bg: "#D4AF37", text: "#011F5B" },
+  "Worker": { icon: "👔", bg: "#D4AF37", text: "#011F5B" },
+  "Student": { icon: "📚", bg: "#D4AF37", text: "#011F5B" },
 };
 
 /* ─── Lazy Image — shows blurry thumb, swaps to full only when in viewport ─── */
@@ -402,10 +404,10 @@ export default function PublicGallery() {
       >
         {/* Page title */}
         <div className="mb-8">
-          <p style={{ color: "#D4AF37", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 500, marginBottom: 6 }}> {/* Eyebrow color */}
+          <p style={{ color: "#D4AF37", fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 500, marginBottom: 6 }}> 
             Our Moments
           </p>
-          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4.5vw, 3rem)", fontWeight: 900, lineHeight: 1.1 }}> {/* H1 span color */}
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4.5vw, 3rem)", fontWeight: 900, lineHeight: 1.1 }}> 
             Gallery of <span style={{ color: "#D4AF37" }}>Excellence</span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.4)", marginTop: 12, maxWidth: 460, lineHeight: 1.7, fontSize: 13 }}>

@@ -185,6 +185,33 @@ export default function ProductDetails() {
                     </button>
                   ))}
                 </div>
+
+                {/* Detailed Variation Info */}
+                {selectedVariation && (
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <h4 className="text-sm font-bold text-[#011F5B] mb-4 flex items-center gap-2">
+                      <Info size={16} /> Design Details: {selectedVariation.name}
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Type</p>
+                        <p className="font-bold text-[#011F5B]">{selectedVariation.name}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Color</p>
+                        <p className="font-bold text-[#011F5B]">{selectedVariation.color}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Material</p>
+                        <p className="font-bold text-[#011F5B]">{selectedVariation.material}</p>
+                      </div>
+                      <div className="bg-white p-3 rounded-lg">
+                        <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Price</p>
+                        <p className="font-bold text-[#D4AF37]">₦{selectedVariation.price.toLocaleString()}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
