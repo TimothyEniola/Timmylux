@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Shield, Bell } from "lucide-react";
+import { toast } from "react-toastify";
+import { getCurrentUser, setCurrentUser } from "../utils/userHelpers";
 import useNotificationStore from "../store/notificationStore";
 
 export default function UserSettings() {
@@ -24,6 +26,40 @@ export default function UserSettings() {
     state: "",
     houseNumber: "",
   });
+
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      setFormData({
+        name: currentUser.name || "",
+        email: currentUser.email || "",
+        phone: currentUser.phone || "",
+      });
+    }
+
+    const savedAddress = localStorage.getItem("userAddress");
+    if (savedAddress) {
+      setAddressData(JSON.parse(savedAddress));
+    }
+  }, []);
+
+  const handleProfileSubmit = (e) => {
+    e.preventDefault();
+    const currentUser = getCurrentUser() || {};
+    setCurrentUser({
+      ...currentUser,
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+    });
+    toast.success("Profile updated successfully");
+  };
+
+  const handleAddressSubmit = (e) => {
+    e.preventDefault();
+    localStorage.setItem("userAddress", JSON.stringify(addressData));
+    toast.success("Address saved successfully");
+  };
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -80,7 +116,7 @@ export default function UserSettings() {
 
             {/* PROFILE TAB */}
             {activeTab === "profile" && (
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleProfileSubmit}>
                 <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2">
                   <User size={18} /> Profile Information
                 </h2>
@@ -117,15 +153,15 @@ export default function UserSettings() {
                   />
                 </div>
 
-                <button className="btn-primary w-full sm:w-auto" disabled>
-                  Update Profile (Disabled)
+                <button type="submit" className="btn-primary w-full sm:w-auto">
+                  Update Profile
                 </button>
               </form>
             )}
 
             {/* ADDRESS TAB */}
             {activeTab === "address" && (
-              <form className="space-y-4">
+              <form className="space-y-4" onSubmit={handleAddressSubmit}>
                 <h2 className="text-lg sm:text-xl font-bold">
                   Address Information
                 </h2>
@@ -184,8 +220,8 @@ export default function UserSettings() {
                   />
                 </div>
 
-                <button className="btn-primary w-full sm:w-auto" disabled>
-                  Save Address (Disabled)
+                <button type="submit" className="btn-primary w-full sm:w-auto">
+                  Save Address
                 </button>
               </form>
             )}

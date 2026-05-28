@@ -244,12 +244,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
               {!collapsed ? (
                 <ProfileDropdown />
               ) : (
-                <Link
-                  to="/profile"
-                  className="flex items-center justify-center h-12 text-white hover:bg-[#D4AF37]/20 rounded-lg transition"
-                >
-                  <User size={18} />
-                </Link>
+                <ProfileDropdown compact />
               )}
             </div>
           </div>

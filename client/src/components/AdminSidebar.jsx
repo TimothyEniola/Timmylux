@@ -182,12 +182,7 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
             {/* Desktop: respect collapsed state */}
             <div className="hidden xl:block">
               {collapsed ? (
-                <Link
-                  to="/admin/profile"
-                  className="flex items-center justify-center h-10 rounded-lg hover:bg-[#D4AF37]/20 transition"
-                >
-                  <User size={18} />
-                </Link>
+                <AdminDropdown compact />
               ) : (
                 <AdminDropdown />
               )}

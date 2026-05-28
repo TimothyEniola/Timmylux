@@ -9,12 +9,14 @@ import {
   Info,
   Package,
   Truck,
-  ShieldCheck
+  ShieldCheck,
+  Share2
 } from "lucide-react";
 import { products } from "../data/Products";
 import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
+import { shareTextAsImage } from "../utils/shareAsImage";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -76,6 +78,24 @@ export default function ProductDetails() {
     } else {
       addToWishlist(product);
       toast.success("Added to wishlist");
+    }
+  };
+
+  const handleShareAsImage = async () => {
+    const shareTitle = `${currentName} — ${product.collection || product.category}`;
+    const shareBody = `${product.description}\n\nPrice: ₦${currentPrice.toLocaleString()}\nVariation: ${selectedVariation?.name || "Standard"}`;
+
+    const shared = await shareTextAsImage({
+      title: shareTitle,
+      text: shareBody,
+      fileName: `${product.name.replace(/\s+/g, "-").toLowerCase()}-details.png`,
+      url: window.location.href,
+    });
+
+    if (shared) {
+      toast.success("Product details shared as image");
+    } else {
+      toast.info("Image share is not available here, copied text instead");
     }
   };
 
@@ -223,6 +243,13 @@ export default function ProductDetails() {
               >
                 <ShoppingCart size={20} />
                 Add to Cart
+              </button>
+              <button
+                onClick={handleShareAsImage}
+                className="p-4 rounded-xl border border-gray-200 text-gray-600 hover:border-[#D4AF37] hover:text-[#D4AF37] transition-all active:scale-95"
+                title="Share product details as image"
+              >
+                <Share2 size={20} />
               </button>
               <button 
                 onClick={toggleWishlist}

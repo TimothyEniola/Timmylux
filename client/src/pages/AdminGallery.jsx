@@ -161,7 +161,7 @@ function GalleryCard({ img, onView }) {
         <div style={{
           position: "absolute", top: 10, right: 10,
           width: 8, height: 8, borderRadius: "50%",
-          background: "#34d399", boxShadow: "0 0 7px #34d399",
+          background: "#D4AF37", boxShadow: "0 0 7px #D4AF37",
         }} />
       )}
     </div>
@@ -259,8 +259,8 @@ function Lightbox({ img, all, onClose }) {
                 </div>
               ))}
               {current.featured && (
-                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#34d399" }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#34d399" }} />
+                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "#D4AF37" }}>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#D4AF37" }} />
                   Featured photo
                 </div>
               )}
@@ -448,9 +448,9 @@ function AdminPanel({ images, setImages, onBack }) {
         {success && (
           <div style={{
             marginBottom: 20, padding: "12px 16px", borderRadius: 12, fontSize: 13, fontWeight: 500,
-            background: success.startsWith("✅") ? "rgba(52,211,153,0.12)" : success.startsWith("🗑️") ? "rgba(251,191,36,0.12)" : "rgba(248,113,113,0.12)",
-            border: `1px solid ${success.startsWith("✅") ? "rgba(52,211,153,0.3)" : success.startsWith("🗑️") ? "rgba(251,191,36,0.3)" : "rgba(248,113,113,0.3)"}`,
-            color: success.startsWith("✅") ? "#34d399" : success.startsWith("🗑️") ? "#FCD34D" : "#F87171",
+            background: success.startsWith("✅") ? "rgba(212,175,55,0.12)" : success.startsWith("🗑️") ? "rgba(251,191,36,0.12)" : "rgba(248,113,113,0.12)",
+            border: `1px solid ${success.startsWith("✅") ? "rgba(212,175,55,0.3)" : success.startsWith("🗑️") ? "rgba(251,191,36,0.3)" : "rgba(248,113,113,0.3)"}`,
+            color: success.startsWith("✅") ? "#D4AF37" : success.startsWith("🗑️") ? "#FCD34D" : "#F87171",
           }}>{success}</div>
         )}
 
@@ -614,7 +614,7 @@ function AdminPanel({ images, setImages, onBack }) {
                       <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, marginTop: 3 }}>{form.date || "No date"}</p>
                     </div>
                     {form.featured && (
-                      <div style={{ position: "absolute", top: 10, right: 10, width: 8, height: 8, borderRadius: "50%", background: "#34d399", boxShadow: "0 0 7px #34d399" }} />
+                      <div style={{ position: "absolute", top: 10, right: 10, width: 8, height: 8, borderRadius: "50%", background: "#D4AF37", boxShadow: "0 0 7px #D4AF37" }} />
                     )}
                   </div>
 
@@ -636,8 +636,8 @@ function AdminPanel({ images, setImages, onBack }) {
                         <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 500 }}>{form.date}</span>
                       </div>
                       {form.featured && (
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#34d399" }}>
-                          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#34d399" }} />
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, color: "#D4AF37" }}>
+                          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#D4AF37" }} />
                           Featured photo
                         </div>
                       )}
@@ -691,7 +691,7 @@ function AdminPanel({ images, setImages, onBack }) {
                         <span style={{ background: "rgba(252,211,77,0.15)", color: "#FCD34D", fontSize: 10, padding: "2px 8px", borderRadius: 999 }}>{img.badge}</span>
                       )}
                       {img.featured && (
-                        <span style={{ background: "rgba(52,211,153,0.12)", color: "#34d399", fontSize: 10, padding: "2px 8px", borderRadius: 999 }}>Featured</span>
+                        <span style={{ background: "rgba(212,175,55,0.12)", color: "#D4AF37", fontSize: 10, padding: "2px 8px", borderRadius: 999 }}>Featured</span>
                       )}
                     </div>
                     <div style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, display: "flex", gap: 12 }}>
@@ -706,8 +706,8 @@ function AdminPanel({ images, setImages, onBack }) {
                       style={{
                         width: 34, height: 34, borderRadius: 9, border: "none", cursor: "pointer", fontSize: 14,
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        background: img.featured ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.06)",
-                        color: img.featured ? "#34d399" : "rgba(255,255,255,0.4)",
+                        background: img.featured ? "rgba(212,175,55,0.15)" : "rgba(255,255,255,0.06)",
+                        color: img.featured ? "#D4AF37" : "rgba(255,255,255,0.4)",
                         transition: "all 0.2s",
                       }}>⭐</button>
                     <button onClick={() => startEdit(img)} title="Edit"
@@ -717,7 +717,7 @@ function AdminPanel({ images, setImages, onBack }) {
                         background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)",
                         transition: "all 0.2s",
                       }}
-                      onMouseEnter={e => { e.currentTarget.style.background = "rgba(59,130,246,0.15)"; e.currentTarget.style.color = "#60a5fa"; }}
+                      onMouseEnter={e => { e.currentTarget.style.background = "rgba(212,175,55,0.15)"; e.currentTarget.style.color = "#011F5B"; }}
                       onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "rgba(255,255,255,0.4)"; }}
                     >✏️</button>
                     <button onClick={() => setConfirmDelete(img.id)} title="Delete"
@@ -763,7 +763,7 @@ function AdminPanel({ images, setImages, onBack }) {
                     {img.badge && <span style={{ display: "inline-block", fontSize: 9, fontWeight: 700, padding: "2px 7px", borderRadius: 999, marginBottom: 5, background: "#FCD34D", color: "#78350F", alignSelf: "flex-start", textTransform: "uppercase" }}>{img.badge}</span>}
                     <p style={{ color: "#fff", fontSize: 11, fontWeight: 600 }}>{img.title}</p>
                   </div>
-                  {img.featured && <div style={{ position: "absolute", top: 8, right: 8, width: 7, height: 7, borderRadius: "50%", background: "#34d399", boxShadow: "0 0 6px #34d399" }} />}
+                  {img.featured && <div style={{ position: "absolute", top: 8, right: 8, width: 7, height: 7, borderRadius: "50%", background: "#D4AF37", boxShadow: "0 0 6px #D4AF37" }} />}
                   <div style={{ position: "absolute", top: 8, left: 8, background: "rgba(0,0,0,0.6)", color: "rgba(255,255,255,0.7)", fontSize: 10, padding: "2px 8px", borderRadius: 999 }}>click to edit</div>
                 </div>
               ))}
@@ -836,7 +836,7 @@ export default function GalleryApp() {
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-            background: "linear-gradient(135deg, #FCD34D, #F97316)",
+            background: "linear-gradient(135deg, #D4AF37, #011F5B)",
             display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
           }}>📸</div>
           <div>

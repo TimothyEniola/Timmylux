@@ -6,7 +6,7 @@ import {
   MessageSquare,
   FileText,
   AlertCircle,
-  PhoneIcon,
+  Phone,
   ShoppingCart,
   Heart,
   User,
@@ -22,6 +22,7 @@ import {
   Settings,
   Star,
   Home,
+  Images,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -124,6 +125,11 @@ export default function Help() {
       icon: User,
       title: "Your Account & Profile",
       desc: "Sign in or create an account to save your orders, wishlist, and preferences. Update your name, email, and profile photo from the Profile page under Account Settings.",
+    },
+    {
+      icon: Images,
+      title: "Gallery Search & Filters",
+      desc: "Use Gallery search and category filters to quickly find photos by event, award, customer, or program. The Gallery page shows featured moments, customer stories, and event highlights.",
     },
     {
       icon: GraduationCap,
@@ -249,6 +255,7 @@ export default function Help() {
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Shop", to: "/products", icon: ShoppingCart },
+              { label: "Gallery", to: "/gallery", icon: Images },
               { label: "Track Order", to: "/track-order", icon: Truck },
               { label: "Academy", to: "/academy", icon: GraduationCap },
               { label: "Contact Us", to: "/custom-request", icon: MessageSquare },
@@ -351,7 +358,7 @@ export default function Help() {
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl p-5 bg-[#F8F9FC] border border-gray-200">
-              <PhoneIcon size={18} className="text-[#011F5B] mb-3" />
+              <Phone size={18} className="text-[#011F5B] mb-3" />
               <p className="font-semibold text-sm text-[#011F5B] mb-1">Phone</p>
               <a href="tel:+2348140838535" className="text-sm text-[#D4AF37] font-medium hover:underline">
                 +234 814 083 8535
@@ -394,7 +401,7 @@ export default function Help() {
                   : "border-transparent text-gray-600 hover:text-gray-900"
               }`}
             >
-              <PhoneIcon size={18} />
+              <Phone size={18} />
               Repair & Service
             </button>
             <button

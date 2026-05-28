@@ -1,8 +1,11 @@
+import React, { useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import { useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import TopBar from "./components/TopBar";
+import ErrorPage from "./pages/Error";
+import NotFound from "./pages/NotFound";
+import ProductDetails from "./pages/ProductDetails";
 import Navbar from "./components/Navbar";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminTopBar from "./components/AdminTopBar";
@@ -42,6 +45,33 @@ import AdminAcademy from "./pages/AdminAcademy";
 import Notifications from "./pages/Notifications";
 import Gallery from "./pages/Gallery";
 import AdminGallery from "./pages/AdminGallery";
+
+class AppErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  componentDidCatch(error, info) {
+    console.error("App caught an error:", error, info);
+  }
+
+  resetError = () => {
+    this.setState({ error: null });
+  };
+
+  render() {
+    if (this.state.error) {
+      return <ErrorPage error={this.state.error} resetErrorBoundary={this.resetError} />;
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
@@ -53,7 +83,8 @@ export default function App() {
       {isAdminRoute && <AdminTopBar collapsed={sidebarCollapsed} />}
       {isAdminRoute ? <AdminSidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} /> : <Navbar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />}
       <div className={`flex-grow transition-all duration-300 ${sidebarCollapsed ? 'xl:ml-16' : 'xl:ml-64'}`}>
-        <Routes>
+        <AppErrorBoundary>
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/products" element={<Products />} />
@@ -87,7 +118,11 @@ export default function App() {
           <Route path="/admin/academy" element={<AdminRoute><AdminAcademy /></AdminRoute>} />
           <Route path="/admin/gallery" element={<AdminRoute><AdminGallery /></AdminRoute>} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/error" element={<ErrorPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
+        </AppErrorBoundary>
       </div>
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'xl:ml-16' : 'xl:ml-64'}`}><Footer /></div>
       <ToastContainer

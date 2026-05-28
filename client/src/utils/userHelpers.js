@@ -10,6 +10,7 @@ export function setCurrentUser(user) {
   const safeUser = {
     name: user.name || "Guest User",
     email: user.email || "guest@example.com",
+    phone: user.phone || "",
     profileImage: user.profileImage || null,
   };
   localStorage.setItem("currentUser", JSON.stringify(safeUser));

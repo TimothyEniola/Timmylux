@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -18,7 +18,31 @@ import { Share2, Copy, Check as CheckIcon } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 
 export default function AdminAnalytics() {
-  const [orders] = useState([
+  const [orders, setOrders] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("adminOrders") || "null");
+      return Array.isArray(saved) && saved.length ? saved : null;
+    } catch {
+      return null;
+    }
+  });
+
+  useEffect(() => {
+    const syncOrders = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem("adminOrders") || "null");
+        setOrders(Array.isArray(saved) && saved.length ? saved : null);
+      } catch {
+        setOrders(null);
+      }
+    };
+
+    syncOrders();
+    window.addEventListener("storage", syncOrders);
+    return () => window.removeEventListener("storage", syncOrders);
+  }, []);
+
+  const analyticsOrders = orders || [
     {
       id: 1,
       customer: "Esther Adebayo",
@@ -75,18 +99,27 @@ export default function AdminAnalytics() {
       status: "Cancelled",
       date: "2026-01-14",
     },
-  ]);
+  ];
+
+  const currentOrders = analyticsOrders.map((o) => ({
+    ...o,
+    amount: Number(o.total || o.amount || 0),
+    customer: o.customerName || o.customer || "Customer",
+    product: o.items?.map((item) => item.name).join(", ") || o.product || "Furniture Order",
+    status: o.status || "Pending",
+    date: o.date || new Date().toISOString(),
+  }));
 
   const [copiedAnalytics, setCopiedAnalytics] = useState(false);
 
   // Calculate statistics
-  const totalSales = orders
+  const totalSales = currentOrders
     .filter((o) => o.status === "Delivered")
     .reduce((sum, o) => sum + o.amount, 0);
-  const pendingOrders = orders.filter((o) => o.status === "Pending").length;
-  const deliveredOrders = orders.filter((o) => o.status === "Delivered").length;
-  const cancelledOrders = orders.filter((o) => o.status === "Cancelled").length;
-  const totalOrders = orders.length;
+  const pendingOrders = currentOrders.filter((o) => o.status === "Pending").length;
+  const deliveredOrders = currentOrders.filter((o) => o.status === "Delivered").length;
+  const cancelledOrders = currentOrders.filter((o) => o.status === "Cancelled").length;
+  const totalOrders = currentOrders.length;
 
   // Data for charts
   const orderStatusData = [
@@ -94,7 +127,7 @@ export default function AdminAnalytics() {
     { name: "Delivered", value: deliveredOrders, color: "#D4AF37" },
     {
       name: "Cancelled",
-      value: orders.filter((o) => o.status === "Cancelled").length,
+      value: cancelledOrders,
       color: "#DC2626",
     },
   ];
@@ -116,7 +149,7 @@ export default function AdminAnalytics() {
   ];
 
   const formatAnalyticsSummary = () => {
-    const cancelledAmount = orders
+    const cancelledAmount = currentOrders
       .filter((o) => o.status === "Cancelled")
       .reduce((sum, o) => sum + o.amount, 0);
     const summary = `
@@ -134,7 +167,7 @@ Sales by Category:
 💼 Office: ₦${(1280000 / 1000000).toFixed(1)}M (${4} sales)
 
 Recent Orders:
-${orders.slice(0, 5).map(order => `- ${order.customer}: ${order.product} (₦${(order.amount / 1000).toFixed(0)}K) - ${order.status}`).join('\n')}
+${currentOrders.slice(0, 5).map(order => `- ${order.customer}: ${order.product} (₦${(order.amount / 1000).toFixed(0)}K) - ${order.status}`).join('\n')}
     `.trim();
     return summary;
   };

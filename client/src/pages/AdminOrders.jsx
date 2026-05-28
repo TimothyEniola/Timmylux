@@ -6,9 +6,10 @@ const statusConfig = {
   Pending: { color: "bg-amber-100 text-amber-800 border-amber-200", dot: "bg-amber-500", icon: Clock },
   Shipped: { color: "bg-blue-100 text-blue-800 border-blue-200", dot: "bg-blue-500", icon: Truck },
   Delivered: { color: "bg-green-100 text-green-800 border-green-200", dot: "bg-green-500", icon: CheckCircle },
+  Cancelled: { color: "bg-red-100 text-red-800 border-red-200", dot: "bg-red-500", icon: X },
 };
 
-const statusFlow = { Pending: "Shipped", Shipped: "Delivered", Delivered: null };
+const statusFlow = { Pending: "Shipped", Shipped: "Delivered", Delivered: null, Cancelled: null };
 
 function getInitials(name) {
   const parts = name.trim().split(/\s+/);
@@ -22,6 +23,12 @@ export default function AdminOrders() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
+    const savedOrders = JSON.parse(localStorage.getItem("adminOrders") || "null");
+    if (savedOrders && Array.isArray(savedOrders) && savedOrders.length) {
+      setOrders(savedOrders);
+      return;
+    }
+
     const mockOrders = [
       {
         id: "ORD-1704067200000",
@@ -74,19 +81,52 @@ export default function AdminOrders() {
           state: "Rivers",
         },
       },
+      {
+        id: "ORD-1704326400000",
+        customerName: "Ngozi Akpan",
+        email: "ngozi@example.com",
+        total: 98000,
+        status: "Cancelled",
+        date: "2024-01-04",
+        items: [{ name: "Lounge Chair", quantity: 1, price: 98000 }],
+        shippingAddress: {
+          fullName: "Ngozi Akpan",
+          phone: "+2347012345678",
+          address: "12 Victoria Island",
+          city: "Lagos",
+          state: "Lagos",
+        },
+      },
     ];
     setOrders(mockOrders);
+    localStorage.setItem("adminOrders", JSON.stringify(mockOrders));
   }, []);
 
+  const setOrderStatus = (orderId, nextStatus) => {
+    setOrders((prev) => {
+      const nextOrders = prev.map((order) => (order.id === orderId ? { ...order, status: nextStatus } : order));
+      localStorage.setItem("adminOrders", JSON.stringify(nextOrders));
+      return nextOrders;
+    });
+  };
+
   const updateOrderStatus = (orderId) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== orderId || !statusFlow[order.status]) return order;
-        const next = statusFlow[order.status];
-        toast.success(`Order moved to "${next}"`);
-        return { ...order, status: next };
-      })
-    );
+    const order = orders.find((o) => o.id === orderId);
+    if (!order || !statusFlow[order.status]) return;
+    const next = statusFlow[order.status];
+    toast.success(`Order moved to "${next}"`);
+    setOrderStatus(orderId, next);
+    if (selectedOrder?.id === orderId) {
+      setSelectedOrder((prev) => ({ ...prev, status: next }));
+    }
+  };
+
+  const cancelOrder = (orderId) => {
+    toast.error("Order marked as Cancelled");
+    setOrderStatus(orderId, "Cancelled");
+    if (selectedOrder?.id === orderId) {
+      setSelectedOrder((prev) => ({ ...prev, status: "Cancelled" }));
+    }
   };
 
   const shareOrder = async (order) => {
@@ -121,6 +161,7 @@ export default function AdminOrders() {
     { label: "Pending", value: orders.filter((o) => o.status === "Pending").length, color: "bg-amber-50 border border-amber-200", text: "text-amber-700" },
     { label: "Shipped", value: orders.filter((o) => o.status === "Shipped").length, color: "bg-blue-50 border border-blue-200", text: "text-blue-700" },
     { label: "Delivered", value: orders.filter((o) => o.status === "Delivered").length, color: "bg-green-50 border border-green-200", text: "text-green-700" },
+    { label: "Cancelled", value: orders.filter((o) => o.status === "Cancelled").length, color: "bg-red-50 border border-red-200", text: "text-red-700" },
   ];
 
   return (
@@ -206,6 +247,15 @@ export default function AdminOrders() {
                           </span>
 
                           {/* Actions */}
+                          {order.status !== "Delivered" && order.status !== "Cancelled" && (
+                            <button
+                              onClick={() => cancelOrder(order.id)}
+                              className="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded-full hover:bg-red-200 transition flex items-center gap-1"
+                            >
+                              <X size={12} /> Cancel
+                            </button>
+                          )}
+
                           {nextStatus && (
                             <button
                               onClick={() => updateOrderStatus(order.id)}
@@ -337,27 +387,32 @@ export default function AdminOrders() {
               </div>
 
               {/* Modal Actions */}
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
+                {selectedOrder.status !== "Delivered" && selectedOrder.status !== "Cancelled" && (
+                  <button
+                    onClick={() => cancelOrder(selectedOrder.id)}
+                    className="flex-1 min-w-[120px] bg-red-100 text-red-700 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-200 transition"
+                  >
+                    Cancel Order
+                  </button>
+                )}
                 {statusFlow[selectedOrder.status] && (
                   <button
-                    onClick={() => {
-                      updateOrderStatus(selectedOrder.id);
-                      setSelectedOrder((prev) => ({ ...prev, status: statusFlow[prev.status] }));
-                    }}
-                    className="flex-1 bg-[#011F5B] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#0e2c5b] transition"
+                    onClick={() => updateOrderStatus(selectedOrder.id)}
+                    className="flex-1 min-w-[120px] bg-[#011F5B] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#0e2c5b] transition"
                   >
                     Move to {statusFlow[selectedOrder.status]}
                   </button>
                 )}
                 <button
                   onClick={() => shareOrder(selectedOrder)}
-                  className="flex items-center gap-1.5 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-200 transition"
+                  className="flex-1 min-w-[120px] flex items-center justify-center gap-1.5 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-200 transition"
                 >
                   <Share2 size={14} /> Share
                 </button>
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="bg-gray-100 text-gray-600 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-200 transition"
+                  className="flex-1 min-w-[120px] bg-gray-100 text-gray-600 px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-200 transition"
                 >
                   Close
                 </button>

@@ -10,7 +10,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { getCurrentUser, clearCurrentUser } from "../utils/userHelpers";
 
-export default function AdminDropdown() {
+export default function AdminDropdown({ compact = false }) {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(getCurrentUser());
   const ref = useRef(null);
@@ -109,22 +109,26 @@ export default function AdminDropdown() {
       {/* TRIGGER */}
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-[#D4AF37]/20 transition"
+        className={`flex items-center gap-3 rounded-lg transition ${compact ? "p-0" : "w-full px-3 py-2 hover:bg-[#D4AF37]/20"}`}
       >
-        <div className="w-9 h-9 rounded-full bg-[#011F5B] border-2 border-[#D4AF37]/50 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0 overflow-hidden">
+        <div className={`flex items-center justify-center ${compact ? "w-11 h-11" : "w-9 h-9"} rounded-full bg-[#011F5B] border-2 border-[#D4AF37]/50 text-white text-sm font-semibold flex-shrink-0 overflow-hidden`}>
           {profileImage ? (
             <img src={profileImage} alt={adminName} className="w-full h-full object-cover" />
           ) : (
             <span>{initials}</span>
           )}
         </div>
-        <div className="flex flex-col text-left flex-1 min-w-0">
-          <span className="text-sm font-medium truncate">{adminName}</span>
-        </div>
-        <ChevronUp
-          size={14}
-          className={`text-gray-400 transition-transform duration-200 flex-shrink-0 ${open ? "rotate-180" : ""}`}
-        />
+        {!compact && (
+          <>
+            <div className="flex flex-col text-left flex-1 min-w-0">
+              <span className="text-sm font-medium truncate">{adminName}</span>
+            </div>
+            <ChevronUp
+              size={14}
+              className={`text-gray-400 transition-transform duration-200 flex-shrink-0 ${open ? "rotate-180" : ""}`}
+            />
+          </>
+        )}
       </button>
     </div>
   );

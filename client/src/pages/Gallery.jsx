@@ -348,13 +348,13 @@ export default function PublicGallery() {
   }, {});
 
   return ( // Nav color and logo gradient
-    <div style={{ minHeight: "100vh", background: "#080808", fontFamily: "'DM Sans', sans-serif", color: "white" }}>
+    <div style={{ minHeight: "100vh", background: "#F8FAFC", fontFamily: "'DM Sans', sans-serif", color: "#011F5B" }}>
 
       {/* Nav */} 
       <nav style={{
         position: "sticky", top: 0, zIndex: 30,
-        background: "rgba(8,8,8,0.88)", backdropFilter: "blur(14px)", // Dark background
-        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        background: "rgba(255,255,255,0.98)", backdropFilter: "blur(16px)",
+        borderBottom: "1px solid rgba(1,31,91,0.08)",
       }}>
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -376,19 +376,19 @@ export default function PublicGallery() {
 
           {/* Search */}
           <div className="relative hidden sm:block">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-xs">🔍</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#011F5B]/50 text-xs">🔍</span>
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search gallery…"
               style={{
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "#F8FAFC",
+                border: "1px solid rgba(1,31,91,0.15)",
                 borderRadius: 10, padding: "8px 14px 8px 30px",
-                color: "white", fontSize: 12, outline: "none", width: 200,
-              }} // Search input focus border
-              onFocus={e => e.target.style.borderColor = "#D4AF37"}
-              onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.1)"}
+                color: "#011F5B", fontSize: 12, outline: "none", width: 200,
+              }}
+              onFocus={e => e.target.style.borderColor = "#011F5B"}
+              onBlur={e => e.target.style.borderColor = "rgba(1,31,91,0.15)"}
             />
           </div>
         </div>
@@ -410,7 +410,7 @@ export default function PublicGallery() {
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.8rem, 4.5vw, 3rem)", fontWeight: 900, lineHeight: 1.1 }}> 
             Gallery of <span style={{ color: "#D4AF37" }}>Excellence</span>
           </h1>
-          <p style={{ color: "rgba(255,255,255,0.4)", marginTop: 12, maxWidth: 460, lineHeight: 1.7, fontSize: 13 }}>
+          <p style={{ color: "rgba(1,31,91,0.65)", marginTop: 12, maxWidth: 460, lineHeight: 1.7, fontSize: 13 }}>
             Relive our events, celebrate our best students and customers, and witness the milestones that define us.
           </p>
         </div>
@@ -436,20 +436,24 @@ export default function PublicGallery() {
 
         {/* Mobile search */}
         <div className="relative sm:hidden mb-5">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30 text-xs">🔍</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#011F5B]/50 text-xs">🔍</span>
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search gallery…"
             style={{
               width: "100%", boxSizing: "border-box",
-              background: "rgba(255,255,255,0.07)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "#F8FAFC",
+              border: "1px solid rgba(1,31,91,0.15)",
               borderRadius: 10, padding: "9px 14px 9px 30px",
-              color: "white", fontSize: 12, outline: "none",
+              color: "#011F5B", fontSize: 12, outline: "none",
             }}
           />
         </div>
+
+        <p className="text-xs text-[#011F5B]/70 mb-5">
+          Search gallery titles and descriptions, or choose a category to narrow the result set.
+        </p>
 
         {/* Stats */}
         <div className="grid grid-cols-4 gap-2 mb-8">
@@ -460,12 +464,12 @@ export default function PublicGallery() {
             { n: IMAGES.filter(i => i.badge === "Best Student").length, label: "Top Students" },
           ].map(s => (
             <div key={s.label} style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background: "#ffffff",
+              border: "1px solid rgba(1,31,91,0.08)",
               borderRadius: 12, padding: "12px 8px", textAlign: "center",
-            }}> {/* Stats section color */}
+            }}>
               <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.1rem,2.5vw,1.7rem)", fontWeight: 900, color: "#D4AF37", lineHeight: 1 }}>{s.n}</p>
-              <p style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", marginTop: 3, textTransform: "uppercase", letterSpacing: "0.07em" }}>{s.label}</p>
+              <p style={{ fontSize: 10, color: "rgba(1,31,91,0.65)", marginTop: 3, textTransform: "uppercase", letterSpacing: "0.07em" }}>{s.label}</p>
             </div>
           ))}
         </div>
@@ -492,7 +496,7 @@ export default function PublicGallery() {
             ))}
           </div>
         ) : (
-          <div style={{ textAlign: "center", padding: "70px 0", color: "rgba(255,255,255,0.3)" }}>
+          <div style={{ textAlign: "center", padding: "70px 0", color: "rgba(1,31,91,0.55)" }}>
             <div style={{ fontSize: 48, marginBottom: 14 }}>📭</div>
             <p style={{ fontSize: 16, fontWeight: 500 }}>No photos found</p>
             <p style={{ fontSize: 13, marginTop: 6 }}>Try a different category or search term</p>
@@ -512,7 +516,7 @@ export default function PublicGallery() {
         {/* Footer */}
         <div style={{
           marginTop: 70, paddingTop: 28,
-          borderTop: "1px solid rgba(255,255,255,0.07)",
+          borderTop: "1px solid rgba(1,31,91,0.08)",
           display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", gap: 10,
         }}>
           <div>

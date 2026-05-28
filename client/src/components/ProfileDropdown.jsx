@@ -12,7 +12,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { getCurrentUser, clearCurrentUser } from "../utils/userHelpers";
 
-export default function ProfileDropdown() {
+export default function ProfileDropdown({ compact = false }) {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(getCurrentUser());
   const ref = useRef(null);
@@ -128,9 +128,10 @@ export default function ProfileDropdown() {
       {/* 🔥 TRIGGER */}
       <button
         onClick={() => setOpen((p) => !p)}
-        className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-indigo-50 transition"
+        className={`flex items-center gap-3 rounded-lg transition ${compact ? "p-0" : "w-full px-3 py-2 hover:bg-indigo-50"}`}
       >
-        <div className="w-9 h-9 rounded-full overflow-hidden bg-[#011F5B] border-2 border-indigo-400 flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+        <div className={`flex items-center justify-center ${compact ? "w-11 h-11" : "w-9 h-9"} rounded-full overflow-hidden bg-[#011F5B] border-2 border-indigo-400 text-white text-sm font-semibold flex-shrink-0`}
+        >
           {profileImage ? (
             <img src={profileImage} alt={userName} className="w-full h-full object-cover" />
           ) : (
@@ -138,16 +139,19 @@ export default function ProfileDropdown() {
           )}
         </div>
 
-        <div className="flex flex-col text-left flex-1">
-          <span className="text-sm font-medium">{userName}</span>
-        </div>
-
-        <ChevronUp
-          size={14}
-          className={`text-gray-500 transition-transform duration-200 ${
-            open ? "rotate-180" : ""
-          }`}
-        />
+        {!compact && (
+          <>
+            <div className="flex flex-col text-left flex-1">
+              <span className="text-sm font-medium">{userName}</span>
+            </div>
+            <ChevronUp
+              size={14}
+              className={`text-gray-500 transition-transform duration-200 ${
+                open ? "rotate-180" : ""
+              }`}
+            />
+          </>
+        )}
       </button>
     </div>
   );
