@@ -14,6 +14,7 @@ export function setCurrentUser(user) {
     profileImage: user.profileImage || null,
   };
   localStorage.setItem("currentUser", JSON.stringify(safeUser));
+  localStorage.setItem("adminCurrentUser", JSON.stringify(safeUser));
   if (safeUser.profileImage) {
     localStorage.setItem("userProfileImage", safeUser.profileImage);
   }
@@ -23,6 +24,19 @@ export function setCurrentUser(user) {
 export function clearCurrentUser() {
   localStorage.removeItem("currentUser");
   localStorage.removeItem("userProfileImage");
+  window.dispatchEvent(new Event("userDataChanged"));
+}
+
+export function getCurrentAdminUser() {
+  try {
+    return JSON.parse(localStorage.getItem("adminCurrentUser")) || null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearCurrentAdminUser() {
+  localStorage.removeItem("adminCurrentUser");
   window.dispatchEvent(new Event("userDataChanged"));
 }
 

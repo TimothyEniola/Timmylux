@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { Plus, Trash2, Copy } from "lucide-react";
 
 export default function AdminCoupons() {
@@ -31,7 +32,7 @@ export default function AdminCoupons() {
 
   const handleAddCoupon = () => {
     if (!newCoupon.discount || !newCoupon.expiryDate) {
-      alert("Please fill in discount and expiry date");
+      toast.error("Please fill in discount and expiry date");
       return;
     }
 
@@ -57,13 +58,13 @@ export default function AdminCoupons() {
       active: true,
     });
 
-    alert("Coupon created successfully!");
+    toast.success("Coupon created successfully!");
   };
 
   const handleDeleteCoupon = (id) => {
     const updatedCoupons = coupons.filter(coupon => coupon.id !== id);
     saveCoupons(updatedCoupons);
-    alert("Coupon deleted!");
+    toast.success("Coupon deleted!");
   };
 
   const toggleCouponStatus = (id) => {
@@ -75,7 +76,7 @@ export default function AdminCoupons() {
 
   const copyToClipboard = (code) => {
     navigator.clipboard.writeText(code);
-    alert("Coupon code copied to clipboard!");
+    toast.success("Coupon code copied to clipboard!");
   };
 
   return (

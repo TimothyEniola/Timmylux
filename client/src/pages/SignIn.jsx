@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { Mail, Lock, Eye, EyeOff, User, ArrowLeft, CheckCircle } from "lucide-react";
 import { setCurrentUser, getCurrentUser, getDisplayNameFromEmail } from "../utils/userHelpers";
 
@@ -28,7 +29,7 @@ export default function SignIn() {
           };
 
     setCurrentUser(user);
-    alert("Sign in successful!");
+    toast.success("Sign in successful!");
     navigate("/");
   };
 

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import { Package, Truck, CheckCircle, Clock, Eye, Share2 } from "lucide-react";
 export default function OrderHistory() {
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -102,7 +103,7 @@ export default function OrderHistory() {
       } else {
         // Fallback for browsers that don't support Web Share API
         navigator.clipboard.writeText(shareData.text);
-        alert("Order details copied to clipboard!");
+        toast.success("Order details copied to clipboard!");
       }
     } catch (error) {
       console.log("Error sharing:", error);

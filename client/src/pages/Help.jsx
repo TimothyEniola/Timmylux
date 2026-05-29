@@ -187,7 +187,12 @@ export default function Help() {
     {
       question: "How do I change or cancel my order?",
       answer:
-        "Contact our support team immediately after placing the order. Orders can be modified or cancelled before they are dispatched. Call +234 814 083 8535 or email support@timmyluxfurniture.com.",
+        "Contact our support team immediately after placing the order. Orders can be changed or cancelled before they are dispatched. If your order has not left the warehouse yet, we can help you update the delivery details or cancel it. Call +234 814 083 8535 or email support@timmyluxfurniture.com.",
+    },
+    {
+      question: "Can I cancel an order after payment?",
+      answer:
+        "Yes, if the order has not been dispatched. Contact support right away with your order ID and we will review the cancellation request and confirm the next steps.",
     },
     {
       question: "How do I return an item?",

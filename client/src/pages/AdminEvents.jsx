@@ -127,11 +127,9 @@ export default function AdminEvents() {
   };
 
   const handleDelete = (eventId) => {
-    if (window.confirm("Are you sure you want to delete this event?")) {
-      const updatedEvents = events.filter((event) => event.id !== eventId);
-      saveEvents(updatedEvents);
-      toast.success("Event deleted.");
-    }
+    const updatedEvents = events.filter((event) => event.id !== eventId);
+    saveEvents(updatedEvents);
+    toast.success("Event deleted.");
   };
 
   const toggleActive = (eventId) => {
@@ -239,7 +237,7 @@ Status: ${event.isActive ? 'Active' : 'Inactive'}
       setTimeout(() => setCopiedEventId(null), 2000);
     } catch (err) {
       console.error('Failed to copy: ', err);
-      alert('Failed to copy to clipboard');
+      toast.error('Failed to copy to clipboard');
     }
   };
 

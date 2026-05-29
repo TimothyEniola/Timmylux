@@ -27,7 +27,7 @@ export default function AdminProfile() {
     e.preventDefault();
     setAdmin(formData);
     setIsEditing(false);
-    alert("Profile updated successfully!");
+    toast.success("Profile updated successfully!");
   };
 
   const handleCancel = () => {
@@ -44,7 +44,7 @@ export default function AdminProfile() {
         localStorage.setItem("adminProfileImage", imageData);
         setAdmin(prev => ({ ...prev, profileImage: imageData }));
         window.dispatchEvent(new Event("adminProfileImageUpdated"));
-        alert("Profile picture updated successfully!");
+        toast.success("Profile picture updated successfully!");
       };
       reader.readAsDataURL(file);
     }

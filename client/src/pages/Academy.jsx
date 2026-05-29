@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { CheckCircle, User, Mail, Phone, Briefcase, ChevronRight, Award, Clock, Users, BookOpen, AlertTriangle, MapPin } from "lucide-react";
 
 const Academy = () => {
@@ -118,7 +119,7 @@ const Academy = () => {
   const handleApplicationSubmit = (e) => {
     e.preventDefault();
     if (!formData.fullName.trim() || !formData.email.trim() || !formData.phone.trim() || !formData.motivation.trim()) {
-      alert("Please fill in all required fields");
+      toast.error("Please fill in all required fields");
       return;
     }
     const application = {

@@ -99,7 +99,7 @@ export default function AdminContentEditor() {
 
   const saveContent = () => {
     localStorage.setItem("adminContent", JSON.stringify(content));
-    alert("Content saved successfully!");
+    toast.success("Content saved successfully!");
   };
 
   const updateContent = (section, field, value) => {

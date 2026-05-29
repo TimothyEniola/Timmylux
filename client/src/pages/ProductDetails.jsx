@@ -36,12 +36,24 @@ export default function ProductDetails() {
       setSelectedVariation(product.variations[0]);
     }
 
-    // If coming from "View Design Variations", scroll to that section
     if (location.hash === "#variations") {
       setTimeout(() => {
         document.getElementById("variations")?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     }
+  }, [product, location.hash]);
+
+  useEffect(() => {
+    if (!product?.variations?.length) return;
+
+    const interval = setInterval(() => {
+      setSelectedVariation((prev) => {
+        const currentIndex = product.variations.findIndex((variation) => variation.id === (prev?.id || product.variations[0].id));
+        return product.variations[(currentIndex + 1) % product.variations.length];
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [product]);
 
   if (!product) {

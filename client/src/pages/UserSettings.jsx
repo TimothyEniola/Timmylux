@@ -70,10 +70,10 @@ export default function UserSettings() {
   const handlePasswordChange = (e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!");
       return;
     }
-    alert("Password updated (frontend only)");
+    toast.success("Password updated (frontend only)");
     setPasswordData({
       currentPassword: "",
       newPassword: "",

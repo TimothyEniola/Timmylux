@@ -24,7 +24,7 @@ export default function AdminNotifications() {
   const handleAddNotification = (e) => {
     e.preventDefault();
     if (!newNotification.title.trim() || !newNotification.message.trim()) {
-      alert("Please fill in both title and message");
+      toast.error("Please fill in both title and message");
       return;
     }
     addNotification({
@@ -32,7 +32,7 @@ export default function AdminNotifications() {
       isSent: true,
     });
     setNewNotification({ title: "", message: "", type: "info", category: "update" });
-    alert("Notification sent to all users!");
+    toast.success("Notification sent to all users!");
   };
 
   // SHARE FUNCTIONS
@@ -53,12 +53,12 @@ export default function AdminNotifications() {
         await navigator.share(shareData);
       } else {
         await navigator.clipboard.writeText(message);
-        alert("Notification details copied to clipboard! Paste them into any app.");
+        toast.success("Notification details copied to clipboard! Paste them into any app.");
       }
     } catch (error) {
       console.log("Share failed:", error);
       await navigator.clipboard.writeText(message);
-      alert("Unable to open share sheet. Notification copied to clipboard.");
+      toast.info("Unable to open share sheet. Notification copied to clipboard.");
     }
   };
 

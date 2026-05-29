@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { Truck, CreditCard, ChevronDown, Tag } from "lucide-react";
+import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 import useNotificationStore from "../store/notificationStore";
 import { products } from "../data/Products";
@@ -49,14 +50,14 @@ export default function Checkout() {
 
   const applyCoupon = () => {
     if (!couponCode.trim()) {
-      alert("Please enter a coupon code");
+      toast.error("Please enter a coupon code");
       return;
     }
 
     const coupon = coupons.find(c => c.code.toLowerCase() === couponCode.toLowerCase() && c.active);
     
     if (!coupon) {
-      alert("Invalid or inactive coupon code");
+      toast.error("Invalid or inactive coupon code");
       return;
     }
 
@@ -64,12 +65,12 @@ export default function Checkout() {
     const now = new Date();
     
     if (expiryDate < now) {
-      alert("This coupon has expired");
+      toast.error("This coupon has expired");
       return;
     }
 
     setAppliedCoupon(coupon);
-    alert(`Coupon "${coupon.code}" applied! ${coupon.type === "percentage" ? coupon.discount + "%" : "₦" + coupon.discount} discount`);
+    toast.success(`Coupon "${coupon.code}" applied! ${coupon.type === "percentage" ? coupon.discount + "%" : "₦" + coupon.discount} discount`);
   };
 
   const removeCoupon = () => {
@@ -79,23 +80,23 @@ export default function Checkout() {
 
   const validateForm = () => {
     if (!formData.fullName.trim()) {
-      alert("Please enter your full name");
+      toast.error("Please enter your full name");
       return false;
     }
     if (!formData.phone.trim()) {
-      alert("Please enter your phone number");
+      toast.error("Please enter your phone number");
       return false;
     }
     if (!formData.address.trim()) {
-      alert("Please enter your delivery address");
+      toast.error("Please enter your delivery address");
       return false;
     }
     if (!formData.city.trim()) {
-      alert("Please enter your city");
+      toast.error("Please enter your city");
       return false;
     }
     if (!formData.state.trim()) {
-      alert("Please enter your state");
+      toast.error("Please enter your state");
       return false;
     }
     return true;
@@ -118,7 +119,7 @@ export default function Checkout() {
   const finishOrder = (message) => {
     clearCart();
     resetCheckoutForm();
-    alert(message);
+    toast.success(message);
     window.location.reload();
   };
 

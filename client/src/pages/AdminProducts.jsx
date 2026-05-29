@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import { Edit, Trash2, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { products } from "../data/Products";
@@ -7,10 +8,8 @@ export default function AdminProducts() {
   const [productsList, setProductsList] = useState(products);
 
   const handleDeleteProduct = (productId) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      setProductsList(productsList.filter(product => product.id !== productId));
-      alert("Product deleted successfully!");
-    }
+    setProductsList(productsList.filter(product => product.id !== productId));
+    toast.success("Product deleted successfully!");
   };
 
   return (

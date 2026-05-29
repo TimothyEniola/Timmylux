@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { setCurrentUser, getDisplayNameFromEmail } from "../utils/userHelpers";
 
@@ -36,7 +37,7 @@ export default function SignUp() {
     };
 
     setCurrentUser(user);
-    alert("Account created successfully!");
+    toast.success("Account created successfully!");
     navigate("/");
   };
 

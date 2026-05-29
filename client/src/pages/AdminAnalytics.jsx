@@ -15,6 +15,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Share2, Copy, Check as CheckIcon } from "lucide-react";
+import { toast } from "react-toastify";
 import { FaWhatsapp } from "react-icons/fa6";
 
 export default function AdminAnalytics() {
@@ -195,7 +196,7 @@ ${currentOrders.slice(0, 5).map(order => `- ${order.customer}: ${order.product} 
       setTimeout(() => setCopiedAnalytics(false), 2000);
     } catch (err) {
       console.error('Failed to copy: ', err);
-      alert('Failed to copy to clipboard');
+      toast.error('Failed to copy to clipboard');
     }
   };
 

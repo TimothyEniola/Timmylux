@@ -8,17 +8,17 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { getCurrentUser, clearCurrentUser } from "../utils/userHelpers";
+import { getCurrentAdminUser, clearCurrentUser, clearCurrentAdminUser } from "../utils/userHelpers";
 
 export default function AdminDropdown({ compact = false }) {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(getCurrentUser());
+  const [user, setUser] = useState(getCurrentAdminUser());
   const ref = useRef(null);
   const navigate = useNavigate();
 
   // Sync user when account changes
   useEffect(() => {
-    const syncUser = () => setUser(getCurrentUser());
+    const syncUser = () => setUser(getCurrentAdminUser());
     window.addEventListener("userDataChanged", syncUser);
     return () => window.removeEventListener("userDataChanged", syncUser);
   }, []);
@@ -94,6 +94,7 @@ export default function AdminDropdown({ compact = false }) {
             <button
               onClick={() => {
                 clearCurrentUser();
+                clearCurrentAdminUser();
                 setOpen(false);
                 navigate("/signin");
               }}

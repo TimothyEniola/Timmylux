@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import { Plus, Edit, Trash2, Save, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -49,7 +50,7 @@ export default function AdminCollections() {
       setCollections(prev => [...prev, newCollection]);
       setFormData({ name: "", description: "", image: "", featured: false });
       setIsAddingCollection(false);
-      alert("Collection added successfully!");
+      toast.success("Collection added successfully!");
     }
   };
 
@@ -72,15 +73,13 @@ export default function AdminCollections() {
       ));
       setEditingId(null);
       setFormData({ name: "", description: "", image: "", featured: false });
-      alert("Collection updated successfully!");
+      toast.success("Collection updated successfully!");
     }
   };
 
   const handleDeleteCollection = (id) => {
-    if (window.confirm("Are you sure you want to delete this collection?")) {
-      setCollections(prev => prev.filter(collection => collection.id !== id));
-      alert("Collection deleted successfully!");
-    }
+    setCollections(prev => prev.filter(collection => collection.id !== id));
+    toast.success("Collection deleted successfully!");
   };
 
   const cancelEdit = () => {

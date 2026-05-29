@@ -250,7 +250,7 @@ export default function AdminAcademy() {
   // ── Location Management ──
   const saveLocation = () => {
     if (!locationForm.name.trim() || !locationForm.address.trim() || !locationForm.city.trim()) {
-      alert("Please fill in Location Name, Address, and City.");
+      toast.error("Please fill in Location Name, Address, and City.");
       return;
     }
     let updated;

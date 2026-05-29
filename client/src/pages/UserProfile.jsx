@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { User, Mail, Phone, MapPin, Calendar, Upload } from "lucide-react";
+import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { getCurrentUser, setCurrentUser } from "../utils/userHelpers";
 
@@ -53,7 +54,7 @@ export default function UserProfile() {
         });
 
         window.dispatchEvent(new Event("userDataChanged"));
-        alert("Profile picture updated successfully!");
+        toast.success("Profile picture updated successfully!");
       };
 
       reader.readAsDataURL(file);

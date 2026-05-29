@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 import { Star, StarOff, Clock } from "lucide-react";
 import { products } from "../data/Products";
 
@@ -83,7 +84,7 @@ export default function AdminFeatured() {
       localStorage.setItem("featuredProducts", JSON.stringify(updated));
     }
 
-    alert(`Product ${productsList.find(p => p.id === productId)?.featured ? 'removed from' : 'added to'} featured!`);
+    toast.success(`Product ${productsList.find(p => p.id === productId)?.featured ? 'removed from' : 'added to'} featured!`);
   };
 
   const getTimeRemaining = (expiryTime) => {

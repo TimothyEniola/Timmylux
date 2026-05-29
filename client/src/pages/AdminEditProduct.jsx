@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { Upload, Save, X, Plus, Trash2 } from "lucide-react";
 import { products } from "../data/Products";
 
@@ -73,7 +74,7 @@ export default function AdminEditProduct() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert("Product updated successfully! (Frontend only)");
+    toast.success("Product updated successfully! (Frontend only)");
     navigate("/admin/products");
   };
 
