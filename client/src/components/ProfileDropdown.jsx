@@ -104,7 +104,7 @@ export default function ProfileDropdown({ compact = false }) {
                 onClick={() => {
                   clearCurrentUser();
                   setOpen(false);
-                  navigate("/signin");
+                  // don't redirect after sign out so pages remain visible
                 }}
                 className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
               >

@@ -96,7 +96,7 @@ export default function AdminDropdown({ compact = false }) {
                 clearCurrentUser();
                 clearCurrentAdminUser();
                 setOpen(false);
-                navigate("/signin");
+                // no redirect — allow browsing pages after sign out
               }}
               className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
             >

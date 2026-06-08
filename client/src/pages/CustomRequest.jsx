@@ -18,6 +18,7 @@ export default function CustomRequest() {
     topic: "",
     address: "",
     description: "",
+    image: null,
     budget: "",
   });
 
@@ -58,11 +59,24 @@ export default function CustomRequest() {
           topic: "",
           address: "",
           description: "",
+          image: null,
           budget: "",
         });
       }, 3000);
     }
   };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData((p) => ({ ...p, image: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => setFormData((p) => ({ ...p, image: null }));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-[#D4AF37]/5 py-12">
@@ -209,6 +223,25 @@ export default function CustomRequest() {
                   className="w-full p-3 border rounded-xl min-h-[120px]"
                   required
                 />
+
+                {/* Image upload */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <label className="w-full sm:w-auto text-sm font-medium">Reference image (optional)</label>
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="w-full"
+                    />
+                    {formData.image && (
+                      <div className="mt-3 flex items-center gap-3">
+                        <img src={formData.image} alt="preview" className="w-28 h-20 object-cover rounded-md border" />
+                        <button type="button" onClick={removeImage} className="text-sm text-red-600 underline">Remove</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {/* Submit */}
                 <button

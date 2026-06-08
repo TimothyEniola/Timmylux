@@ -314,6 +314,7 @@ ${currentOrders.slice(0, 5).map(order => `- ${order.customer}: ${order.product} 
                   labelLine={false}
                   label={({ name, value }) => `${name}: ${value}`}
                   outerRadius={100}
+                  stroke="none"
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -362,7 +363,7 @@ ${currentOrders.slice(0, 5).map(order => `- ${order.customer}: ${order.product} 
               <YAxis />
               <Tooltip formatter={(value) => `₦${(value / 1000000).toFixed(1)}M`} />
               <Legend />
-              <Bar dataKey="amount" fill="#D4AF37" />
+              <Bar dataKey="amount" fill="#D4AF37" stroke="none" />
             </BarChart>
           </ResponsiveContainer>
         </div>

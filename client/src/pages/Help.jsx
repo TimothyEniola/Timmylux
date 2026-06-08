@@ -139,7 +139,7 @@ export default function Help() {
     {
       icon: ClipboardList,
       title: "Custom Request",
-      desc: "Want a furniture piece designed to your exact specs? Submit a custom request with your measurements, material preferences, and design ideas. Our team will contact you with a quote.",
+      desc: "Want a furniture piece designed to your exact specs? Submit a custom request with your measurements, material preferences, design ideas, and attach reference images. Our team will contact you with a quote.",
     },
     {
       icon: Bell,
