@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { User, Mail, Phone, MapPin, Calendar, Upload } from "lucide-react";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
@@ -10,7 +11,7 @@ export default function UserProfile() {
   const [user, setUser] = useState({
     name: storedUser?.name || "John Doe",
     email: storedUser?.email || "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
+    phone: storedUser?.phone || "+1 (555) 123-4567",
     role: "Customer",
     created_at: "2024-01-15T00:00:00.000Z",
     profileImage:
@@ -19,46 +20,91 @@ export default function UserProfile() {
       null,
   });
 
-  const [addresses] = useState([
-    {
-      houseNumber: "12A",
-      street: "Luxury Lane",
-      lga: "Premium District",
-      state: "California",
-    },
-  ]);
+  // ✅ SINGLE CLEAN ADDRESSES STATE
+  const [addresses, setAddresses] = useState(() => {
+    try {
+      const saved = localStorage.getItem("userAddress");
+
+      return saved
+        ? [JSON.parse(saved)]
+        : [
+          {
+            houseNumber: "12A",
+            street: "Luxury Lane",
+            lga: "Premium District",
+            state: "California",
+          },
+        ];
+    } catch {
+      return [
+        {
+          houseNumber: "12A",
+          street: "Luxury Lane",
+          lga: "Premium District",
+          state: "California",
+        },
+      ];
+    }
+  });
 
   const isLoadingAddresses = false;
 
+  useEffect(() => {
+    const handler = () => {
+      const cur = getCurrentUser() || {};
+
+      setUser((prev) => ({
+        ...prev,
+        name: cur.name || prev.name,
+        email: cur.email || prev.email,
+        phone: cur.phone || prev.phone,
+        profileImage:
+          cur.profileImage ||
+          localStorage.getItem("userProfileImage") ||
+          prev.profileImage,
+      }));
+
+      try {
+        const savedAddr = localStorage.getItem("userAddress");
+        if (savedAddr) setAddresses([JSON.parse(savedAddr)]);
+      } catch { }
+    };
+
+    window.addEventListener("userDataChanged", handler);
+    return () => window.removeEventListener("userDataChanged", handler);
+  }, []);
+
   const handleProfileImageUpload = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageData = reader.result;
 
-        localStorage.setItem("userProfileImage", imageData);
+    if (!file) return;
 
-        setUser((prev) => ({
-          ...prev,
-          profileImage: imageData,
-        }));
+    const reader = new FileReader();
 
-        const existingUser = getCurrentUser() || {};
+    reader.onloadend = () => {
+      const imageData = reader.result;
 
-        setCurrentUser({
-          ...existingUser,
-          name: existingUser.name || user.name,
-          email: existingUser.email || user.email,
-          profileImage: imageData,
-        });
+      localStorage.setItem("userProfileImage", imageData);
 
-        window.dispatchEvent(new Event("userDataChanged"));
-        toast.success("Profile picture updated successfully!");
-      };
+      setUser((prev) => ({
+        ...prev,
+        profileImage: imageData,
+      }));
 
-      reader.readAsDataURL(file);
-    }
+      const existingUser = getCurrentUser() || {};
+
+      setCurrentUser({
+        ...existingUser,
+        name: existingUser.name || user.name,
+        email: existingUser.email || user.email,
+        profileImage: imageData,
+      });
+
+      window.dispatchEvent(new Event("userDataChanged"));
+      toast.success("Profile picture updated successfully!");
+    };
+
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -164,10 +210,7 @@ export default function UserProfile() {
             {addresses.length > 0 ? (
               <div className="grid md:grid-cols-2 gap-4">
                 {addresses.map((addr, index) => (
-                  <div
-                    key={index}
-                    className="border p-4 rounded-lg"
-                  >
+                  <div key={index} className="border p-4 rounded-lg">
                     <div className="flex gap-3">
                       <MapPin size={18} />
                       <div>

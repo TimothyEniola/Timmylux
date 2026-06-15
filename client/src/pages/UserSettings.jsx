@@ -58,6 +58,7 @@ export default function UserSettings() {
   const handleAddressSubmit = (e) => {
     e.preventDefault();
     localStorage.setItem("userAddress", JSON.stringify(addressData));
+    window.dispatchEvent(new Event("userDataChanged"));
     toast.success("Address saved successfully");
   };
 

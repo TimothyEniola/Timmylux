@@ -19,6 +19,7 @@ export default function CustomRequest() {
     address: "",
     description: "",
     image: null,
+    imageType: null,
     budget: "",
   });
 
@@ -70,8 +71,11 @@ export default function CustomRequest() {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
+    const isImage = file.type.startsWith("image");
+    const isVideo = file.type.startsWith("video");
+    const isPdf = file.type === "application/pdf";
     reader.onload = () => {
-      setFormData((p) => ({ ...p, image: reader.result }));
+      setFormData((p) => ({ ...p, image: reader.result, imageType: isImage ? "image" : isVideo ? "video" : isPdf ? "pdf" : "file" }));
     };
     reader.readAsDataURL(file);
   };
@@ -236,7 +240,18 @@ export default function CustomRequest() {
                     />
                     {formData.image && (
                       <div className="mt-3 flex items-center gap-3">
-                        <img src={formData.image} alt="preview" className="w-28 h-20 object-cover rounded-md border" />
+                        {formData.imageType === "image" && (
+                          <img src={formData.image} alt="preview" className="w-28 h-20 object-cover rounded-md border" />
+                        )}
+                        {formData.imageType === "video" && (
+                          <video src={formData.image} controls className="w-36 h-24 rounded-md border" />
+                        )}
+                        {formData.imageType === "pdf" && (
+                          <a href={formData.image} target="_blank" rel="noreferrer" className="text-sm underline">Open uploaded PDF</a>
+                        )}
+                        {formData.imageType === "file" && (
+                          <a href={formData.image} target="_blank" rel="noreferrer" className="text-sm underline">Open file</a>
+                        )}
                         <button type="button" onClick={removeImage} className="text-sm text-red-600 underline">Remove</button>
                       </div>
                     )}

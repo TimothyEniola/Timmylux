@@ -1,4 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { Link } from "react-router-dom";
+import ceoImg from "../assets/ceo.png";
+import ogeeImg from "../assets/ogee.png";
+
+const STORAGE_KEY = "galleryItems";
 
 /* ─── Fonts ─── */
 const injectFonts = () => {
@@ -11,7 +16,7 @@ const injectFonts = () => {
 };
 
 /* ─── Constants ─── */
-const CATEGORIES = ["All", "Events", "Workers", "Students", "Best Customer", "Best Student", "Awards", "Team", "Milestones"];
+const CATEGORIES = ["All", "Customers", "Events", "Workers", "Students", "Best Customer", "Best Student", "Awards", "Team", "Milestones"];
 
 const BADGE_OPTIONS = [
   { label: "None", value: "" },
@@ -320,7 +325,7 @@ function AdminLogin({ onLogin, onBack }) {
 /* ─── Admin Panel ─── */
 function AdminPanel({ images, setImages, onBack }) {
   const [tab, setTab] = useState("upload");
-  const blankForm = () => ({ title: "", category: "Events", badge: "", description: "", date: new Date().toISOString().slice(0, 10), featured: false, url: "", thumb: "" });
+  const blankForm = () => ({ title: "", category: "Events", badge: "", description: "", date: new Date().toISOString().slice(0, 10), featured: false, url: "", thumb: "", type: "image" });
   const [form, setForm] = useState(blankForm());
   const [preview, setPreview] = useState(null);
   const [success, setSuccess] = useState("");
@@ -333,10 +338,11 @@ function AdminPanel({ images, setImages, onBack }) {
   const handleFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    const isVideo = file.type && file.type.startsWith("video");
     const reader = new FileReader();
     reader.onload = (ev) => {
       setPreview(ev.target.result);
-      setForm(f => ({ ...f, url: ev.target.result, thumb: ev.target.result }));
+      setForm(f => ({ ...f, url: ev.target.result, thumb: ev.target.result, type: isVideo ? "video" : "image" }));
     };
     reader.readAsDataURL(file);
   };
@@ -345,17 +351,18 @@ function AdminPanel({ images, setImages, onBack }) {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (!file) return;
+    const isVideo = file.type && file.type.startsWith("video");
     const reader = new FileReader();
     reader.onload = (ev) => {
       setPreview(ev.target.result);
-      setForm(f => ({ ...f, url: ev.target.result, thumb: ev.target.result }));
+      setForm(f => ({ ...f, url: ev.target.result, thumb: ev.target.result, type: isVideo ? "video" : "image" }));
     };
     reader.readAsDataURL(file);
   }, []);
 
   const submitUpload = () => {
     if (!form.title.trim()) { notify("❌ Please enter a title."); return; }
-    if (!form.url.trim()) { notify("❌ Please provide an image (upload or URL)."); return; }
+    if (!form.url.trim()) { notify("❌ Please provide media (upload or URL)."); return; }
 
     if (editId) {
       setImages(imgs => imgs.map(img =>
@@ -374,12 +381,26 @@ function AdminPanel({ images, setImages, onBack }) {
     setPreview(null);
   };
 
+  const addBossImages = () => {
+    const bossItems = [
+      { id: 101, title: "Our CEO", category: "Workers", badge: "Worker", featured: true, date: new Date().toISOString().slice(0,10), description: "The visionary leader and founder.", thumb: ceoImg, url: ceoImg, type: "image" },
+      { id: 102, title: "Mr. Ogee — CEO's Mentor", category: "Workers", badge: "Worker", featured: true, date: new Date().toISOString().slice(0,10), description: "The mentor who trained our CEO.", thumb: ogeeImg, url: ogeeImg, type: "image" },
+    ];
+    setImages(prev => {
+      const ids = new Set(prev.map(i => i.id));
+      const toAdd = bossItems.filter(b => !ids.has(b.id));
+      if (!toAdd.length) { notify("ℹ️ Boss images already present."); return prev; }
+      notify("✅ Boss images added.");
+      return [...toAdd, ...prev];
+    });
+  };
+
   const startEdit = (img) => {
     setForm({
       title: img.title, category: img.category,
       badge: img.badge || "", description: img.description,
       date: img.date, featured: img.featured,
-      url: img.url, thumb: img.thumb || "",
+      url: img.url, thumb: img.thumb || "", type: img.type || "image",
     });
     setPreview(img.url);
     setEditId(img.id);
@@ -437,9 +458,14 @@ function AdminPanel({ images, setImages, onBack }) {
             <div style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", letterSpacing: "0.05em" }}>Manage Gallery</div>
           </div>
         </div>
-        <button onClick={onBack} style={{ ...S.ghostBtn, display: "flex", alignItems: "center", gap: 6 }}>
-          ← Back to Gallery
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={onBack} style={{ ...S.ghostBtn, display: "flex", alignItems: "center", gap: 6 }}>
+            ← Back to Gallery
+          </button>
+          <Link to="/admin/profile" style={{ ...S.ghostBtn, display: "flex", alignItems: "center", gap: 6 }}>
+            Edit User
+          </Link>
+        </div>
       </nav>
 
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 20px 60px" }}>
@@ -463,6 +489,9 @@ function AdminPanel({ images, setImages, onBack }) {
             </button>
           ))}
         </div>
+        <div style={{ marginBottom: 18 }}>
+          <button onClick={addBossImages} style={{ ...S.goldBtn }}>Add Boss Images</button>
+        </div>
 
         {/* ── Upload / Edit Tab ── */}
         {tab === "upload" && (
@@ -485,9 +514,13 @@ function AdminPanel({ images, setImages, onBack }) {
                 onMouseEnter={e => e.currentTarget.style.borderColor = "#D4AF37"}
                 onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"}
               >
-                <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
+                <input ref={fileRef} type="file" accept="image/*,video/*" style={{ display: "none" }} onChange={handleFile} />
                 {preview ? (
-                  <img src={preview} alt="preview" style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 10 }} />
+                  (form.type === "video" || String(preview).startsWith("data:video")) ? (
+                    <video src={preview} style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 10 }} controls />
+                  ) : (
+                    <img src={preview} alt="preview" style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 10 }} />
+                  )
                 ) : (
                   <>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>🖼️</div>
@@ -800,7 +833,16 @@ function AdminPanel({ images, setImages, onBack }) {
 export default function GalleryApp() {
   useEffect(() => { injectFonts(); }, []);
 
-  const [images, setImages] = useState(INITIAL_IMAGES);
+  const [images, setImages] = useState(() => {
+    try {
+      const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      return s && s.length ? s : INITIAL_IMAGES;
+    } catch { return INITIAL_IMAGES; }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(images)); } catch {}
+  }, [images]);
   const [cat, setCat] = useState("All");
   const [search, setSearch] = useState("");
   const [lightbox, setLightbox] = useState(null);
@@ -809,17 +851,24 @@ export default function GalleryApp() {
 
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
 
-  const filtered = images.filter(img =>
-    (cat === "All" || img.category === cat) &&
-    (img.title.toLowerCase().includes(search.toLowerCase()) ||
-      img.description.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = images.filter(img => {
+    const matchesCategory =
+      cat === "All"
+        ? true
+        : cat === "Customers"
+        ? ((img.badge && img.badge.includes("Customer")) || img.category === "Best Customer")
+        : img.category === cat;
+    const matchesSearch = img.title.toLowerCase().includes(search.toLowerCase()) || img.description.toLowerCase().includes(search.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   if (view === "admin-login") return <AdminLogin onLogin={() => setView("admin")} onBack={() => setView("gallery")} />;
   if (view === "admin") return <AdminPanel images={images} setImages={setImages} onBack={() => setView("gallery")} />;
 
   const counts = CATEGORIES.reduce((acc, c) => {
-    acc[c] = c === "All" ? images.length : images.filter(i => i.category === c).length;
+    if (c === "All") acc[c] = images.length;
+    else if (c === "Customers") acc[c] = images.filter(i => (i.badge && i.badge.includes("Customer")) || i.category === "Best Customer").length;
+    else acc[c] = images.filter(i => i.category === c).length;
     return acc;
   }, {});
 

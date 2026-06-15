@@ -19,6 +19,12 @@
   }
 }
 
+:root {
+  --primary: #D4AF37;
+  --secondary: #fbbf24;
+  --navy: #011F5B;
+}
+
 @layer components {
   .btn-primary {
     @apply bg-[#D4AF37] text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-[#b8942a] hover:shadow-lg;

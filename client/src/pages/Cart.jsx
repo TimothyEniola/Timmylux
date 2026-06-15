@@ -57,7 +57,7 @@ export default function Cart() {
                 className="bg-white rounded-xl shadow-md p-4 sm:p-6 flex flex-col sm:flex-row gap-4"
               >
                 {/* Image */}
-                <img
+                <img  
                   src={item.image}
                   alt={item.name}
                   className="w-full sm:w-24 h-48 sm:h-24 object-cover rounded-lg"

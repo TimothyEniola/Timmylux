@@ -113,11 +113,15 @@ export default function EventsSection() {
               >
                 {/* IMAGE */}
                 <div className="relative h-56 overflow-hidden">
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                  />
+                  {event.image ? (
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/40">No image</div>
+                  )}
 
                   {/* overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#060C1A] to-transparent" />
