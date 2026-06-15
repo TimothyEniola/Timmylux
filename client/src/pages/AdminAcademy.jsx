@@ -144,6 +144,20 @@ export default function AdminAcademy() {
     setContent(prev => ({ ...prev, [field]: value }));
   };
 
+  const updateHeroStat = (index, field, value) => {
+    const newStats = [...content.heroStats];
+    newStats[index][field] = value;
+    setContent(prev => ({ ...prev, heroStats: newStats }));
+  };
+
+  const addHeroStat = () => {
+    setContent(prev => ({ ...prev, heroStats: [...(prev.heroStats || []), { num: "", label: "" }] }));
+  };
+
+  const removeHeroStat = (index) => {
+    setContent(prev => ({ ...prev, heroStats: prev.heroStats.filter((_, i) => i !== index) }));
+  };
+
   const updateOffering = (index, field, value) => {
     const newOfferings = [...content.offerings];
     newOfferings[index][field] = value;
@@ -409,6 +423,56 @@ export default function AdminAcademy() {
                 />
               ) : (
                 <p className="p-2 bg-gray-50 rounded">{content.heroSubtitle}</p>
+              )}
+            </div>
+            {/* Hero Stats Editor */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium mb-2">Hero Stats</label>
+              <div className="space-y-3">
+                {(content.heroStats || []).map((stat, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    {isEditing ? (
+                      <>
+                        <input
+                          type="text"
+                          value={stat.num}
+                          onChange={(e) => updateHeroStat(idx, 'num', e.target.value)}
+                          placeholder="Number (e.g. 2Yrs, 6mo, 100%)"
+                          className="p-2 border rounded w-28"
+                        />
+                        <input
+                          type="text"
+                          value={stat.label}
+                          onChange={(e) => updateHeroStat(idx, 'label', e.target.value)}
+                          placeholder="Label (e.g. Intensive program)"
+                          className="p-2 border rounded flex-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeHeroStat(idx)}
+                          className="p-2 text-red-600 hover:text-red-800 rounded-md"
+                          title="Remove stat"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-4">
+                        <div className="text-lg font-bold text-[#011F5B]">{stat.num}</div>
+                        <div className="text-sm text-gray-600">{stat.label}</div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={addHeroStat}
+                  className="inline-flex items-center gap-2 mt-3 bg-[#011F5B] text-white px-3 py-2 rounded-lg hover:bg-[#0b2b65] transition"
+                >
+                  <Plus size={14} /> Add Stat
+                </button>
               )}
             </div>
           </div>
