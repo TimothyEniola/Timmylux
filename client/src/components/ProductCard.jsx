@@ -1,5 +1,5 @@
 import { Star, Eye, EyeOff, Heart, ShoppingCart } from "lucide-react";
-import { memo, useState, useEffect, useRef } from "react";
+import { memo } from "react";
 import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
@@ -7,48 +7,11 @@ import useWishlistStore from "../store/wishlistStore";
 const ProductCard = memo(function ProductCard({
   product,
   showDiscount = false,
-  timerText,
-  timerColor,
-  showCardTimer = false,
 }) {
   const addToCart = useCartStore((state) => state.addItem);
   const addToWishlist = useWishlistStore((state) => state.addItem);
   const removeFromWishlist = useWishlistStore((state) => state.removeItem);
   const isInWishlist = useWishlistStore((state) => state.isInWishlist);
-
-  // For card timer
-  const [cardCountdown, setCardCountdown] = useState("07:00:00");
-  const [cardTimerColor, setCardTimerColor] = useState("bg-emerald-500");
-  const saleEndTimeRef = useRef(Date.now() + 7 * 60 * 60 * 1000);
-
-  // Set up timer for this card if showCardTimer is true
-  useEffect(() => {
-    if (!showCardTimer) return;
-
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const diff = saleEndTimeRef.current - now;
-      
-      if (diff <= 0) {
-        setCardCountdown("00:00:00");
-        setCardTimerColor("bg-red-500");
-        clearInterval(interval);
-        return;
-      }
-
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      const nextCountdown = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-      
-      setCardCountdown(nextCountdown);
-      
-      const newColor = diff <= 6 * 60 * 60 * 1000 ? "bg-red-500" : "bg-emerald-500";
-      setCardTimerColor(prev => prev !== newColor ? newColor : prev);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [showCardTimer]);
 
   // Use first variation image if available
   const displayImage = product?.variations?.[0]?.image || product?.image;
@@ -60,16 +23,6 @@ const ProductCard = memo(function ProductCard({
     originalPrice && displayPrice
       ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100)
       : 0;
-
-  const timerClassName = (showCardTimer ? cardCountdown : timerText)
-    ? `absolute bottom-3 left-3 z-10 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white ${
-        showCardTimer ? cardTimerColor : (timerColor || "bg-emerald-500")
-      }`
-    : "";
-
-  const displayTimerText = showCardTimer 
-    ? (cardCountdown === "00:00:00" ? "Sale ended" : `Ends in ${cardCountdown}`)
-    : timerText;
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -106,8 +59,6 @@ const ProductCard = memo(function ProductCard({
           className="product-image w-full h-full object-cover"
           loading="lazy"
         />
-
-        {displayTimerText && <div className={timerClassName}>{displayTimerText}</div>}
 
         {/* ✅ Discount Badge */}
         {showDiscount && discountPercentage > 0 && (

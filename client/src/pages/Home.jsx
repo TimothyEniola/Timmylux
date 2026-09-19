@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package, CreditCard, Headphones, Star, ArrowRight } from "lucide-react";
 import ProductCard from "../components/ProductCard";
@@ -7,9 +7,6 @@ import { products } from "../data/Products";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState("07:00:00");
-  const [timerColor, setTimerColor] = useState("bg-emerald-500");
-  const saleEndTimeRef = useRef(Date.now() + 7 * 60 * 60 * 1000);
 
   const [content, setContent] = useState({
     hero: {
@@ -63,7 +60,10 @@ export default function Home() {
     },
   });
 
-  const homepageProducts = products.filter((product) => product.featured).slice(0, 4);
+  const homepageProducts = useMemo(
+    () => products.filter((product) => product.featured).slice(0, 4),
+    []
+  );
 
   useEffect(() => {
     const savedContent = localStorage.getItem("adminContent");
@@ -85,36 +85,11 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const diff = saleEndTimeRef.current - now;
-      if (diff <= 0) {
-        setCountdown("00:00:00");
-        setTimerColor("bg-red-500");
-        clearInterval(interval);
-        return;
-      }
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-      setCountdown(
-        `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
-      );
-      const newColor = diff <= 6 * 60 * 60 * 1000 ? "bg-red-500" : "bg-emerald-500";
-      setTimerColor((prev) => (prev !== newColor ? newColor : prev));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <div className="home-page">
       <style>{`
-        /* ── Global enhancements ── */
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
-
         .home-page {
-          font-family: 'DM Sans', sans-serif;
+          font-family: 'Segoe UI', 'DM Sans', sans-serif;
         }
 
         /* ── Hero ── */
@@ -869,7 +844,6 @@ export default function Home() {
                 key={product.id}
                 product={product}
                 showDiscount={product.featured}
-                showCardTimer={true}
               />
             ))}
           </div>
