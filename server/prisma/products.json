@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Premium Leather Handbag",
+    "category": "Handbags",
+    "collection": "Luxury",
+    "price": 85000,
+    "originalPrice": 100000,
+    "description": "Exquisite handcrafted leather handbag with gold accents",
+    "featured": true,
+    "featuredExpiry": "2024-12-31T23:59:59Z",
+    "available": true,
+    "images": [
+      "https://res.cloudinary.com/demo/image/upload/sample1.jpg",
+      "https://res.cloudinary.com/demo/image/upload/sample2.jpg"
+    ],
+    "variations": [
+      {
+        "name": "Black - Large",
+        "price": 85000,
+        "color": "Black",
+        "material": "Genuine Leather",
+        "image": "https://res.cloudinary.com/demo/image/upload/black.jpg"
+      },
+      {
+        "name": "Brown - Large",
+        "price": 85000,
+        "color": "Brown",
+        "material": "Genuine Leather",
+        "image": "https://res.cloudinary.com/demo/image/upload/brown.jpg"
+      },
+      {
+        "name": "Red - Large",
+        "price": 90000,
+        "color": "Red",
+        "material": "Genuine Leather",
+        "image": "https://res.cloudinary.com/demo/image/upload/red.jpg"
+      }
+    ]
+  },
+  {
+    "name": "Crossbody Messenger Bag",
+    "category": "Crossbody",
+    "collection": "Casual",
+    "price": 35000,
+    "description": "Stylish crossbody bag perfect for daily use",
+    "featured": false,
+    "available": true,
+    "images": [
+      "https://res.cloudinary.com/demo/image/upload/crossbody.jpg"
+    ]
+  }
+]
