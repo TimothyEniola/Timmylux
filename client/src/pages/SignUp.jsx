@@ -7,7 +7,6 @@ import { setCurrentUser, getDisplayNameFromEmail } from "../utils/userHelpers";
 export default function SignUp() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",

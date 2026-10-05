@@ -1,101 +1,13 @@
-import { useState, useEffect } from "react";
+import { createElement, useState } from "react";
 import { Save, Edit3, Image, Type, Eye, EyeOff } from "lucide-react";
+import { toast } from "react-toastify";
+import { loadHomeContent } from "../data/homepageContent";
 
 export default function AdminContentEditor() {
   const [activeSection, setActiveSection] = useState("hero");
-  const [content, setContent] = useState({
-    hero: {
-      title: "Explore Our Modern Furniture Collection",
-      subtitle:
-        "Discover timeless elegance and modern comfort with our curated collection of premium furniture. Transform your space with pieces that blend luxury craftsmanship with contemporary design.",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1759691555105-17e609a3e46f?auto=format&fit=crop&q=80",
-      ctaText: "Shop Now →",
-      secondaryCtaText: "View All Products",
-    },
-    features: {
-      title: "Why Choose Us",
-      subtitle: "Experience luxury furniture shopping like never before",
-      features: [
-        {
-          title: "Free Shipping",
-          description: "Free shipping for orders above $1000",
-          icon: "Package",
-        },
-        {
-          title: "Secure Payment",
-          description: "100% secure payment methods",
-          icon: "CreditCard",
-        },
-        {
-          title: "24/7 Support",
-          description: "Round the clock customer support",
-          icon: "Headphones",
-        },
-        {
-          title: "Quality Guarantee",
-          description: "Premium quality furniture guaranteed",
-          icon: "Star",
-        },
-      ],
-    },
-    categories: {
-      title: "Browse by Category",
-      subtitle: "Explore our wide range of collections",
-      categories: [
-        {
-          name: "Living Room",
-          count: "200+ Items",
-          image:
-            "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
-          items: ["Sofa Sets", "Coffee Tables", "Armchairs", "TV Units"],
-        },
-        {
-          name: "Bedroom",
-          count: "150+ Items",
-          image:
-            "https://images.pexels.com/photos/1454806/pexels-photo-1454806.jpeg",
-          items: ["Beds", "Wardrobes", "Nightstands", "Dressers"],
-        },
-        {
-          name: "Dining",
-          count: "80+ Items",
-          image:
-            "https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg",
-          items: ["Dining Tables", "Chairs", "Sideboards", "Bar Stools"],
-        },
-      ],
-    },
-    products: {
-      title: "Curated Home Highlights",
-      subtitle: "Featured Products",
-      flashSaleText: "Flash Sale",
-      description: "Only 4 exclusive items featured here",
-    },
-  });
+  const [content, setContent] = useState(loadHomeContent);
 
-  const [editing, setEditing] = useState({});
   const [previewMode, setPreviewMode] = useState(false);
-
-  useEffect(() => {
-    const savedContent = localStorage.getItem("adminContent");
-    if (savedContent) {
-      const loaded = JSON.parse(savedContent);
-      if (loaded?.categories?.categories) {
-        loaded.categories.categories = loaded.categories.categories.map((category) => ({
-          ...category,
-          count:
-            category.count ||
-            (Array.isArray(category.items)
-              ? `${category.items.length} Items`
-              : typeof category.items === "string"
-              ? category.items
-              : ""),
-        }));
-      }
-      setContent(loaded);
-    }
-  }, []);
 
   const saveContent = () => {
     localStorage.setItem("adminContent", JSON.stringify(content));
@@ -195,7 +107,7 @@ export default function AdminContentEditor() {
                 { id: "features", label: "Features", icon: Type },
                 { id: "categories", label: "Categories", icon: Image },
                 { id: "products", label: "Products", icon: Type },
-              ].map(({ id, label, icon: Icon }) => (
+              ].map(({ id, label, icon }) => (
                 <button
                   key={id}
                   onClick={() => setActiveSection(id)}
@@ -205,7 +117,7 @@ export default function AdminContentEditor() {
                       : "border-transparent text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  <Icon size={16} />
+                  {createElement(icon, { size: 16 })}
                   {label}
                 </button>
               ))}

@@ -154,14 +154,13 @@ function loadImages() {
 
 /* ─── Lazy Image ─── */
 function LazyImg({ thumb, src, alt, style = {}, className = "" }) {
-  const [loaded, setLoaded] = useState(false);
-  const [fullSrc, setFullSrc] = useState(null);
+  const [loaded, setLoaded] = useState(() => !thumb);
+  const [fullSrc, setFullSrc] = useState(() => (thumb ? null : src));
   const imgRef = useRef(null);
 
   useEffect(() => {
     const el = imgRef.current;
-    if (!el) return;
-    if (!thumb) { setFullSrc(src); setLoaded(true); return; }
+    if (!el || !thumb) return;
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -228,7 +227,13 @@ async function shareMedia(img) {
       toast.success("Image URL copied!");
     }
   } catch {
-    try { await navigator.clipboard.writeText(img.url); toast.success("URL copied!"); } catch {}
+    try {
+      await navigator.clipboard.writeText(img.url);
+      toast.success("URL copied!");
+    } catch (error) {
+      console.warn("Unable to copy media URL:", error);
+      toast.error("Could not share this item. Please try again.");
+    }
   }
 }
 

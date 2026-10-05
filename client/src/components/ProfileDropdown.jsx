@@ -9,14 +9,13 @@ import {
   ChevronRight,
   ChevronUp,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { getCurrentUser, clearCurrentUser } from "../utils/userHelpers";
 
 export default function ProfileDropdown({ compact = false }) {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(getCurrentUser());
   const ref = useRef(null);
-  const navigate = useNavigate();
 
   const userName = user?.name || "Guest User";
   const profileImage = user?.profileImage || null;
@@ -52,8 +51,8 @@ export default function ProfileDropdown({ compact = false }) {
         <div className="absolute bottom-[calc(100%+10px)] left-0 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[999] overflow-hidden transition-all duration-200">
 
           {/* HEADER */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-blue-50 to-indigo-100 border-b border-indigo-200 cursor-pointer hover:from-indigo-100 hover:to-blue-200 transition">
-            <div className="w-10 h-10 rounded-full bg-[#011F5B] border-2 border-indigo-300 flex items-center justify-center text-white font-semibold text-sm">
+          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#011F5B]/5 to-[#D4AF37]/10 border-b border-[#D4AF37]/20 cursor-pointer hover:to-[#D4AF37]/15 transition">
+            <div className="w-10 h-10 rounded-full bg-[#011F5B] border-2 border-[#D4AF37]/50 flex items-center justify-center text-white font-semibold text-sm">
               {initials}
             </div>
 
@@ -128,9 +127,9 @@ export default function ProfileDropdown({ compact = false }) {
       {/* 🔥 TRIGGER */}
       <button
         onClick={() => setOpen((p) => !p)}
-        className={`flex items-center gap-3 rounded-lg transition ${compact ? "p-0" : "w-full px-3 py-2 hover:bg-indigo-50"}`}
+        className={`flex items-center gap-3 rounded-lg transition ${compact ? "p-0" : "w-full px-3 py-2 hover:bg-[#D4AF37]/10"}`}
       >
-        <div className={`flex items-center justify-center ${compact ? "w-11 h-11" : "w-9 h-9"} rounded-full overflow-hidden bg-[#011F5B] border-2 border-indigo-400 text-white text-sm font-semibold flex-shrink-0`}
+        <div className={`flex items-center justify-center ${compact ? "w-11 h-11" : "w-9 h-9"} rounded-full overflow-hidden bg-[#011F5B] border-2 border-[#D4AF37]/50 text-white text-sm font-semibold flex-shrink-0`}
         >
           {profileImage ? (
             <img src={profileImage} alt={userName} className="w-full h-full object-cover" />

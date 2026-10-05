@@ -1,12 +1,25 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Truck, CreditCard, ChevronDown, Tag } from "lucide-react";
 import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 import useNotificationStore from "../store/notificationStore";
-import { products } from "../data/Products";
+import useProductStore from "../store/productStore";
+import useCurrentTime from "../hooks/useCurrentTime";
+import { getProductPriceInfo } from "../utils/productPromotions";
+import { readStoredArray } from "../utils/storage";
 
 export default function Checkout() {
   const items = useCartStore((state) => state.items);
+  const products = useProductStore((state) => state.products);
+  const hasTimedProducts = products.some((product) => product.promotion);
+  const now = useCurrentTime(1000, hasTimedProducts);
+  const checkoutItems = useMemo(() => items.map((item) => {
+    const catalogProduct = products.find((product) => String(product.id) === String(item.id));
+    if (!catalogProduct) return item;
+    const selectedVariation = item.selectedVariation || catalogProduct.variations?.[0];
+    const priceInfo = getProductPriceInfo(catalogProduct, selectedVariation, now);
+    return { ...item, price: priceInfo.price };
+  }), [items, products, now]);
   const updateVariation = useCartStore((state) => state.updateVariation);
   const clearCart = useCartStore((state) => state.clearCart);
   const { addNotification } = useNotificationStore();
@@ -22,19 +35,11 @@ export default function Checkout() {
   const [expandedVariations, setExpandedVariations] = useState({});
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
-  const [coupons, setCoupons] = useState([]);
-
-  // Load coupons from localStorage
-  useEffect(() => {
-    const savedCoupons = localStorage.getItem("adminCoupons");
-    if (savedCoupons) {
-      setCoupons(JSON.parse(savedCoupons));
-    }
-  }, []);
+  const [coupons] = useState(() => readStoredArray("adminCoupons"));
 
   const total = useMemo(
-    () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
-    [items]
+    () => checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [checkoutItems]
   );
 
   const discount = useMemo(() => {
@@ -301,7 +306,7 @@ export default function Checkout() {
 
             {items.length > 0 ? (
               <div className="space-y-6">
-                {items.map((item) => {
+                {checkoutItems.map((item) => {
                   const product = products.find(p => p.id === item.id);
                   const hasVariations = product?.variations && product.variations.length > 0;
                   

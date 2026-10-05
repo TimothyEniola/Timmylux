@@ -7,14 +7,13 @@ import {
   ChevronRight,
   ChevronUp,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { getCurrentAdminUser, clearCurrentUser, clearCurrentAdminUser } from "../utils/userHelpers";
 
 export default function AdminDropdown({ compact = false }) {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState(getCurrentAdminUser());
   const ref = useRef(null);
-  const navigate = useNavigate();
 
   // Sync user when account changes
   useEffect(() => {
@@ -49,8 +48,8 @@ export default function AdminDropdown({ compact = false }) {
       {open && (
         <div className="absolute bottom-[calc(100%+10px)] left-0 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 z-[999] overflow-hidden">
           {/* HEADER */}
-          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-blue-50 to-indigo-100 border-b border-indigo-200">
-            <div className="w-10 h-10 rounded-full bg-[#011F5B] border-2 border-indigo-300 flex items-center justify-center text-white font-semibold text-sm overflow-hidden flex-shrink-0">
+          <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#011F5B]/5 to-[#D4AF37]/10 border-b border-[#D4AF37]/20">
+            <div className="w-10 h-10 rounded-full bg-[#011F5B] border-2 border-[#D4AF37]/50 flex items-center justify-center text-white font-semibold text-sm overflow-hidden flex-shrink-0">
               {profileImage ? (
                 <img src={profileImage} alt={adminName} className="w-full h-full object-cover" />
               ) : (

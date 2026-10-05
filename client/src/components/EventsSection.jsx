@@ -1,216 +1,169 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import {
+  Award,
   Calendar,
+  Clock,
   Gift,
-  Tag,
-  Percent,
-  Star,
+  MapPin,
   PartyPopper,
+  Percent,
+  Sparkles,
+  Star,
+  Tag,
   Trophy,
   Users,
-  Award,
-  MapPin,
-  Clock,
   ArrowRight,
-  Sparkles,
+  BookOpen,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { readStoredArray } from "../utils/storage";
+import useCurrentTime from "../hooks/useCurrentTime";
+
+const eventIcons = {
+  discount: Percent,
+  gift: Gift,
+  promo: Tag,
+  announcement: Star,
+  party: PartyPopper,
+  award: Trophy,
+  compensation: Users,
+  customer_year: Award,
+  promo_season: Calendar,
+  program: BookOpen,
+};
+
+function isCurrentOrUpcoming(event, now) {
+  if (!event?.isActive) return false;
+  const endDate = event.endDate
+    ? new Date(`${event.endDate}${event.endTime ? `T${event.endTime}` : "T23:59"}`)
+    : null;
+  return !endDate || Number.isNaN(endDate.getTime()) || endDate.getTime() >= now;
+}
+
+function getEventTarget(event) {
+  if (event.targetUrl) return event.targetUrl;
+  return event.type === "program" ? "/academy" : "/products";
+}
 
 export default function EventsSection() {
-  const [events, setEvents] = useState([]);
+  const [events] = useState(() => readStoredArray("adminEvents"));
+  const hasTimedEvents = events.some((event) => event.endDate);
+  const now = useCurrentTime(1000, hasTimedEvents);
   const [copiedCode, setCopiedCode] = useState(null);
+  const visibleEvents = useMemo(() => events.filter((event) => isCurrentOrUpcoming(event, now)), [events, now]);
 
-  const demoEvent = {
-    id: "demo-event",
-    title: "Grand Promo Launch Party",
-    description:
-      "Join us for an exclusive launch party featuring premium furniture showcases, live demonstrations, complimentary refreshments, and special customer appreciation gifts.",
-    type: "party",
-    startDate: new Date().toISOString(),
-    startTime: "18:00",
-    location: "Timmy Luxe Showroom, Lagos",
-    image:
-      "https://images.pexels.com/photos/276583/pexels-photo-276583.jpeg",
-    discountPercentage: 15,
-    promoCode: "TUXSAVE15",
-    targetUrl: "/products",
-    maxAttendees: 200,
-    contactInfo: "events@timmyluxe.com | +234 123 456 7890",
-  };
-
-  useEffect(() => {
-    const savedEvents = localStorage.getItem("adminEvents");
-    if (savedEvents) {
-      const allEvents = JSON.parse(savedEvents);
-      setEvents(allEvents.filter((event) => event.isActive));
+  const handleCopy = async (code) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCode(code);
+      window.setTimeout(() => setCopiedCode(null), 2000);
+    } catch {
+      setCopiedCode(null);
     }
-  }, []);
-
-  const displayEvents = events.length > 0 ? events : [demoEvent];
-
-  const handleCopy = (code) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(code);
-    setTimeout(() => setCopiedCode(null), 2000);
-  };
-
-  const getEventIcon = (type) => {
-    const map = {
-      discount: Percent,
-      gift: Gift,
-      promo: Tag,
-      announcement: Star,
-      party: PartyPopper,
-      award: Trophy,
-      compensation: Users,
-      customer_year: Award,
-      promo_season: Calendar,
-    };
-    return map[type] || Calendar;
   };
 
   return (
-    <section className="relative bg-[#060C1A] py-24 px-6 overflow-hidden text-white">
-      {/* Background glow */}
-      <div className="absolute w-[500px] h-[500px] bg-yellow-500/10 blur-[120px] top-[-100px] right-[-100px]" />
-      <div className="absolute w-[400px] h-[400px] bg-blue-900/40 blur-[120px] bottom-[-100px] left-[-100px]" />
+    <section className="relative overflow-hidden bg-navy px-6 py-20 text-white sm:py-24">
+      <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
 
-      <div className="max-w-7xl mx-auto">
-        {/* HEADER */}
-        <div className="flex flex-col lg:flex-row justify-between items-start mb-16 gap-6">
+      <div className="relative mx-auto max-w-7xl">
+        <div className="mb-12 flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-end">
           <div>
-            <div className="flex items-center gap-2 text-yellow-500 uppercase tracking-widest text-xs mb-4">
-              <Sparkles size={14} /> Curated for You
+            <div className="mb-4 flex items-center gap-2 text-xs uppercase tracking-widest text-primary">
+              <Sparkles size={14} aria-hidden="true" /> TimmyLux updates
             </div>
-
-            <h2 className="text-4xl md:text-6xl font-serif leading-tight">
-              Exclusive <span className="text-yellow-500 italic">Events</span>
-              <br /> & Promotions
+            <h2 className="text-4xl font-bold leading-tight md:text-5xl">
+              Programs <span className="text-primary">& Events</span>
             </h2>
-
-            <p className="text-white/50 mt-4 max-w-md text-sm">
-              Limited-time luxury offers and immersive experiences crafted for
-              the discerning.
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/65">
+              See the programs, events, and promotions published by TimmyLux.
             </p>
           </div>
-
-          <div className="flex items-center gap-2 border border-yellow-500/30 bg-yellow-500/10 text-yellow-500 px-4 py-2 rounded-full text-sm">
-            <Calendar size={14} />
-            {displayEvents.length} Active Event
-            {displayEvents.length > 1 && "s"}
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-primary">
+            <Calendar size={14} aria-hidden="true" />
+            {visibleEvents.length} upcoming or active {visibleEvents.length === 1 ? "program" : "programs"}
           </div>
         </div>
 
-        {/* GRID */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {displayEvents.map((event) => {
-            const Icon = getEventIcon(event.type);
+        {visibleEvents.length ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {visibleEvents.map((event) => {
+              const Icon = eventIcons[event.type] || Calendar;
+              const target = getEventTarget(event);
+              const isExternal = /^https?:\/\//i.test(target);
+              const actionClass = "flex items-center justify-between rounded-lg border border-primary/40 px-4 py-3 text-primary transition-colors hover:bg-primary hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
-            return (
-              <div
-                key={event.id}
-                className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:-translate-y-2 transition-all duration-300"
-              >
-                {/* IMAGE */}
-                <div className="relative h-56 overflow-hidden">
-                  {event.image ? (
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-white/5 flex items-center justify-center text-white/40">No image</div>
-                  )}
-
-                  {/* overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#060C1A] to-transparent" />
-
-                  {/* type */}
-                  <div className="absolute top-4 left-4 flex items-center gap-1 text-xs bg-black/60 backdrop-blur px-3 py-1 rounded-full text-yellow-500 border border-yellow-500/30">
-                    <Icon size={12} />
-                    {event.type.toUpperCase()}
-                  </div>
-
-                  {/* discount */}
-                  {event.discountPercentage && (
-                    <div className="absolute bottom-4 right-4 bg-yellow-500 text-black px-3 py-1 rounded-lg font-bold">
-                      {event.discountPercentage}% OFF
+              return (
+                <article key={event.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-transform duration-300 hover:-translate-y-1">
+                  <div className="relative h-52 overflow-hidden bg-white/5">
+                    {event.image ? (
+                      <img src={event.image} alt={event.title || "TimmyLux event"} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" decoding="async" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-white/50"><Icon size={40} aria-hidden="true" /></div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy/90 to-transparent" />
+                    <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-navy/80 px-3 py-1 text-xs uppercase text-primary">
+                      <Icon size={12} aria-hidden="true" /> {String(event.type || "event").replaceAll("_", " ")}
                     </div>
-                  )}
-                </div>
-
-                {/* BODY */}
-                <div className="p-6">
-                  <h3 className="text-xl font-serif mb-2 group-hover:text-yellow-500 transition">
-                    {event.title}
-                  </h3>
-
-                  <p className="text-white/50 text-sm mb-4 line-clamp-3">
-                    {event.description}
-                  </p>
-
-                  {/* PROMO */}
-                  {event.promoCode && (
-                    <div className="flex justify-between items-center border border-dashed border-yellow-500/40 bg-yellow-500/5 px-4 py-3 rounded-lg mb-4">
-                      <div>
-                        <p className="text-[10px] uppercase text-white/40">
-                          Promo Code
-                        </p>
-                        <p className="text-yellow-500 font-bold tracking-widest">
-                          {event.promoCode}
-                        </p>
+                    {Number(event.discountPercentage) > 0 && (
+                      <div className="absolute bottom-4 right-4 rounded-lg bg-primary px-3 py-1 font-bold text-navy">
+                        {event.discountPercentage}% off
                       </div>
-                      <button
-                        onClick={() => handleCopy(event.promoCode)}
-                        className="text-xs border border-yellow-500/40 px-3 py-1 rounded hover:bg-yellow-500/20"
-                      >
-                        {copiedCode === event.promoCode ? "Copied!" : "Copy"}
-                      </button>
-                    </div>
-                  )}
-
-                  {/* META */}
-                  <div className="text-sm text-white/50 space-y-2 mb-4">
-                    <div className="flex items-center gap-2">
-                      <Clock size={14} />
-                      {new Date(event.startDate).toLocaleDateString()} ·{" "}
-                      {event.startTime}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <MapPin size={14} />
-                      {event.location}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Users size={14} />
-                      {event.maxAttendees} seats
-                    </div>
+                    )}
                   </div>
 
-                  {/* CONTACT */}
-                  <div className="text-xs text-white/40 bg-white/5 p-3 rounded mb-4">
-                    <strong className="block text-[10px] uppercase">
-                      Contact
-                    </strong>
-                    {event.contactInfo}
-                  </div>
+                  <div className="p-5 sm:p-6">
+                    <h3 className="mb-2 text-xl font-semibold text-white group-hover:text-primary">{event.title}</h3>
+                    <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-white/65">{event.description}</p>
 
-                  {/* CTA */}
-                  <Link
-                    to={event.targetUrl}
-                    className="flex items-center justify-between border border-yellow-500/30 text-yellow-500 px-4 py-3 rounded-lg hover:bg-yellow-500 hover:text-black transition"
-                  >
-                    <span>Explore Offer</span>
-                    <ArrowRight size={16} />
-                  </Link>
-                </div>
-              </div>     
-            );
-          })}
-        </div>
+                    {event.promoCode && (
+                      <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-4 py-3">
+                        <div>
+                          <p className="text-[10px] uppercase text-white/45">Promo code</p>
+                          <p className="font-bold tracking-widest text-primary">{event.promoCode}</p>
+                        </div>
+                        <button type="button" onClick={() => handleCopy(event.promoCode)} className="rounded border border-primary/40 px-3 py-1 text-xs text-primary hover:bg-primary/15" aria-label={`Copy promo code ${event.promoCode}`}>
+                          {copiedCode === event.promoCode ? "Copied" : "Copy"}
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="mb-5 space-y-2 text-sm text-white/60">
+                      {(event.startDate || event.startTime) && (
+                        <div className="flex items-center gap-2"><Clock size={14} aria-hidden="true" />
+                          {event.startDate && !Number.isNaN(Date.parse(event.startDate)) ? new Date(event.startDate).toLocaleDateString() : ""}{event.startTime ? ` · ${event.startTime}` : ""}
+                        </div>
+                      )}
+                      {event.location && <div className="flex items-center gap-2"><MapPin size={14} aria-hidden="true" />{event.location}</div>}
+                      {event.maxAttendees && <div className="flex items-center gap-2"><Users size={14} aria-hidden="true" />{event.maxAttendees} seats</div>}
+                    </div>
+
+                    {isExternal ? (
+                      <a href={target} target="_blank" rel="noreferrer" className={actionClass}>
+                        <span>{event.type === "program" ? "View program" : "Explore offer"}</span><ArrowRight size={16} aria-hidden="true" />
+                      </a>
+                    ) : (
+                      <Link to={target} className={actionClass}>
+                        <span>{event.type === "program" ? "View program" : "Explore offer"}</span><ArrowRight size={16} aria-hidden="true" />
+                      </Link>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-10 text-center">
+            <Calendar className="mx-auto mb-3 text-primary" size={28} aria-hidden="true" />
+            <h3 className="font-semibold text-white">No upcoming programs or events</h3>
+            <p className="mt-2 text-sm text-white/60">New announcements and offers will appear here when published.</p>
+            <Link to="/academy" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+              Explore TimmyLux Academy <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+        )}
       </div>
-    </section> 
+    </section>
   );
 }

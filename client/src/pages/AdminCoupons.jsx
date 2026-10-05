@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import { Plus, Trash2, Copy } from "lucide-react";
+import { readStoredArray } from "../utils/storage";
 
 export default function AdminCoupons() {
-  const [coupons, setCoupons] = useState([]);
+  const [coupons, setCoupons] = useState(() => readStoredArray("adminCoupons"));
   const [newCoupon, setNewCoupon] = useState({
     code: "",
     discount: "",
@@ -12,13 +13,6 @@ export default function AdminCoupons() {
     active: true,
   });
 
-  useEffect(() => {
-    // Load coupons from localStorage
-    const savedCoupons = localStorage.getItem("adminCoupons");
-    if (savedCoupons) {
-      setCoupons(JSON.parse(savedCoupons));
-    }
-  }, []);
 
   const saveCoupons = (updatedCoupons) => {
     setCoupons(updatedCoupons);

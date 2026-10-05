@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { 
   Star, 
@@ -12,7 +12,9 @@ import {
   ShieldCheck,
   Share2
 } from "lucide-react";
-import { products } from "../data/Products";
+import useProductStore from "../store/productStore";
+import useCurrentTime from "../hooks/useCurrentTime";
+import { getProductPriceInfo } from "../utils/productPromotions";
 import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
@@ -27,34 +29,23 @@ export default function ProductDetails() {
   const removeFromWishlist = useWishlistStore((state) => state.removeItem);
   const isInWishlist = useWishlistStore((state) => state.isInWishlist);
 
-  const product = products.find((p) => p.id === parseInt(id));
-
-  const [selectedVariation, setSelectedVariation] = useState(null);
+  const product = useProductStore((state) => state.products.find((item) => String(item.id) === String(id)));
+  const [selectedVariationId, setSelectedVariationId] = useState(null);
+  const selectedVariation = useMemo(
+    () => product?.variations?.find((variation) => variation.id === selectedVariationId) || product?.variations?.[0] || null,
+    [product, selectedVariationId]
+  );
+  const now = useCurrentTime(1000, Boolean(product?.promotion));
+  const priceInfo = getProductPriceInfo(product, selectedVariation, now);
 
   useEffect(() => {
-    if (product && product.variations && product.variations.length > 0) {
-      setSelectedVariation(product.variations[0]);
-    }
-
-    if (location.hash === "#variations") {
-      setTimeout(() => {
-        document.getElementById("variations")?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    }
+    if (location.hash !== "#variations") return undefined;
+    const timerId = window.setTimeout(() => {
+      document.getElementById("variations")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+    return () => window.clearTimeout(timerId);
   }, [product, location.hash]);
 
-  useEffect(() => {
-    if (!product?.variations?.length) return;
-
-    const interval = setInterval(() => {
-      setSelectedVariation((prev) => {
-        const currentIndex = product.variations.findIndex((variation) => variation.id === (prev?.id || product.variations[0].id));
-        return product.variations[(currentIndex + 1) % product.variations.length];
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [product]);
 
   if (!product) {
     return (
@@ -68,7 +59,7 @@ export default function ProductDetails() {
   }
 
   const currentImage = selectedVariation?.image || product.image;
-  const currentPrice = selectedVariation?.price || product.price;
+  const currentPrice = priceInfo.price;
   const currentName = selectedVariation ? `${product.name} - ${selectedVariation.name}` : product.name;
 
   const handleAddToCart = () => {
@@ -76,6 +67,7 @@ export default function ProductDetails() {
       ...product,
       selectedVariation: selectedVariation,
       price: currentPrice,
+      originalPrice: priceInfo.status === "active" ? priceInfo.regularPrice : product.originalPrice,
       image: currentImage,
       name: currentName
     };
@@ -139,7 +131,7 @@ export default function ProductDetails() {
                 {product.variations.map((v) => (
                   <button
                     key={v.id}
-                    onClick={() => setSelectedVariation(v)}
+                      onClick={() => setSelectedVariationId(v.id)}
                     className={`relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${
                       selectedVariation?.id === v.id ? "border-[#D4AF37] scale-95" : "border-transparent opacity-70 hover:opacity-100"
                     }`}
@@ -173,14 +165,19 @@ export default function ProductDetails() {
                   <span className="text-sm font-bold text-gray-700 ml-1">4.9</span>
                 </div>
                 <span className="text-gray-300">|</span>
-                <span className="text-sm text-green-600 font-medium">In Stock</span>
+                <span className={`text-sm font-medium ${product.available ? "text-green-600" : "text-red-600"}`}>
+                  {product.available ? "In Stock" : "Out of Stock"}
+                </span>
               </div>
             </div>
 
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-[#011F5B] mb-4">
+              <h2 className="text-3xl font-bold text-[#011F5B] mb-1">
                 ₦{currentPrice.toLocaleString()}
               </h2>
+              {priceInfo.status === "active" && (
+                <p className="mb-3 text-sm text-gray-400 line-through">₦{priceInfo.regularPrice.toLocaleString()}</p>
+              )}
               <p className="text-gray-600 leading-relaxed">
                 {product.description}
               </p>
@@ -196,7 +193,7 @@ export default function ProductDetails() {
                   {product.variations.map((v) => (
                     <button
                       key={v.id}
-                      onClick={() => setSelectedVariation(v)}
+                      onClick={() => setSelectedVariationId(v.id)}
                       className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
                         selectedVariation?.id === v.id 
                           ? "bg-white border-[#D4AF37] shadow-md ring-1 ring-[#D4AF37]" 
@@ -251,7 +248,8 @@ export default function ProductDetails() {
             <div className="flex flex-col sm:flex-row gap-4 mt-auto">
               <button 
                 onClick={handleAddToCart}
-                className="flex-1 bg-[#011F5B] hover:bg-[#0d2f7a] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95"
+                disabled={!product.available}
+                className="flex-1 bg-[#011F5B] hover:bg-[#0d2f7a] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ShoppingCart size={20} />
                 Add to Cart
@@ -278,7 +276,7 @@ export default function ProductDetails() {
             {/* Trust Badges */}
             <div className="grid grid-cols-2 gap-4 mt-8 pt-8 border-t border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 text-[#011F5B] rounded-lg"><Truck size={18} /></div>
+                <div className="rounded-lg bg-navy/5 p-2 text-navy"><Truck size={18} /></div>
                 <span className="text-xs font-semibold text-gray-600">Nationwide Delivery</span>
               </div>
               <div className="flex items-center gap-3">

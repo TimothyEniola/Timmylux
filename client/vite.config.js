@@ -9,11 +9,9 @@ export default defineConfig({
     tailwindcss()
   ],
   build: {
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-      },
+    minify: 'esbuild',
+    esbuild: {
+      drop: ['console'],
     },
     rollupOptions: {
       output: {

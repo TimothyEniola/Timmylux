@@ -24,9 +24,9 @@ export default function Notifications() {
   const getCategoryIcon = (category) => {
     switch (category) {
       case "event":
-        return <Calendar size={20} className="text-purple-600" />;
+        return <Calendar size={20} className="text-primary" />;
       case "product":
-        return <Package size={20} className="text-blue-600" />;
+        return <Package size={20} className="text-navy" />;
       case "update":
         return <Sparkles size={20} className="text-amber-600" />;
       case "order":
@@ -38,9 +38,9 @@ export default function Notifications() {
   const getCategoryColor = (category) => {
     switch (category) {
       case "event":
-        return "bg-purple-50 border-purple-200";
+        return "bg-primary/10 border-primary/30";
       case "product":
-        return "bg-blue-50 border-blue-200";
+        return "bg-navy/5 border-navy/20";
       case "update":
         return "bg-amber-50 border-amber-200";
       case "order":
@@ -67,7 +67,6 @@ export default function Notifications() {
   const eventCount = notifications.filter(n => n.category === "event").length;
   const productCount = notifications.filter(n => n.category === "product").length;
   const updateCount = notifications.filter(n => n.category === "update" || n.category === "info").length;
-  const orderCount = notifications.filter(n => n.category === "order" || !n.category).length;
 
   return (
     <div className="container-custom py-8">
@@ -192,7 +191,7 @@ export default function Notifications() {
                             {getCategoryLabel(notif.category)}
                           </span>
                           {!notif.read && (
-                            <span className="inline-flex w-2 h-2 rounded-full bg-blue-500" title="New"></span>
+                            <span className="inline-flex h-2 w-2 rounded-full bg-primary" title="New"></span>
                           )}
                         </div>
 
@@ -217,7 +216,7 @@ export default function Notifications() {
                         {!notif.read && (
                           <button
                             onClick={() => markAsRead(notif.id)}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition text-blue-600 hover:text-blue-700"
+                            className="rounded-lg p-2 text-navy transition hover:bg-navy/5"
                             title="Mark as read"
                           >
                             <Check size={18} />
@@ -235,8 +234,8 @@ export default function Notifications() {
 
         {/* Info Banner */}
         {notifications.length > 0 && (
-          <div className="mt-8 bg-blue-50 border border-blue-200 rounded-xl p-4">
-            <p className="text-sm text-blue-900">
+          <div className="mt-8 rounded-xl border border-navy/15 bg-navy/5 p-4">
+            <p className="text-sm text-navy">
               <strong>💡 Tip:</strong> You'll receive notifications about academy events, new products, order updates, and important announcements. Click on any notification to mark it as read.
             </p>
           </div>

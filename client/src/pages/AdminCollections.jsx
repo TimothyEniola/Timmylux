@@ -216,7 +216,7 @@ export default function AdminCollections() {
               <div className="flex gap-2">
                 <button
                   onClick={() => handleEditCollection(collection)}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#011F5B] text-white py-2 px-4 rounded-lg transition-colors hover:bg-[#0d2f7a] flex items-center justify-center gap-2"
                 >
                   <Edit size={16} /> Edit
                 </button>

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { readStoredArray } from "../utils/storage";
 import { X, Share2, Package, Truck, CheckCircle, Clock, Search, ChevronRight, MapPin, Mail, Phone } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -18,89 +19,9 @@ function getInitials(name) {
 }
 
 export default function AdminOrders() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState(() => readStoredArray("adminOrders"));
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-
-  useEffect(() => {
-    const savedOrders = JSON.parse(localStorage.getItem("adminOrders") || "null");
-    if (savedOrders && Array.isArray(savedOrders) && savedOrders.length) {
-      setOrders(savedOrders);
-      return;
-    }
-
-    const mockOrders = [
-      {
-        id: "ORD-1704067200000",
-        customerName: "John Doe",
-        email: "john@example.com",
-        total: 150000,
-        status: "Pending",
-        date: "2024-01-01",
-        items: [
-          { name: "Modern Sofa", quantity: 1, price: 120000 },
-          { name: "Coffee Table", quantity: 1, price: 30000 },
-        ],
-        shippingAddress: {
-          fullName: "John Doe",
-          phone: "+2341234567890",
-          address: "123 Main St",
-          city: "Lagos",
-          state: "Lagos",
-        },
-      },
-      {
-        id: "ORD-1704153600000",
-        customerName: "Jane Smith",
-        email: "jane@example.com",
-        total: 75000,
-        status: "Shipped",
-        date: "2024-01-02",
-        items: [{ name: "Dining Chair", quantity: 4, price: 18750 }],
-        shippingAddress: {
-          fullName: "Jane Smith",
-          phone: "+2340987654321",
-          address: "456 Oak Ave",
-          city: "Abuja",
-          state: "FCT",
-        },
-      },
-      {
-        id: "ORD-1704240000000",
-        customerName: "Bob Johnson",
-        email: "bob@example.com",
-        total: 200000,
-        status: "Delivered",
-        date: "2024-01-03",
-        items: [{ name: "King Size Bed", quantity: 1, price: 200000 }],
-        shippingAddress: {
-          fullName: "Bob Johnson",
-          phone: "+2345678901234",
-          address: "789 Pine Rd",
-          city: "Port Harcourt",
-          state: "Rivers",
-        },
-      },
-      {
-        id: "ORD-1704326400000",
-        customerName: "Ngozi Akpan",
-        email: "ngozi@example.com",
-        total: 98000,
-        status: "Cancelled",
-        date: "2024-01-04",
-        items: [{ name: "Lounge Chair", quantity: 1, price: 98000 }],
-        shippingAddress: {
-          fullName: "Ngozi Akpan",
-          phone: "+2347012345678",
-          address: "12 Victoria Island",
-          city: "Lagos",
-          state: "Lagos",
-        },
-      },
-    ];
-    setOrders(mockOrders);
-    localStorage.setItem("adminOrders", JSON.stringify(mockOrders));
-  }, []);
 
   const setOrderStatus = (orderId, nextStatus) => {
     setOrders((prev) => {
@@ -351,7 +272,7 @@ export default function AdminOrders() {
 
               {/* Shipping address */}
               {selectedOrder.shippingAddress && (
-                <div className="bg-blue-50 rounded-xl p-4">
+                <div className="rounded-xl bg-navy/5 p-4">
                   <h3 className="font-semibold text-[#011F5B] text-sm mb-2 flex items-center gap-2">
                     <MapPin size={14} /> Shipping Address
                   </h3>

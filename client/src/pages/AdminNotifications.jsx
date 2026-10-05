@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Bell, Plus, Trash2, Send, ShoppingCart, AlertCircle, Share2, Calendar, Package, Sparkles } from "lucide-react";
+import { toast } from "react-toastify";
 import useNotificationStore from "../store/notificationStore";
 
 export default function AdminNotifications() {
@@ -126,7 +127,7 @@ export default function AdminNotifications() {
                 : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
-            Send New
+            Send New ({sentNotifications.length})
           </button>
         </div>
 
@@ -148,7 +149,7 @@ export default function AdminNotifications() {
                     <div
                       key={notif.id}
                       className={`border rounded-lg p-4 transition-colors ${
-                        !notif.read ? "bg-blue-50 border-blue-200" : "bg-white"
+                        !notif.read ? "bg-navy/5 border-navy/20" : "bg-white"
                       }`}
                     >
                       <div className="flex justify-between items-start gap-3">
@@ -159,7 +160,7 @@ export default function AdminNotifications() {
                               ORDER
                             </span>
                             {!notif.read && (
-                              <span className="inline-flex rounded-full px-2 py-1 text-[11px] font-semibold bg-blue-100 text-blue-700">
+                              <span className="inline-flex rounded-full bg-primary/15 px-2 py-1 text-[11px] font-semibold text-navy">
                                 NEW
                               </span>
                             )}
@@ -206,7 +207,7 @@ export default function AdminNotifications() {
           {activeTab === "events" && (
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Calendar size={18} className="text-purple-600" />
+                <Calendar size={18} className="text-primary" />
                 Events & Announcements
               </h2>
 
@@ -217,13 +218,13 @@ export default function AdminNotifications() {
                   {eventNotifications.map((notif) => (
                     <div
                       key={notif.id}
-                      className={`border-l-4 border-purple-600 rounded-lg p-4 bg-purple-50`}
+                      className="rounded-lg border-l-4 border-primary bg-primary/10 p-4"
                     >
                       <div className="flex justify-between items-start gap-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <Calendar size={16} className="text-purple-600" />
-                            <span className="inline-flex rounded-full px-2 py-1 text-[11px] font-semibold bg-purple-100 text-purple-700">
+                            <Calendar size={16} className="text-primary" />
+                            <span className="inline-flex rounded-full bg-primary/15 px-2 py-1 text-[11px] font-semibold text-navy">
                               EVENT
                             </span>
                           </div>
@@ -253,7 +254,7 @@ export default function AdminNotifications() {
           {activeTab === "products" && (
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Package size={18} className="text-blue-600" />
+                <Package size={18} className="text-navy" />
                 Product Updates
               </h2>
 
@@ -264,13 +265,13 @@ export default function AdminNotifications() {
                   {productNotifications.map((notif) => (
                     <div
                       key={notif.id}
-                      className={`border-l-4 border-blue-600 rounded-lg p-4 bg-blue-50`}
+                      className="rounded-lg border-l-4 border-navy bg-navy/5 p-4"
                     >
                       <div className="flex justify-between items-start gap-3">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <Package size={16} className="text-blue-600" />
-                            <span className="inline-flex rounded-full px-2 py-1 text-[11px] font-semibold bg-blue-100 text-blue-700">
+                            <Package size={16} className="text-navy" />
+                            <span className="inline-flex rounded-full bg-navy/10 px-2 py-1 text-[11px] font-semibold text-navy">
                               PRODUCT
                             </span>
                           </div>

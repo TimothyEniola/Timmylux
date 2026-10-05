@@ -25,7 +25,8 @@ import {
   Images,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { createElement, useState } from "react";
+import { readStoredJson } from "../utils/storage";
 
 const FAQItem = ({ question, answer }) => {
   const [open, setOpen] = useState(false);
@@ -51,7 +52,7 @@ const FAQItem = ({ question, answer }) => {
   );
 };
 
-const SectionCard = ({ icon: Icon, title, children, accent = false }) => (
+const SectionCard = ({ icon, title, children, accent = false }) => (
   <div
     className={`rounded-2xl p-6 border ${
       accent
@@ -60,7 +61,7 @@ const SectionCard = ({ icon: Icon, title, children, accent = false }) => (
     }`}
   >
     <div className={`flex items-center gap-3 mb-3 ${accent ? "text-[#D4AF37]" : "text-[#011F5B]"}`}>
-      <Icon size={20} />
+      {createElement(icon, { size: 20 })}
       <h3 className={`font-semibold text-base ${accent ? "text-white" : "text-[#011F5B]"}`}>{title}</h3>
     </div>
     <div className={`text-sm leading-relaxed space-y-1.5 ${accent ? "text-white/80" : "text-gray-600"}`}>
@@ -71,19 +72,13 @@ const SectionCard = ({ icon: Icon, title, children, accent = false }) => (
 
 export default function Help() {
   const [activePolicy, setActivePolicy] = useState("repair");
-  const [policies, setPolicies] = useState({
+  const [policies] = useState(() => ({
     repairPolicy:
       "For repairs, please call our support team. We only provide repair services for goods purchased directly from us.",
     returnPolicy:
       "Items must be returned within 1-2 weeks after delivery. Contact our support team to arrange collection. We only accept returns for goods purchased from us.",
-  });
-
-  useEffect(() => {
-    const savedPolicies = localStorage.getItem("adminPolicies");
-    if (savedPolicies) {
-      setPolicies(JSON.parse(savedPolicies));
-    }
-  }, []);
+    ...readStoredJson("adminPolicies", {}),
+  }));
 
   const siteFeatures = [
     {
@@ -264,13 +259,13 @@ export default function Help() {
               { label: "Track Order", to: "/track-order", icon: Truck },
               { label: "Academy", to: "/academy", icon: GraduationCap },
               { label: "Contact Us", to: "/custom-request", icon: MessageSquare },
-            ].map(({ label, to, icon: Icon }) => (
+            ].map(({ label, to, icon }) => (
               <Link
                 key={label}
                 to={to}
                 className="flex items-center gap-2 justify-center px-3 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-[#011F5B] hover:bg-[#011F5B] hover:text-white hover:border-[#011F5B] transition"
               >
-                <Icon size={15} />
+                {createElement(icon, { size: 15 })}
                 {label}
               </Link>
             ))}
@@ -436,7 +431,7 @@ export default function Help() {
           {/* Repair Policy */}
           {activePolicy === "repair" && (
             <div className="space-y-4">
-              <div className="bg-blue-50 border-l-4 border-[#011F5B] p-4 rounded">
+              <div className="rounded border-l-4 border-primary bg-primary/10 p-4">
                 <p className="flex items-start gap-2 text-[#011F5B] font-semibold">
                   <AlertCircle size={20} className="flex-shrink-0 mt-0.5" />
                   <span>

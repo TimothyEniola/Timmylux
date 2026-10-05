@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
+import { readStoredArray } from "../utils/storage";
 import useNotificationStore from "../store/notificationStore";
 import {
   Plus,
@@ -9,6 +10,7 @@ import {
   Gift,
   Tag,
   Percent,
+  BookOpen,
   Star,
   PartyPopper,
   Trophy,
@@ -23,7 +25,7 @@ import { FaWhatsapp } from "react-icons/fa6";
 
 export default function AdminEvents() {
   const { addNotification } = useNotificationStore();
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState(() => readStoredArray("adminEvents"));
   const [showForm, setShowForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [copiedEventId, setCopiedEventId] = useState(null);
@@ -51,12 +53,6 @@ export default function AdminEvents() {
     jobType: "full-time",
   });
 
-  useEffect(() => {
-    const savedEvents = localStorage.getItem("adminEvents");
-    if (savedEvents) {
-      setEvents(JSON.parse(savedEvents));
-    }
-  }, []);
 
   const saveEvents = (newEvents) => {
     setEvents(newEvents);
@@ -161,37 +157,14 @@ export default function AdminEvents() {
         return Award;
       case "promo_season":
         return Calendar;
+      case "program":
+        return BookOpen;
       default:
         return Calendar;
     }
   };
 
-  const getEventTypeColor = (type) => {
-    switch (type) {
-      case "discount":
-        return "bg-green-100 text-green-800";
-      case "gift":
-        return "bg-purple-100 text-purple-800";
-      case "promo":
-        return "bg-blue-100 text-blue-800";
-      case "announcement":
-        return "bg-yellow-100 text-yellow-800";
-      case "party":
-        return "bg-pink-100 text-pink-800";
-      case "award":
-        return "bg-indigo-100 text-indigo-800";
-      case "compensation":
-        return "bg-orange-100 text-orange-800";
-      case "customer_year":
-        return "bg-teal-100 text-teal-800";
-      case "worker":
-        return "bg-red-100 text-red-800";
-      case "promo_season":
-        return "bg-gray-200 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  const getEventTypeColor = () => "bg-[#D4AF37]/15 text-[#011F5B]";
 
   const formatEventDetails = (event) => {
     const details = `
@@ -316,7 +289,7 @@ Status: ${event.isActive ? 'Active' : 'Inactive'}
                       </button>
                       <button
                         onClick={() => shareViaEmail(event)}
-                        className="text-gray-400 hover:text-blue-500"
+                        className="text-gray-400 transition-colors hover:text-primary"
                         title="Share via Email"
                       >
                         <span className="text-sm font-bold">✉</span>
@@ -448,8 +421,9 @@ Status: ${event.isActive ? 'Active' : 'Inactive'}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
                         required
                       >
-                        <option value="promo">Promotion</option>
-                        <option value="discount">Discount</option>
+                         <option value="promo">Promotion</option>
+                         <option value="program">Program</option>
+                         <option value="discount">Discount</option>
                         <option value="gift">Gift</option>
                         <option value="announcement">Announcement</option>
                         <option value="party">Party</option>

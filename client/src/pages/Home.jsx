@@ -1,89 +1,35 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package, CreditCard, Headphones, Star, ArrowRight } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import EventsSection from "../components/EventsSection";
-import { products } from "../data/Products";
+import useProductStore from "../store/productStore";
+import useCurrentTime from "../hooks/useCurrentTime";
+import { getPromotionStatus } from "../utils/productPromotions";
+import { loadHomeContent } from "../data/homepageContent";
 
 export default function Home() {
   const navigate = useNavigate();
-
-  const [content, setContent] = useState({
-    hero: {
-      title: "Explore Our Modern Furniture Collection",
-      subtitle:
-        "Discover timeless elegance and modern comfort with our curated collection of premium furniture. Transform your space with pieces that blend luxury craftsmanship with contemporary design.",
-      backgroundImage:
-        "https://images.unsplash.com/photo-1759691555105-17e609a3e46f?auto=format&fit=crop&q=80",
-      ctaText: "Shop Now →",
-      secondaryCtaText: "View All Products",
-    },
-    features: {
-      title: "Why Choose Us",
-      subtitle: "Experience luxury furniture shopping like never before",
-      features: [
-        { title: "Free Shipping", description: "Free shipping for orders above $1000", icon: "Package" },
-        { title: "Secure Payment", description: "100% secure payment methods", icon: "CreditCard" },
-        { title: "24/7 Support", description: "Round the clock customer support", icon: "Headphones" },
-        { title: "Quality Guarantee", description: "Premium quality furniture guaranteed", icon: "Star" },
-      ],
-    },
-    categories: {
-      title: "Browse by Category",
-      subtitle: "Explore our wide range of collections",
-      categories: [
-        {
-          name: "Living Room",
-          count: "200+ Items",
-          image: "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg",
-          items: ["Sofa Sets", "Coffee Tables", "Armchairs", "TV Units"],
-        },
-        {
-          name: "Bedroom",
-          count: "150+ Items",
-          image: "https://images.pexels.com/photos/1454806/pexels-photo-1454806.jpeg",
-          items: ["Beds", "Wardrobes", "Nightstands", "Dressers"],
-        },
-        {
-          name: "Dining",
-          count: "80+ Items",
-          image: "https://images.pexels.com/photos/1080721/pexels-photo-1080721.jpeg",
-          items: ["Dining Tables", "Chairs", "Sideboards", "Bar Stools"],
-        },
-      ],
-    },
-    products: {
-      title: "Curated Home Highlights",
-      subtitle: "Featured Products",
-      flashSaleText: "Flash Sale",
-      description: "Only 4 exclusive items featured here",
-    },
-  });
+  const content = useMemo(() => loadHomeContent(), []);
+  const products = useProductStore((state) => state.products);
+  const hasTimedProducts = products.some((product) => product.promotion || product.featuredExpiry);
+  const now = useCurrentTime(1000, hasTimedProducts);
 
   const homepageProducts = useMemo(
-    () => products.filter((product) => product.featured).slice(0, 4),
-    []
+    () =>
+      products
+        .filter((product) =>
+          product.featured &&
+          (!product.featuredExpiry || Number(product.featuredExpiry) > now)
+        )
+        .slice(0, 4),
+    [products, now]
   );
 
-  useEffect(() => {
-    const savedContent = localStorage.getItem("adminContent");
-    if (savedContent) {
-      const loaded = JSON.parse(savedContent);
-      if (loaded?.categories?.categories) {
-        loaded.categories.categories = loaded.categories.categories.map((category) => ({
-          ...category,
-          count:
-            category.count ||
-            (Array.isArray(category.items)
-              ? `${category.items.length} Items`
-              : typeof category.items === "string"
-              ? category.items
-              : ""),
-        }));
-      }
-      setContent(loaded);
-    }
-  }, []);
+  const activeSalesCount = homepageProducts.filter(
+    (product) => getPromotionStatus(product.promotion, now) === "active"
+  ).length;
+
 
   return (
     <div className="home-page">
@@ -659,8 +605,7 @@ export default function Home() {
               <div className="hero-badge">The Best Online Furniture Store</div>
 
               <h1 className="hero-title mb-6">
-                {/* Split title to italicize last word for elegance */}
-                Explore Our <span>Modern</span><br />Furniture Collection
+                {content.hero.title}
               </h1>
 
               <p className="hero-subtitle mb-10">{content.hero.subtitle}</p>
@@ -700,7 +645,7 @@ export default function Home() {
               </div>
 
               <div className="img-wrap">
-                <img src={content.hero.backgroundImage} alt="Living Room" loading="lazy" />
+                <img src={content.hero.backgroundImage} alt="Curated TimmyLux living room furniture" loading="eager" fetchPriority="high" decoding="async" />
                 <div
                   style={{
                     position: "absolute",
@@ -835,7 +780,7 @@ export default function Home() {
               <div className="dot" />
               <span>{content.products.flashSaleText}</span>
             </div>
-            <h3>{content.products.description}</h3>
+            <h3>{activeSalesCount > 0 ? `${activeSalesCount} featured ${activeSalesCount === 1 ? "offer" : "offers"} live now` : content.products.description}</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

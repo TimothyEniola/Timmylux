@@ -1,14 +1,14 @@
-import { useState } from "react";
 import { toast } from "react-toastify";
 import { Edit, Trash2, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { products } from "../data/Products";
+import useProductStore from "../store/productStore";
 
 export default function AdminProducts() {
-  const [productsList, setProductsList] = useState(products);
+  const productsList = useProductStore((state) => state.products);
+  const removeProduct = useProductStore((state) => state.removeProduct);
 
   const handleDeleteProduct = (productId) => {
-    setProductsList(productsList.filter(product => product.id !== productId));
+    removeProduct(productId);
     toast.success("Product deleted successfully!");
   };
 
@@ -62,7 +62,7 @@ export default function AdminProducts() {
                     <div className="flex gap-2">
                       <Link
                         to={`/admin/edit-product/${product.id}`}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                        className="rounded p-2 text-[#011F5B] transition-colors hover:bg-[#011F5B]/5"
                         title="Edit Product"
                       >
                         <Edit size={16} />
@@ -107,7 +107,7 @@ export default function AdminProducts() {
                   <div className="flex flex-col gap-2">
                     <Link
                       to={`/admin/edit-product/${product.id}`}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                      className="rounded p-2 text-[#011F5B] transition-colors hover:bg-[#011F5B]/5"
                       title="Edit Product"
                     >
                       <Edit size={16} />

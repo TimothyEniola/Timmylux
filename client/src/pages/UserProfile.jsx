@@ -47,8 +47,6 @@ export default function UserProfile() {
     }
   });
 
-  const isLoadingAddresses = false;
-
   useEffect(() => {
     const handler = () => {
       const cur = getCurrentUser() || {};
@@ -67,7 +65,9 @@ export default function UserProfile() {
       try {
         const savedAddr = localStorage.getItem("userAddress");
         if (savedAddr) setAddresses([JSON.parse(savedAddr)]);
-      } catch { }
+      } catch (error) {
+        console.warn("Unable to read saved address:", error);
+      }
     };
 
     window.addEventListener("userDataChanged", handler);

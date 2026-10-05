@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Package,
   TrendingUp,
@@ -16,8 +16,6 @@ import {
 // import { useAuth } from "../context/AuthContext";
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
-
   const [recentOrders] = useState([
     {
       id: 1,

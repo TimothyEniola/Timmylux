@@ -1,50 +1,53 @@
-import React, { useState } from "react";
+import React, { lazy, Suspense, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import TopBar from "./components/TopBar";
 import ErrorPage from "./pages/Error";
-import NotFound from "./pages/NotFound";
-import ProductDetails from "./pages/ProductDetails";
+import Loader from "./components/loader";
+
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ProductDetails = lazy(() => import("./pages/ProductDetails"));
 import Navbar from "./components/Navbar";
 import AdminSidebar from "./components/AdminSidebar";
 import AdminTopBar from "./components/AdminTopBar";
 import Footer from "./components/Footer";
-import Home from "./pages/Home";
-import About from "./pages/About";
-import Products from "./pages/Products";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
-import UserProfile from "./pages/UserProfile";
-import UserSettings from "./pages/UserSettings";
-import Wishlist from "./pages/Wishlist";
-import OrderHistory from "./pages/OrderHistory";
-import TrackOrder from "./pages/TrackOrder";
-import CustomRequest from "./pages/CustomRequest";
-import Help from "./pages/Help";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminProducts from "./pages/AdminProducts";
-import AdminAddProduct from "./pages/AdminAddProduct";
-import AdminEditProduct from "./pages/AdminEditProduct";
-import AdminCollections from "./pages/AdminCollections";
-import AdminFeatured from "./pages/AdminFeatured";
-import AdminOrders from "./pages/AdminOrders";
-import AdminSettings from "./pages/AdminSettings";
-import AdminNotifications from "./pages/AdminNotifications";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
-import AdminContentEditor from "./pages/AdminContentEditor";
-import AdminEvents from "./pages/AdminEvents";
-import AdminAnalytics from "./pages/AdminAnalytics";
-import AdminCoupons from "./pages/AdminCoupons";
-import AdminProfile from "./pages/AdminProfile";
-import Academy from "./pages/Academy";
-import AdminAcademy from "./pages/AdminAcademy";
-import Notifications from "./pages/Notifications";
-import Gallery from "./pages/Gallery";
-import AdminGallery from "./pages/AdminGallery";
+
+const Home = lazy(() => import("./pages/Home"));
+const About = lazy(() => import("./pages/About"));
+const Products = lazy(() => import("./pages/Products"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const SignIn = lazy(() => import("./pages/SignIn"));
+const SignUp = lazy(() => import("./pages/SignUp"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
+const UserSettings = lazy(() => import("./pages/UserSettings"));
+const Wishlist = lazy(() => import("./pages/Wishlist"));
+const OrderHistory = lazy(() => import("./pages/OrderHistory"));
+const TrackOrder = lazy(() => import("./pages/TrackOrder"));
+const CustomRequest = lazy(() => import("./pages/CustomRequest"));
+const Help = lazy(() => import("./pages/Help"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const AdminProducts = lazy(() => import("./pages/AdminProducts"));
+const AdminAddProduct = lazy(() => import("./pages/AdminAddProduct"));
+const AdminEditProduct = lazy(() => import("./pages/AdminEditProduct"));
+const AdminCollections = lazy(() => import("./pages/AdminCollections"));
+const AdminFeatured = lazy(() => import("./pages/AdminFeatured"));
+const AdminOrders = lazy(() => import("./pages/AdminOrders"));
+const AdminSettings = lazy(() => import("./pages/AdminSettings"));
+const AdminNotifications = lazy(() => import("./pages/AdminNotifications"));
+const AdminContentEditor = lazy(() => import("./pages/AdminContentEditor"));
+const AdminEvents = lazy(() => import("./pages/AdminEvents"));
+const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
+const AdminCoupons = lazy(() => import("./pages/AdminCoupons"));
+const AdminProfile = lazy(() => import("./pages/AdminProfile"));
+const Academy = lazy(() => import("./pages/Academy"));
+const AdminAcademy = lazy(() => import("./pages/AdminAcademy"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const Gallery = lazy(() => import("./pages/Gallery"));
+const AdminGallery = lazy(() => import("./pages/AdminGallery"));
 
 class AppErrorBoundary extends React.Component {
   constructor(props) {
@@ -84,6 +87,7 @@ export default function App() {
       {isAdminRoute ? <AdminSidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} /> : <Navbar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />}
       <div className={`flex-grow transition-all duration-300 ${sidebarCollapsed ? 'xl:ml-16' : 'xl:ml-64'}`}>
         <AppErrorBoundary>
+          <Suspense fallback={<Loader text="Loading page..." />}>
           <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
@@ -121,7 +125,8 @@ export default function App() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/error" element={<ErrorPage />} />
           <Route path="*" element={<NotFound />} />
-        </Routes>
+          </Routes>
+          </Suspense>
         </AppErrorBoundary>
       </div>
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'xl:ml-16' : 'xl:ml-64'}`}><Footer /></div>

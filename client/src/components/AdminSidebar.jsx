@@ -26,14 +26,12 @@ import logo from "../assets/reallogo.png";
 import AdminDropdown from "./AdminDropdown";
 
 export default function AdminSidebar({ collapsed, setCollapsed }) {
-  const [open, setOpen] = useState(false);
+  const [openForPath, setOpenForPath] = useState(null);
   const { getUnreadCount } = useNotificationStore();
   const unreadCount = getUnreadCount();
   const location = useLocation();
-
-  useEffect(() => {
-    setOpen(false);
-  }, [location.pathname]);
+  const open = openForPath === location.pathname;
+  const setOpen = (nextOpen) => setOpenForPath(nextOpen ? location.pathname : null);
 
   // Lock body scroll when mobile sidebar is open
   useEffect(() => {

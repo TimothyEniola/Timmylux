@@ -8,14 +8,10 @@ import useNotificationStore from "../store/notificationStore";
 
 export default function TopBar({ collapsed }) {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notifRef = useRef(null);
-
-  useEffect(() => {
-    setSearchQuery(searchParams.get("q") || "");
-  }, [searchParams]);
 
   // Close notification dropdown on outside click
   useEffect(() => {
@@ -64,7 +60,12 @@ export default function TopBar({ collapsed }) {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              const params = new URLSearchParams(searchParams);
+              if (e.target.value) params.set("q", e.target.value);
+              else params.delete("q");
+              setSearchParams(params, { replace: true });
+            }}
             placeholder="Search products..."
             className="flex-1 px-5 py-2.5 text-black text-sm outline-none placeholder:text-gray-400"
           />
@@ -119,7 +120,7 @@ export default function TopBar({ collapsed }) {
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className="text-xs text-blue-600 hover:underline"
+                      className="text-xs text-primary hover:underline"
                     >
                       Mark all read
                     </button>
@@ -141,13 +142,13 @@ export default function TopBar({ collapsed }) {
                           navigate("/notifications");
                         }}
                         className={`p-3 border-b text-sm cursor-pointer hover:bg-gray-50 transition-colors ${
-                          !notif.read ? "bg-blue-50" : ""
+                          !notif.read ? "bg-navy/5" : ""
                         }`}
                       >
                         <div className="flex gap-3 items-start">
                           <div
                             className={`w-2 h-2 mt-1.5 rounded-full flex-shrink-0 ${
-                              notif.read ? "bg-gray-300" : "bg-blue-500"
+                              notif.read ? "bg-gray-300" : "bg-primary"
                             }`}
                           />
                           <div className="flex-1 min-w-0">
@@ -157,7 +158,7 @@ export default function TopBar({ collapsed }) {
                             </p>
                           </div>
                           {!notif.read && (
-                            <Check size={14} className="text-blue-500 flex-shrink-0 mt-0.5" />
+                            <Check size={14} className="mt-0.5 flex-shrink-0 text-primary" />
                           )}
                         </div>
                       </div>

@@ -29,11 +29,13 @@ import logo from "../assets/reallogo.png";
 import ProfileDropdown from "./ProfileDropdown";
 
 export default function UserSidebar({ collapsed, setCollapsed }) {
-  const [open, setOpen] = useState(false);
+  const [openForPath, setOpenForPath] = useState(null);
   const [search, setSearch] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
+  const open = openForPath === location.pathname;
+  const setOpen = (nextOpen) => setOpenForPath(nextOpen ? location.pathname : null);
 
   const { items: cartItems } = useCartStore();
   const { items: wishlistItems } = useWishlistStore();
@@ -46,9 +48,6 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
 
   const unreadCount = getUnreadCount();
 
-  useEffect(() => {
-    setOpen(false);
-  }, [location.pathname]);
 
   // Lock body scroll on mobile sidebar open
   useEffect(() => {

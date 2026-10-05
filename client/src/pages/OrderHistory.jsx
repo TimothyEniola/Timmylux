@@ -249,7 +249,7 @@ export default function OrderHistory() {
                 <div className="grid md:grid-cols-2 gap-8">
                   {/* Order Details */}
                   <div className="space-y-6">
-                    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 rounded-xl">
+                    <div className="rounded-xl bg-gradient-to-br from-navy/5 to-primary/10 p-6">
                       <h3 className="text-xl font-bold text-[#011F5B] mb-4 flex items-center gap-2">
                         <Package size={24} />
                         Order Details

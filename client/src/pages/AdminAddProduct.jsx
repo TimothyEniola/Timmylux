@@ -1,10 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Save, Plus, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
+import PromotionFields from "../components/PromotionFields";
 import useNotificationStore from "../store/notificationStore";
+import useProductStore from "../store/productStore";
+import { toIsoDateTime } from "../utils/productPromotions";
 
 export default function AdminAddProduct() {
+  const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
+  const addProduct = useProductStore((state) => state.addProduct);
+  const [promotion, setPromotion] = useState({ discountValue: "", startsAt: "", endsAt: "" });
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -57,12 +64,39 @@ export default function AdminAddProduct() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const hasPromotion = Object.values(promotion).some(Boolean);
+    let savedPromotion = null;
+    if (hasPromotion) {
+      const discountValue = Number(promotion.discountValue);
+      const startsAt = toIsoDateTime(promotion.startsAt);
+      const endsAt = toIsoDateTime(promotion.endsAt);
+      if (!Number.isFinite(discountValue) || discountValue <= 0 || discountValue > 100 || !startsAt || !endsAt || Date.parse(endsAt) <= Date.parse(startsAt)) {
+        toast.error("Enter a discount from 1–100% and a valid end time after the start time.");
+        return;
+      }
+      savedPromotion = { discountType: "percentage", discountValue, startsAt, endsAt };
+    }
+
+    const savedProduct = {
+      ...formData,
+      id: Date.now(),
+      price: Number(formData.price),
+      originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined,
+      variations: formData.variations.map((variation) => ({
+        ...variation,
+        price: variation.price ? Number(variation.price) : Number(formData.price),
+      })),
+      promotion: savedPromotion,
+    };
+    addProduct(savedProduct);
     addNotification({
       title: `🛋️ New Product: ${formData.name}`,
       message: `A new product "${formData.name}" has been added to the ${formData.category || "store"} collection. Check it out now!`,
       category: "product",
     });
     toast.success(`"${formData.name}" added successfully!`);
+    navigate("/admin/products");
   };
 
   return (
@@ -108,7 +142,7 @@ export default function AdminAddProduct() {
                   <option value="">Select Category</option>
                   <option>Living Room</option>
                   <option>Bedroom</option>
-                  <option>Dining Room</option>
+                  <option>Dining</option>
                   <option>Office</option>
                   <option>Outdoor</option>
                 </select>
@@ -183,6 +217,8 @@ export default function AdminAddProduct() {
               />
             </div>
           </Section>
+
+          <PromotionFields value={promotion} onChange={setPromotion} />
 
           {/* VARIATIONS */}
           <Section title="Product Variations">

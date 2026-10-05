@@ -1,30 +1,24 @@
-import { useState, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
-import { products, categories } from "../data/Products";
+import { categories } from "../data/Products";
+import useProductStore from "../store/productStore";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 // import { useSearchParams } from "react-router-dom";
 import { useSearchParams, Link } from "react-router-dom";
 
 export default function Products() {
-  const [searchParams] = useSearchParams();
-  const queryParam = searchParams.get("q") || "";
-  const categoryParam = searchParams.get("category") || "All";
-  const [searchQuery, setSearchQuery] = useState(queryParam);
-  const [selectedCategory, setSelectedCategory] = useState(categoryParam);
-
-  useEffect(() => {
-    setSearchQuery(queryParam);
-    setSelectedCategory(categoryParam);
-  }, [queryParam, categoryParam]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
+  const selectedCategory = searchParams.get("category") || "All";
+  const products = useProductStore((state) => state.products);
 
   const filteredProducts = products.filter((product) => {
     const query = searchQuery.trim().toLowerCase();
     const categoryMatch = selectedCategory === "All" || product.category === selectedCategory;
     const searchMatch = query === "" ||
-      product.name.toLowerCase().includes(query) ||
-      product.category.toLowerCase().includes(query) ||
-      product.description.toLowerCase().includes(query) ||
-      product.collection?.toLowerCase().includes(query);
+      String(product.name || "").toLowerCase().includes(query) ||
+      String(product.category || "").toLowerCase().includes(query) ||
+      String(product.description || "").toLowerCase().includes(query) ||
+      String(product.collection || "").toLowerCase().includes(query);
 
     return categoryMatch && searchMatch;
   });
@@ -67,7 +61,12 @@ export default function Products() {
             <div className="w-full lg:w-48">
               <select
                 value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
+                onChange={(e) => {
+                  const params = new URLSearchParams(searchParams);
+                  if (e.target.value === "All") params.delete("category");
+                  else params.set("category", e.target.value);
+                  setSearchParams(params, { replace: true });
+                }}
                 className="w-full rounded-2xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] bg-white text-sm"
               >
                 {categories.map((category) => (
@@ -83,7 +82,12 @@ export default function Products() {
               <input
                 type="search"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  const params = new URLSearchParams(searchParams);
+                  if (e.target.value) params.set("q", e.target.value);
+                  else params.delete("q");
+                  setSearchParams(params, { replace: true });
+                }}
                 placeholder="Search collections, products..."
                 className="w-full rounded-2xl border border-gray-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] text-sm"
               />

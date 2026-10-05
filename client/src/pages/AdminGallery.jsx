@@ -87,15 +87,13 @@ const S = {
 
 /* ─── Lazy Image ─── */
 function LazyImg({ thumb, src, alt, style = {} }) {
-  const [loaded, setLoaded] = useState(false);
-  const [fullSrc, setFullSrc] = useState(null);
+  const [loaded, setLoaded] = useState(() => !thumb);
+  const [fullSrc, setFullSrc] = useState(() => (thumb ? null : src));
   const ref = useRef(null);
 
   useEffect(() => {
-    // If no thumb, just load directly
-    if (!thumb) { setFullSrc(src); setLoaded(true); return; }
     const el = ref.current;
-    if (!el) return;
+    if (!el || !thumb) return;
     const obs = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         const hi = new Image();
@@ -841,7 +839,11 @@ export default function GalleryApp() {
   });
 
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(images)); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
+    } catch (error) {
+      console.warn("Unable to save gallery items:", error);
+    }
   }, [images]);
   const [cat, setCat] = useState("All");
   const [search, setSearch] = useState("");

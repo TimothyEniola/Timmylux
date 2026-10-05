@@ -222,7 +222,7 @@ ${currentOrders.slice(0, 5).map(order => `- ${order.customer}: ${order.product} 
               </button>
               <button
                 onClick={shareViaEmail}
-                className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                className="p-2 rounded-lg bg-[#011F5B] text-white transition-colors hover:bg-[#0d2f7a]"
                 title="Share via Email"
               >
                 <span className="text-sm font-bold">✉</span>

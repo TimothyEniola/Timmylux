@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { createElement, useState } from "react";
 import { User, Shield, Bell, Settings, Save } from "lucide-react";
 import { toast } from "react-toastify";
 import useNotificationStore from "../store/notificationStore";
 import { getCurrentUser, setCurrentUser } from "../utils/userHelpers";
+import { readStoredJson } from "../utils/storage";
 
 export default function AdminSettings() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -16,7 +17,11 @@ export default function AdminSettings() {
     sms: false,
   });
 
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
+  const [formData, setFormData] = useState(() => {
+    const savedProfile = readStoredJson("adminProfile", null);
+    const user = getCurrentUser() || {};
+    return savedProfile || { name: user.name || "", email: user.email || "", phone: user.phone || "" };
+  });
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -24,7 +29,7 @@ export default function AdminSettings() {
     confirmPassword: "",
   });
 
-  const [policies, setPolicies] = useState({
+  const [policies, setPolicies] = useState(() => ({
     repairPolicy:
       "For repairs, please call our support team. We only provide repair services for goods purchased directly from us.",
     returnPolicy:
@@ -33,28 +38,8 @@ export default function AdminSettings() {
     warrantyInfo: "All furniture comes with a 1-year manufacturing defect warranty",
     supportPhone: "+234 814 083 8535",
     supportEmail: "support@timmyluxfurniture.com",
-  });
-
-  // Load saved data on mount
-  useEffect(() => {
-    const savedPolicies = localStorage.getItem("adminPolicies");
-    if (savedPolicies) setPolicies(JSON.parse(savedPolicies));
-
-    // Load profile: prefer adminProfile, fallback to currentUser
-    const savedProfile = localStorage.getItem("adminProfile");
-    if (savedProfile) {
-      setFormData(JSON.parse(savedProfile));
-    } else {
-      const user = getCurrentUser();
-      if (user) {
-        setFormData({
-          name: user.name || "",
-          email: user.email || "",
-          phone: user.phone || "",
-        });
-      }
-    }
-  }, []);
+    ...readStoredJson("adminPolicies", {}),
+  }));
 
   const handleProfileSave = (e) => {
     e.preventDefault();
@@ -109,7 +94,7 @@ export default function AdminSettings() {
           {/* Tabs */}
           <div className="border-b overflow-x-auto">
             <div className="flex min-w-max">
-              {tabs.map(({ id, label, icon: Icon }) => (
+              {tabs.map(({ id, label, icon }) => (
                 <button
                   key={id}
                   onClick={() => setActiveTab(id)}
@@ -119,7 +104,7 @@ export default function AdminSettings() {
                       : "text-gray-500 hover:text-[#011F5B]"
                   }`}
                 >
-                  <Icon size={15} />
+                  {createElement(icon, { size: 15 })}
                   {label}
                 </button>
               ))}
@@ -293,7 +278,7 @@ export default function AdminSettings() {
                           {!notif.read && (
                             <button
                               onClick={() => markAsRead(notif.id)}
-                              className="mt-2 text-xs text-blue-600 hover:underline"
+                              className="mt-2 text-xs text-[#011F5B] hover:underline"
                             >
                               Mark as read
                             </button>
@@ -319,14 +304,14 @@ export default function AdminSettings() {
                 </div>
 
                 {/* Repair Policy */}
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-5">
+                <div className="rounded-xl border border-navy/15 bg-navy/5 p-5">
                   <label className="block text-sm font-semibold text-[#011F5B] mb-2">
                     Repair & Service Policy
                   </label>
                   <textarea
                     value={policies.repairPolicy}
                     onChange={(e) => setPolicies({ ...policies, repairPolicy: e.target.value })}
-                    className="w-full border border-blue-200 p-3 rounded-lg min-h-[110px] focus:outline-none focus:ring-2 focus:ring-[#011F5B] text-sm resize-none"
+                    className="w-full min-h-[110px] rounded-lg border border-navy/20 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#011F5B] resize-none"
                   />
                 </div>
 

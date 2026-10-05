@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { User, Mail, Phone, MapPin, Calendar, Save, Edit, Upload } from "lucide-react";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function AdminProfile() {
   // Static admin data (frontend demo)
@@ -237,10 +238,10 @@ export default function AdminProfile() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <Link
                 to="/admin/products"
-                className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-              >
-                <User size={20} className="text-blue-600" />
-                <span className="font-medium text-blue-900">Manage Products</span>
+              className="flex items-center gap-3 p-4 rounded-lg bg-navy/5 transition-colors hover:bg-navy/10"
+            >
+              <User size={20} className="text-navy" />
+              <span className="font-medium text-navy">Manage Products</span>
               </Link>
 
               <Link
@@ -253,10 +254,10 @@ export default function AdminProfile() {
 
               <Link
                 to="/admin"
-                className="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
-              >
-                <Calendar size={20} className="text-purple-600" />
-                <span className="font-medium text-purple-900">Dashboard</span>
+              className="flex items-center gap-3 rounded-lg bg-primary/10 p-4 transition-colors hover:bg-primary/15"
+            >
+              <Calendar size={20} className="text-primary" />
+              <span className="font-medium text-navy">Dashboard</span>
               </Link>
             </div>
           </div>

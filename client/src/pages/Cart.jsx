@@ -1,10 +1,28 @@
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingBag, Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
+import useProductStore from "../store/productStore";
+import useCurrentTime from "../hooks/useCurrentTime";
+import { getProductPriceInfo } from "../utils/productPromotions";
 
 export default function Cart() {
-  const { items, removeItem, updateQuantity, getTotal } = useCartStore();
+  const { items, removeItem, updateQuantity } = useCartStore();
+  const products = useProductStore((state) => state.products);
+  const hasTimedProducts = products.some((product) => product.promotion);
+  const now = useCurrentTime(1000, hasTimedProducts);
+  const cartItems = useMemo(() => items.map((item) => {
+    const product = products.find((entry) => String(entry.id) === String(item.id));
+    if (!product) return item;
+    const selectedVariation = item.selectedVariation || product.variations?.[0];
+    const priceInfo = getProductPriceInfo(product, selectedVariation, now);
+    return { ...item, price: priceInfo.price };
+  }), [items, products, now]);
+  const total = useMemo(
+    () => cartItems.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0),
+    [cartItems]
+  );
 
   const handleRemoveItem = (item) => {
     removeItem(item.id);
@@ -22,7 +40,7 @@ export default function Cart() {
     }
   };
 
-  if (items.length === 0) {
+  if (cartItems.length === 0) {
     return (
       <div className="py-16 sm:py-20 px-4">
         <div className="container-custom text-center">
@@ -51,7 +69,7 @@ export default function Cart() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-6">
-            {items.map((item) => (
+            {cartItems.map((item) => (
               <div
                 key={item.id}
                 className="bg-white rounded-xl shadow-md p-4 sm:p-6 flex flex-col sm:flex-row gap-4"
@@ -130,7 +148,7 @@ export default function Cart() {
                 <div className="flex justify-between">
                   <span>Subtotal</span>
                   <span className="font-semibold">
-                    ₦{getTotal().toLocaleString()}
+                    ₦{total.toLocaleString()}
                   </span>
                 </div>
 
@@ -144,7 +162,7 @@ export default function Cart() {
                 <div className="border-t pt-3 flex justify-between">
                   <span className="text-lg font-bold">Total</span>
                   <span className="text-xl sm:text-2xl font-bold text-[#D4AF37]">
-                    ₦{getTotal().toLocaleString()}
+                    ₦{total.toLocaleString()}
                   </span>
                 </div>
               </div>

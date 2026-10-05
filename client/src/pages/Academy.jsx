@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import { CheckCircle, User, Mail, Phone, Briefcase, ChevronRight, Award, Clock, Users, BookOpen, AlertTriangle, MapPin } from "lucide-react";
+import { loadAcademyContent } from "../data/academyContent";
+import { readStoredArray, readStoredJson, readStoredString } from "../utils/storage";
 
 const Academy = () => {
   const [showApplicationForm, setShowApplicationForm] = useState(false);
@@ -34,82 +36,12 @@ const Academy = () => {
     },
   ];
 
-  const [academyStatus, setAcademyStatus] = useState("closed");
-  const [locations, setLocations] = useState(defaultLocations);
-  const [content, setContent] = useState({
-    heroTitle: "TimmyLux Academy",
-    heroSubtitle:
-      "Become a skilled furniture designer and interior craftsman. Learn practical, real-world skills and build a career in luxury furniture.",
-    heroStats: [
-      { num: "6mo", label: "Intensive program" },
-      { num: "4+", label: "Core skill areas" },
-      { num: "100%", label: "Hands-on training" },
-      { num: "₦100k", label: "Total fee (2 installments)" },
-    ],
-    requirementsTitle: "Admission Requirements",
-    requirements: [
-      {
-        title: "Basic Education",
-        description:
-          "Applicants should have at least a secondary school education and basic understanding of English.",
-      },
-      {
-        title: "Passion for Craft",
-        description:
-          "You must have a strong interest in furniture design, woodworking, or interior styling.",
-      },
-      {
-        title: "Commitment",
-        description:
-          "Willingness to complete the full training program and participate in hands-on sessions.",
-      },
-      {
-        title: "Acceptance Fee",
-        description:
-          "A non-refundable acceptance fee of ₦30,000 is required upon admission.",
-      },
-    ],
-    programTitle: "Program Structure",
-    program: [
-      { title: "Duration", description: "3 - 6 months intensive training (practical & theory)." },
-      { title: "Hands-on Training", description: "Work directly with tools, materials, and real client projects." },
-      { title: "Mentorship", description: "Learn directly from experienced craftsmen and designers." },
-      { title: "Certification", description: "Receive a TimmyLux Academy certificate upon successful completion." },
-    ],
-    sectionTitle: "What You Will Learn",
-    offerings: [
-      { title: "Furniture Design", description: "Understand modern and luxury furniture design principles and concepts." },
-      { title: "Woodworking Skills", description: "Learn cutting, shaping, polishing, and finishing techniques." },
-      { title: "Interior Design Basics", description: "Understand how furniture fits into complete interior spaces." },
-      { title: "Business & Client Work", description: "Learn how to work with clients, pricing, and running your own furniture business." },
-    ],
-    ctaTitle: "Start Your Journey Today",
-    ctaSubtitle: "Take the first step into a profitable and creative career in furniture design.",
-    ctaButtonText: "Apply Now",
-    rulesTitle: "Academy Rules",
-    rulesDescription: "A safe and focused environment is essential. All students must follow academy rules.",
-    rules: [
-      { title: "No Smoking", description: "Smoking is strictly prohibited anywhere on academy premises." },
-      { title: "No Drinking", description: "Alcohol and intoxicants are not allowed in the academy environment." },
-      { title: "No Fighting", description: "Physical fights or disorderly conduct will result in immediate removal." },
-      { title: "No Cultist Activity", description: "Any cult-related behavior, symbols, or gatherings are banned." },
-      { title: "Respect Instructors", description: "Listen to trainers, arrive on time, and stay focused during sessions." },
-    ],
+  const [academyStatus] = useState(() => readStoredString("academyStatus", "closed"));
+  const [locations] = useState(() => {
+    const saved = readStoredJson("academyLocations", null);
+    return Array.isArray(saved) && saved.length ? saved : defaultLocations;
   });
-
-  useEffect(() => {
-    const saved = localStorage.getItem("academyContent");
-    if (saved) setContent(JSON.parse(saved));
-
-    const savedStatus = localStorage.getItem("academyStatus");
-    if (savedStatus) setAcademyStatus(savedStatus);
-
-    const savedLocations = localStorage.getItem("academyLocations");
-    if (savedLocations) {
-      const parsed = JSON.parse(savedLocations);
-      if (parsed.length > 0) setLocations(parsed);
-    }
-  }, []);
+  const [content] = useState(loadAcademyContent);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -128,7 +60,7 @@ const Academy = () => {
       submittedAt: new Date().toISOString(),
       status: "pending",
     };
-    const existingApps = JSON.parse(localStorage.getItem("academyApplications") || "[]");
+    const existingApps = readStoredArray("academyApplications");
     existingApps.push(application);
     localStorage.setItem("academyApplications", JSON.stringify(existingApps));
     setApplicationSubmitted(true);
@@ -170,8 +102,7 @@ const Academy = () => {
           </span>
 
           <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">
-            TimmyLux{" "}
-            <span style={{ color: "#D4AF37" }}>Academy</span>
+            {content.heroTitle}
           </h1>
 
           <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-12 leading-relaxed">

@@ -102,7 +102,7 @@ const About = () => {
             <p className="text-gray-700">📞 +234 8140838535</p>
             <p className="text-gray-700">📧 timothyyemitan@gmail.com</p>
             <p className="text-gray-700">
-              🌐 Portfolio: <a href="https://timmyluxfurniture-interiorcreation.vercel.app/" className="text-blue-600 underline">timmyluxfurniture-interiorcreation.vercel.app</a> | Instagram: <a href="https://instagram.com/timmy_lux" className="text-blue-600 underline">@timmy_lux</a>
+              🌐 Portfolio: <a href="https://timmyluxfurniture-interiorcreation.vercel.app/" className="text-[#D4AF37] underline">timmyluxfurniture-interiorcreation.vercel.app</a> | Instagram: <a href="https://instagram.com/timmy_lux" className="text-[#D4AF37] underline">@timmy_lux</a>
             </p>
           </div>
 

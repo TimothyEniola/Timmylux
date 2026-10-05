@@ -53,7 +53,7 @@ export default function AdminTopBar({ collapsed }) {
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllAsRead}
-                        className="text-xs text-blue-600"
+                        className="text-xs text-primary"
                       >
                         Mark all
                       </button>
@@ -71,13 +71,13 @@ export default function AdminTopBar({ collapsed }) {
                           key={notif.id}
                           onClick={() => markAsRead(notif.id)}
                           className={`p-3 border-b text-sm cursor-pointer ${
-                            !notif.read ? "bg-blue-50" : ""
+                            !notif.read ? "bg-navy/5" : ""
                           }`}
                         >
                           <div className="flex gap-2">
                             <div
                               className={`w-2 h-2 mt-2 rounded-full ${
-                                notif.read ? "bg-gray-300" : "bg-blue-500"
+                                notif.read ? "bg-gray-300" : "bg-primary"
                               }`}
                             />
                             <div className="flex-1">
@@ -87,7 +87,7 @@ export default function AdminTopBar({ collapsed }) {
                               </p>
                             </div>
                             {!notif.read && (
-                              <Check size={14} className="text-blue-500" />
+                              <Check size={14} className="text-primary" />
                             )}
                           </div>
                         </div>
@@ -136,7 +136,7 @@ export default function AdminTopBar({ collapsed }) {
                   {unreadCount > 0 && (
                     <button
                       onClick={markAllAsRead}
-                      className="text-xs text-blue-600"
+                      className="text-xs text-primary"
                     >
                       Mark all
                     </button>
@@ -154,13 +154,13 @@ export default function AdminTopBar({ collapsed }) {
                         key={notif.id}
                         onClick={() => markAsRead(notif.id)}
                         className={`p-4 border-b cursor-pointer ${
-                          !notif.read ? "bg-blue-50" : ""
+                          !notif.read ? "bg-navy/5" : ""
                         }`}
                       >
                         <div className="flex gap-3">
                           <div
                             className={`w-2 h-2 mt-2 rounded-full ${
-                              notif.read ? "bg-gray-300" : "bg-blue-500"
+                                notif.read ? "bg-gray-300" : "bg-primary"
                             }`}
                           />
                           <div className="flex-1">
@@ -172,7 +172,7 @@ export default function AdminTopBar({ collapsed }) {
                             </p>
                           </div>
                           {!notif.read && (
-                            <Check size={14} className="text-blue-500" />
+                              <Check size={14} className="text-primary" />
                           )}
                         </div>
                       </div>

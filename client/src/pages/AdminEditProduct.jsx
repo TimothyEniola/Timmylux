@@ -1,41 +1,45 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Upload, Save, X, Plus, Trash2 } from "lucide-react";
-import { products } from "../data/Products";
+import { Save, X, Plus, Trash2 } from "lucide-react";
+import PromotionFields from "../components/PromotionFields";
+import useProductStore from "../store/productStore";
+import { toDateTimeLocal, toIsoDateTime } from "../utils/productPromotions";
 
 export default function AdminEditProduct() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    name: "",
-    category: "",
-    price: "",
-    collection: "",
-    description: "",
-    featured: false,
-    available: true,
-    variations: []
-  });
-
-  const [imagePreview, setImagePreview] = useState(null);
-
-  useEffect(() => {
-    const product = products.find(p => p.id === parseInt(id));
-    if (product) {
-      setFormData({
-        name: product.name,
-        category: product.category,
-        price: product.price,
-        collection: product.collection || "",
-        description: product.description || "",
-        featured: product.featured || false,
-        available: product.available !== false,
-        variations: product.variations || []
-      });
-      setImagePreview(product.variations?.[0]?.image || product.image);
+  const product = useProductStore((state) => state.products.find((item) => String(item.id) === String(id)));
+  const updateProduct = useProductStore((state) => state.updateProduct);
+  const [promotion, setPromotion] = useState(() => ({
+    discountValue: product?.promotion?.discountValue ? String(product.promotion.discountValue) : "",
+    startsAt: toDateTimeLocal(product?.promotion?.startsAt),
+    endsAt: toDateTimeLocal(product?.promotion?.endsAt),
+  }));
+  const [formData, setFormData] = useState(() => {
+    if (!product) {
+      return {
+        name: "",
+        category: "",
+        price: "",
+        collection: "",
+        description: "",
+        featured: false,
+        available: true,
+        variations: [],
+      };
     }
-  }, [id]);
+    return {
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      collection: product.collection || "",
+      description: product.description || "",
+      featured: Boolean(product.featured),
+      available: product.available !== false,
+      variations: product.variations || [],
+    };
+  });
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -74,7 +78,29 @@ export default function AdminEditProduct() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    toast.success("Product updated successfully! (Frontend only)");
+    const hasPromotion = Object.values(promotion).some(Boolean);
+    let savedPromotion = null;
+    if (hasPromotion) {
+      const discountValue = Number(promotion.discountValue);
+      const startsAt = toIsoDateTime(promotion.startsAt);
+      const endsAt = toIsoDateTime(promotion.endsAt);
+      if (!Number.isFinite(discountValue) || discountValue <= 0 || discountValue > 100 || !startsAt || !endsAt || Date.parse(endsAt) <= Date.parse(startsAt)) {
+        toast.error("Enter a discount from 1–100% and a valid end time after the start time.");
+        return;
+      }
+      savedPromotion = { discountType: "percentage", discountValue, startsAt, endsAt };
+    }
+
+    updateProduct(id, {
+      ...formData,
+      price: Number(formData.price),
+      variations: formData.variations.map((variation) => ({
+        ...variation,
+        price: variation.price ? Number(variation.price) : Number(formData.price),
+      })),
+      promotion: savedPromotion,
+    });
+    toast.success("Product updated successfully!");
     navigate("/admin/products");
   };
 
@@ -93,7 +119,11 @@ export default function AdminEditProduct() {
           </button>
         </div>
 
-        <form
+        {!product ? (
+          <div className="rounded-lg border border-gray-200 bg-white p-8 text-center text-gray-600">
+            Product not found. Return to the product list and choose another item.
+          </div>
+        ) : <form
           onSubmit={handleSubmit}
           className="bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md space-y-6"
         >
@@ -127,7 +157,7 @@ export default function AdminEditProduct() {
                 <option value="">Select Category</option>
                 <option value="Living Room">Living Room</option>
                 <option value="Bedroom">Bedroom</option>
-                <option value="Dining Room">Dining Room</option>
+                 <option value="Dining">Dining</option>
                 <option value="Office">Office</option>
                 <option value="Outdoor">Outdoor</option>
               </select>
@@ -176,6 +206,8 @@ export default function AdminEditProduct() {
               placeholder="Product description..."
             />
           </div>
+
+          <PromotionFields value={promotion} onChange={setPromotion} />
 
           {/* Checkboxes */}
           <div className="flex flex-wrap gap-6">
@@ -317,7 +349,7 @@ export default function AdminEditProduct() {
               <Save size={20} /> Update Product
             </button>
           </div>
-        </form>
+        </form>}
       </div>
     </div>
   );

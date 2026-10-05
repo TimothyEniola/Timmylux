@@ -1,138 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Save, Edit3, Plus, Trash2, CheckCircle, Clock, X } from "lucide-react";
 import { toast } from "react-toastify";
 import useNotificationStore from "../store/notificationStore";
+import { loadAcademyContent } from "../data/academyContent";
+import { readStoredArray, readStoredString } from "../utils/storage";
 
 export default function AdminAcademy() {
   const { addNotification } = useNotificationStore();
   const [activeTab, setActiveTab] = useState("content");
   const [isEditing, setIsEditing] = useState(false);
-  const [applications, setApplications] = useState([]);
+  const [applications, setApplications] = useState(() => readStoredArray("academyApplications"));
   const [selectedApp, setSelectedApp] = useState(null);
-  const [academyStatus, setAcademyStatus] = useState("closed"); // "opened" or "closed"
-  const [graduationStudents, setGraduationStudents] = useState([]);
+  const [academyStatus, setAcademyStatus] = useState(() => readStoredString("academyStatus", "closed"));
+  const [graduationStudents, setGraduationStudents] = useState(() => readStoredArray("graduationStudents"));
 
-  // Locations state
   const emptyLocationForm = { name: "", address: "", city: "", state: "", phone: "", hours: "" };
-  const [locations, setLocations] = useState([]);
+  const [locations, setLocations] = useState(() => readStoredArray("academyLocations"));
   const [locationForm, setLocationForm] = useState(emptyLocationForm);
   const [editingLocationId, setEditingLocationId] = useState(null);
-  const [content, setContent] = useState({
-    heroTitle: "TimmyLux Academy",
-    heroSubtitle: "Become a skilled furniture designer and interior craftsman. Learn practical, real-world skills and build a career in luxury furniture.",
-    heroStats: [
-      { num: "6mo", label: "Intensive program" },
-      { num: "4+", label: "Core skill areas" },
-      { num: "100%", label: "Hands-on training" },
-      { num: "₦100k", label: "Total fee (2 installments)" },
-    ],
-    requirementsTitle: "Admission Requirements",
-    requirements: [
-      {
-        title: "Basic Education",
-        description: "Applicants should have at least a secondary school education and basic understanding of English."
-      },
-      {
-        title: "Passion for Craft",
-        description: "You must have a strong interest in furniture design, woodworking, or interior styling."
-      },
-      {
-        title: "Commitment",
-        description: "Willingness to complete the full training program and participate in hands-on sessions."
-      },
-      {
-        title: "Acceptance Fee",
-        description: "A non-refundable acceptance fee of ₦30,000 is required upon admission."
-      }
-    ],
-    programTitle: "Program Structure",
-    program: [
-      {
-        title: "Duration",
-        description: "3 - 6 months intensive training (practical & theory)."
-      },
-      {
-        title: "Hands-on Training",
-        description: "Work directly with tools, materials, and real client projects."
-      },
-      {
-        title: "Mentorship",
-        description: "Learn directly from experienced craftsmen and designers."
-      },
-      {
-        title: "Certification",
-        description: "Receive a TimmyLux Academy certificate upon successful completion."
-      }
-    ],
-    sectionTitle: "What You Will Learn",
-    offerings: [
-      {
-        title: "Furniture Design",
-        description: "Understand modern and luxury furniture design principles and concepts."
-      },
-      {
-        title: "Woodworking Skills",
-        description: "Learn cutting, shaping, polishing, and finishing techniques."
-      },
-      {
-        title: "Interior Design Basics",
-        description: "Understand how furniture fits into complete interior spaces."
-      },
-      {
-        title: "Business & Client Work",
-        description: "Learn how to work with clients, pricing, and running your own furniture business."
-      }
-    ],
-    ctaTitle: "Start Your Journey Today",
-    ctaSubtitle: "Take the first step into a profitable and creative career in furniture design.",
-    ctaButtonText: "Apply Now",
-    rulesTitle: "Academy Rules",
-    rulesDescription: "A safe and focused environment is essential. All students must follow academy rules before admission.",
-    rules: [
-      { title: "No Smoking", description: "Smoking is strictly prohibited anywhere on academy premises." },
-      { title: "No Drinking", description: "Alcohol and intoxicants are not allowed in the academy environment." },
-      { title: "No Fighting", description: "Physical fights or disorderly conduct will result in immediate removal." },
-      { title: "No Cultist Activity", description: "Any cult-related behavior, symbols, or gatherings are banned." },
-      { title: "Respect Instructors", description: "Listen to trainers, arrive on time, and stay focused during sessions." },
-    ],
-    disciplineTitle: "Discipline Guidelines",
-    disciplineText: "Students must maintain professionalism, respect instructors and peers, keep the learning space clean, and follow all training schedules. Failure to comply may lead to dismissal from the program.",
-    statusOpenText: "The academy is open for applications. Students can apply, view the program details, and complete the admission process.",
-    statusClosedText: "The academy is currently closed. Students will see a notification that it is not open yet and will be notified when applications reopen.",
-    graduationNote: "Final year students will complete graduation after finishing the academy program and paying the required fees." 
-  });
-
-  // Load content from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('academyContent');
-    if (saved) {
-      setContent(JSON.parse(saved));
-    }
-    
-    // Load applications
-    const savedApps = localStorage.getItem('academyApplications');
-    if (savedApps) {
-      setApplications(JSON.parse(savedApps));
-    }
-
-    // Load academy status
-    const savedStatus = localStorage.getItem('academyStatus');
-    if (savedStatus) {
-      setAcademyStatus(savedStatus);
-    }
-
-    // Load graduation students
-    const savedGraduates = localStorage.getItem('graduationStudents');
-    if (savedGraduates) {
-      setGraduationStudents(JSON.parse(savedGraduates));
-    }
-
-    // Load locations
-    const savedLocations = localStorage.getItem('academyLocations');
-    if (savedLocations) {
-      setLocations(JSON.parse(savedLocations));
-    }
-  }, []);
+  const [content, setContent] = useState(loadAcademyContent);
 
   const handleSave = () => {
     localStorage.setItem('academyContent', JSON.stringify(content));
@@ -856,7 +742,7 @@ export default function AdminAcademy() {
             <div className="bg-white p-6 rounded-lg shadow-md">
               <button
                 onClick={() => setSelectedApp(null)}
-                className="mb-4 text-blue-600 hover:text-blue-800 flex items-center gap-2"
+                className="mb-4 flex items-center gap-2 text-navy hover:text-primary"
               >
                 ← Back to Applications
               </button>
@@ -997,7 +883,7 @@ export default function AdminAcademy() {
                         </span>
                         <button
                           onClick={() => setSelectedApp(app)}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          className="text-sm font-medium text-navy hover:text-primary"
                         >
                           View Details
                         </button>
@@ -1185,7 +1071,7 @@ export default function AdminAcademy() {
                       <div className="flex gap-1 flex-shrink-0">
                         <button
                           onClick={() => startEditLocation(loc)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                          className="rounded-lg p-2 text-navy transition hover:bg-navy/5"
                           title="Edit location"
                         >
                           <Edit3 size={16} />

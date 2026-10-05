@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { User, Shield, Bell } from "lucide-react";
 import { toast } from "react-toastify";
 import { getCurrentUser, setCurrentUser } from "../utils/userHelpers";
 import useNotificationStore from "../store/notificationStore";
+import { readStoredJson } from "../utils/storage";
 
 export default function UserSettings() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -14,34 +15,22 @@ export default function UserSettings() {
     sms: false,
   });
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
+  const [formData, setFormData] = useState(() => {
+    const currentUser = getCurrentUser() || {};
+    return {
+      name: currentUser.name || "",
+      email: currentUser.email || "",
+      phone: currentUser.phone || "",
+    };
   });
 
-  const [addressData, setAddressData] = useState({
+  const [addressData, setAddressData] = useState(() => ({
     street: "",
     lga: "",
     state: "",
     houseNumber: "",
-  });
-
-  useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      setFormData({
-        name: currentUser.name || "",
-        email: currentUser.email || "",
-        phone: currentUser.phone || "",
-      });
-    }
-
-    const savedAddress = localStorage.getItem("userAddress");
-    if (savedAddress) {
-      setAddressData(JSON.parse(savedAddress));
-    }
-  }, []);
+    ...readStoredJson("userAddress", {}),
+  }));
 
   const handleProfileSubmit = (e) => {
     e.preventDefault();
@@ -342,7 +331,7 @@ export default function UserSettings() {
                           {!notif.read && (
                             <button
                               onClick={() => markAsRead(notif.id)}
-                              className="mt-3 text-xs text-blue-600 hover:underline"
+                              className="mt-3 text-xs text-[#011F5B] hover:underline"
                             >
                               Mark as read
                             </button>
