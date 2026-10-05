@@ -39,6 +39,24 @@ export default function ProductDetails() {
   const priceInfo = getProductPriceInfo(product, selectedVariation, now);
 
   useEffect(() => {
+    if (!product?.variations || product.variations.length < 2) {
+      return undefined;
+    }
+
+    const variationOrder = product.variations.map((variation) => variation.id);
+
+    const intervalId = window.setInterval(() => {
+      setSelectedVariationId((currentId) => {
+        const currentIndex = variationOrder.indexOf(currentId ?? selectedVariation?.id ?? variationOrder[0]);
+        const nextIndex = (currentIndex + 1) % variationOrder.length;
+        return variationOrder[nextIndex];
+      });
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, [product, selectedVariation?.id]);
+
+  useEffect(() => {
     if (location.hash !== "#variations") return undefined;
     const timerId = window.setTimeout(() => {
       document.getElementById("variations")?.scrollIntoView({ behavior: "smooth" });

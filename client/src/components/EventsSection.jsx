@@ -19,6 +19,11 @@ import { Link } from "react-router-dom";
 import { readStoredArray } from "../utils/storage";
 import useCurrentTime from "../hooks/useCurrentTime";
 
+const MS_IN_SECOND = 1000;
+const MS_IN_MINUTE = 60 * MS_IN_SECOND;
+const MS_IN_HOUR = 60 * MS_IN_MINUTE;
+const MS_IN_DAY = 24 * MS_IN_HOUR;
+
 const eventIcons = {
   discount: Percent,
   gift: Gift,
@@ -45,9 +50,86 @@ function getEventTarget(event) {
   return event.type === "program" ? "/academy" : "/products";
 }
 
+function getDateTime(dateValue, timeValue) {
+  if (!dateValue) return null;
+
+  const isoString = timeValue ? `${dateValue}T${timeValue}` : `${dateValue}T23:59`;
+  const parsedDate = new Date(isoString);
+
+  if (Number.isNaN(parsedDate.getTime())) return null;
+  return parsedDate;
+}
+
+function getCountdownState(event, now) {
+  const startDate = getDateTime(event?.startDate, event?.startTime);
+  const endDate = getDateTime(event?.endDate, event?.endTime);
+
+  if (!startDate && !endDate) return null;
+
+  if (startDate && now < startDate.getTime()) {
+    return {
+      label: "Starts in",
+      targetTime: startDate.getTime(),
+      status: "upcoming",
+    };
+  }
+
+  if (endDate && now <= endDate.getTime()) {
+    return {
+      label: "Ends in",
+      targetTime: endDate.getTime(),
+      status: "active",
+    };
+  }
+
+  if (endDate && now > endDate.getTime()) {
+    return {
+      label: "Ended",
+      targetTime: endDate.getTime(),
+      status: "ended",
+    };
+  }
+
+  if (startDate && now >= startDate.getTime()) {
+    return {
+      label: "Ends in",
+      targetTime: endDate ? endDate.getTime() : startDate.getTime(),
+      status: "active",
+    };
+  }
+
+  return null;
+}
+
+function formatCountdown(msLeft) {
+  const safeMs = Math.max(msLeft, 0);
+  const days = Math.floor(safeMs / MS_IN_DAY);
+  const hours = Math.floor((safeMs % MS_IN_DAY) / MS_IN_HOUR);
+  const minutes = Math.floor((safeMs % MS_IN_HOUR) / MS_IN_MINUTE);
+  const seconds = Math.floor((safeMs % MS_IN_MINUTE) / MS_IN_SECOND);
+
+  if (days > 0) {
+    return `${days}d ${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m`;
+  }
+
+  return `${String(hours).padStart(2, "0")}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
+}
+
+function getCountdownStyle(timeLeftMs, status) {
+  if (status === "ended") {
+    return "border-red-400/50 bg-red-500/10 text-red-200";
+  }
+
+  if (timeLeftMs <= 12 * MS_IN_HOUR) {
+    return "border-red-400/50 bg-red-500/10 text-red-200";
+  }
+
+  return "border-emerald-400/50 bg-emerald-500/10 text-emerald-200";
+}
+
 export default function EventsSection() {
   const [events] = useState(() => readStoredArray("adminEvents"));
-  const hasTimedEvents = events.some((event) => event.endDate);
+  const hasTimedEvents = events.some((event) => event.startDate || event.endDate);
   const now = useCurrentTime(1000, hasTimedEvents);
   const [copiedCode, setCopiedCode] = useState(null);
   const visibleEvents = useMemo(() => events.filter((event) => isCurrentOrUpcoming(event, now)), [events, now]);
@@ -138,6 +220,23 @@ export default function EventsSection() {
                       {event.location && <div className="flex items-center gap-2"><MapPin size={14} aria-hidden="true" />{event.location}</div>}
                       {event.maxAttendees && <div className="flex items-center gap-2"><Users size={14} aria-hidden="true" />{event.maxAttendees} seats</div>}
                     </div>
+
+                    {(() => {
+                      const countdown = getCountdownState(event, now);
+
+                      if (!countdown) return null;
+
+                      const timeLeft = Math.max(countdown.targetTime - now, 0);
+                      const badgeColor = getCountdownStyle(timeLeft, countdown.status);
+
+                      return (
+                        <div className={`mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium ${badgeColor}`}>
+                          <Clock size={12} aria-hidden="true" />
+                          <span>{countdown.label}</span>
+                          <span>{formatCountdown(timeLeft)}</span>
+                        </div>
+                      );
+                    })()}
 
                     {isExternal ? (
                       <a href={target} target="_blank" rel="noreferrer" className={actionClass}>
