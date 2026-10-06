@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Award,
   Calendar,
@@ -15,7 +15,15 @@ import {
   ArrowRight,
   BookOpen,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
+import ShareButton from "./ShareButton";
+import {
+  copyTextToClipboard,
+  createEventShareText,
+  getEventAnchorId,
+  getEventShareUrl,
+} from "../utils/eventSharing";
 import { readStoredArray } from "../utils/storage";
 import useCurrentTime from "../hooks/useCurrentTime";
 
@@ -116,38 +124,45 @@ function formatCountdown(msLeft) {
 }
 
 function getCountdownStyle(timeLeftMs, status) {
-  if (status === "ended") {
-    return "border-red-400/50 bg-red-500/10 text-red-200";
+  if (status === "ended" || timeLeftMs <= 12 * MS_IN_HOUR) {
+    return "border-red-200 bg-red-50 text-red-700";
   }
 
-  if (timeLeftMs <= 12 * MS_IN_HOUR) {
-    return "border-red-400/50 bg-red-500/10 text-red-200";
-  }
-
-  return "border-emerald-400/50 bg-emerald-500/10 text-emerald-200";
+  return "border-emerald-200 bg-emerald-50 text-emerald-800";
 }
 
 export default function EventsSection() {
+  const location = useLocation();
   const [events] = useState(() => readStoredArray("adminEvents"));
   const hasTimedEvents = events.some((event) => event.startDate || event.endDate);
   const now = useCurrentTime(1000, hasTimedEvents);
   const [copiedCode, setCopiedCode] = useState(null);
   const visibleEvents = useMemo(() => events.filter((event) => isCurrentOrUpcoming(event, now)), [events, now]);
 
+  useEffect(() => {
+    if (!location.hash) return undefined;
+    const frameId = window.requestAnimationFrame(() => {
+      document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
+    });
+    return () => window.cancelAnimationFrame(frameId);
+  }, [location.hash, visibleEvents.length]);
+
   const handleCopy = async (code) => {
     try {
-      await navigator.clipboard.writeText(code);
+      await copyTextToClipboard(code);
       setCopiedCode(code);
+      toast.success("Promo code copied.");
       window.setTimeout(() => setCopiedCode(null), 2000);
     } catch {
       setCopiedCode(null);
+      toast.error("Could not copy the promo code. Please copy it manually.");
     }
   };
 
   return (
-    <section className="relative overflow-hidden bg-navy px-6 py-20 text-white sm:py-24">
+    <section id="events" className="relative overflow-hidden bg-[#F7F6F1] px-6 py-20 text-navy sm:py-24">
       <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-white/5 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-80 w-80 rounded-full bg-navy/5 blur-3xl" />
 
       <div className="relative mx-auto max-w-7xl">
         <div className="mb-12 flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-end">
@@ -155,14 +170,14 @@ export default function EventsSection() {
             <div className="mb-4 flex items-center gap-2 text-xs uppercase tracking-widest text-primary">
               <Sparkles size={14} aria-hidden="true" /> TimmyLux updates
             </div>
-            <h2 className="text-4xl font-bold leading-tight md:text-5xl">
+            <h2 className="text-4xl font-bold leading-tight text-navy md:text-5xl">
               Programs <span className="text-primary">& Events</span>
             </h2>
-            <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/65">
+            <p className="mt-4 max-w-lg text-sm leading-relaxed text-gray-600">
               See the programs, events, and promotions published by TimmyLux.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-white px-4 py-2 text-sm font-medium text-navy shadow-sm">
             <Calendar size={14} aria-hidden="true" />
             {visibleEvents.length} upcoming or active {visibleEvents.length === 1 ? "program" : "programs"}
           </div>
@@ -174,15 +189,18 @@ export default function EventsSection() {
               const Icon = eventIcons[event.type] || Calendar;
               const target = getEventTarget(event);
               const isExternal = /^https?:\/\//i.test(target);
-              const actionClass = "flex items-center justify-between rounded-lg border border-primary/40 px-4 py-3 text-primary transition-colors hover:bg-primary hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+              const actionClass = "flex items-center justify-between rounded-lg border border-primary/50 px-4 py-3 text-navy transition-colors hover:bg-primary hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+              const shareTitle = event.title || "TimmyLux event";
+              const shareText = createEventShareText(event);
+              const shareUrl = getEventShareUrl(event);
 
               return (
-                <article key={event.id} className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-transform duration-300 hover:-translate-y-1">
-                  <div className="relative h-52 overflow-hidden bg-white/5">
+                <article id={getEventAnchorId(event)} key={event.id} className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
+                  <div className="relative h-52 overflow-hidden bg-stone-100">
                     {event.image ? (
                       <img src={event.image} alt={event.title || "TimmyLux event"} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" decoding="async" />
                     ) : (
-                      <div className="flex h-full items-center justify-center text-white/50"><Icon size={40} aria-hidden="true" /></div>
+                      <div className="flex h-full items-center justify-center text-navy/45"><Icon size={40} aria-hidden="true" /></div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-navy/90 to-transparent" />
                     <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-navy/80 px-3 py-1 text-xs uppercase text-primary">
@@ -196,13 +214,13 @@ export default function EventsSection() {
                   </div>
 
                   <div className="p-5 sm:p-6">
-                    <h3 className="mb-2 text-xl font-semibold text-white group-hover:text-primary">{event.title}</h3>
-                    <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-white/65">{event.description}</p>
+                    <h3 className="mb-2 text-xl font-semibold text-navy transition-colors group-hover:text-primary">{event.title}</h3>
+                    <p className="mb-4 line-clamp-3 text-sm leading-relaxed text-gray-600">{event.description}</p>
 
                     {event.promoCode && (
-                      <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-dashed border-primary/40 bg-primary/5 px-4 py-3">
+                      <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-dashed border-primary/50 bg-[#F7F6F1] px-4 py-3">
                         <div>
-                          <p className="text-[10px] uppercase text-white/45">Promo code</p>
+                          <p className="text-[10px] uppercase text-gray-500">Promo code</p>
                           <p className="font-bold tracking-widest text-primary">{event.promoCode}</p>
                         </div>
                         <button type="button" onClick={() => handleCopy(event.promoCode)} className="rounded border border-primary/40 px-3 py-1 text-xs text-primary hover:bg-primary/15" aria-label={`Copy promo code ${event.promoCode}`}>
@@ -211,7 +229,7 @@ export default function EventsSection() {
                       </div>
                     )}
 
-                    <div className="mb-5 space-y-2 text-sm text-white/60">
+                    <div className="mb-5 space-y-2 text-sm text-gray-600">
                       {(event.startDate || event.startTime) && (
                         <div className="flex items-center gap-2"><Clock size={14} aria-hidden="true" />
                           {event.startDate && !Number.isNaN(Date.parse(event.startDate)) ? new Date(event.startDate).toLocaleDateString() : ""}{event.startTime ? ` · ${event.startTime}` : ""}
@@ -238,25 +256,28 @@ export default function EventsSection() {
                       );
                     })()}
 
-                    {isExternal ? (
-                      <a href={target} target="_blank" rel="noreferrer" className={actionClass}>
-                        <span>{event.type === "program" ? "View program" : "Explore offer"}</span><ArrowRight size={16} aria-hidden="true" />
-                      </a>
-                    ) : (
-                      <Link to={target} className={actionClass}>
-                        <span>{event.type === "program" ? "View program" : "Explore offer"}</span><ArrowRight size={16} aria-hidden="true" />
-                      </Link>
-                    )}
+                    <div className="flex flex-col gap-3">
+                      {isExternal ? (
+                        <a href={target} target="_blank" rel="noreferrer" className={actionClass}>
+                          <span>{event.type === "program" ? "View program" : "Explore offer"}</span><ArrowRight size={16} aria-hidden="true" />
+                        </a>
+                      ) : (
+                        <Link to={target} className={actionClass}>
+                          <span>{event.type === "program" ? "View program" : "Explore offer"}</span><ArrowRight size={16} aria-hidden="true" />
+                        </Link>
+                      )}
+                      <ShareButton title={shareTitle} text={shareText} url={shareUrl} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-navy/15 px-4 py-2 text-sm font-semibold text-navy transition-colors hover:border-primary hover:bg-[#F7F6F1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />
+                    </div>
                   </div>
                 </article>
               );
             })}
           </div>
         ) : (
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-10 text-center">
+          <div className="rounded-2xl border border-stone-200 bg-white px-6 py-10 text-center shadow-sm">
             <Calendar className="mx-auto mb-3 text-primary" size={28} aria-hidden="true" />
-            <h3 className="font-semibold text-white">No upcoming programs or events</h3>
-            <p className="mt-2 text-sm text-white/60">New announcements and offers will appear here when published.</p>
+            <h3 className="font-semibold text-navy">No upcoming programs or events</h3>
+            <p className="mt-2 text-sm text-gray-600">New announcements and offers will appear here when published.</p>
             <Link to="/academy" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
               Explore TimmyLux Academy <ArrowRight size={15} aria-hidden="true" />
             </Link>

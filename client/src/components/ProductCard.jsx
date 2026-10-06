@@ -1,10 +1,11 @@
 import { memo } from "react";
-import { Clock, Eye, EyeOff, Heart, ShoppingCart, Star } from "lucide-react";
+import { Clock, Eye, Heart, Package, ShoppingCart, Star } from "lucide-react";
 import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { formatRemainingTime, getProductPriceInfo } from "../utils/productPromotions";
+import { isMadeToOrder } from "../utils/productAvailability";
 
 const ProductCard = memo(function ProductCard({ product, showDiscount = false }) {
   const addToCart = useCartStore((state) => state.addItem);
@@ -26,7 +27,6 @@ const ProductCard = memo(function ProductCard({ product, showDiscount = false })
   const wishlisted = isInWishlist(product.id);
 
   const handleAddToCart = () => {
-    if (!product?.available) return;
     const cartProduct = {
       ...product,
       price: priceInfo.price,
@@ -35,10 +35,12 @@ const ProductCard = memo(function ProductCard({ product, showDiscount = false })
       selectedVariation: product.variations?.[0] || null,
     };
     addToCart(cartProduct);
-    toast.success(`${product.name} added to cart!`, {
-      position: "top-right",
-      autoClose: 3000,
-    });
+    toast.success(
+      isMadeToOrder(product)
+        ? `${product.name} added as a made-to-order request.`
+        : `${product.name} added to cart!`,
+      { position: "top-right", autoClose: 3000 }
+    );
   };
 
   const handleWishlistToggle = () => {
@@ -90,21 +92,21 @@ const ProductCard = memo(function ProductCard({ product, showDiscount = false })
           <button
             type="button"
             onClick={handleAddToCart}
-            disabled={!product?.available}
-            className="rounded-full bg-white p-2 text-gray-600 shadow-lg transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label={`Add ${product.name} to cart`}
-            title="Add to Cart"
+            className="rounded-full bg-white p-2 text-gray-600 shadow-lg transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--navy)"
+            aria-label={`${isMadeToOrder(product) ? "Request build" : "Add"} ${product.name} to cart`}
+            title={isMadeToOrder(product) ? "Request this made-to-order item" : "Add to Cart"}
           >
             <ShoppingCart size={16} aria-hidden="true" />
           </button>
 
           <span
             className={`rounded-full p-2 text-white shadow-lg ${
-              product?.available ? "bg-green-600" : "bg-red-500"
+              product?.available ? "bg-green-700" : "bg-amber-700"
             }`}
-            aria-label={product?.available ? "In stock" : "Out of stock"}
+            aria-label={product?.available ? "In stock" : "Made to order"}
+            title={product?.available ? "In stock" : "Made to order"}
           >
-            {product?.available ? <Eye size={16} aria-hidden="true" /> : <EyeOff size={16} aria-hidden="true" />}
+            {product?.available ? <Eye size={16} aria-hidden="true" /> : <Package size={16} aria-hidden="true" />}
           </span>
         </div>
       </div>
@@ -148,8 +150,8 @@ const ProductCard = memo(function ProductCard({ product, showDiscount = false })
         )}
 
         {!product?.available && (
-          <p className="mt-3 text-sm font-semibold uppercase tracking-[0.08em] text-red-600">
-            Out of Stock
+          <p className="mt-3 text-sm font-semibold uppercase tracking-[0.08em] text-amber-800">
+            Made to Order
           </p>
         )}
       </div>

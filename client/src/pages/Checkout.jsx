@@ -1,12 +1,22 @@
 import { useMemo, useState } from "react";
-import { Truck, CreditCard, ChevronDown, Tag } from "lucide-react";
+import {
+  Truck,
+  CreditCard,
+  ChevronDown,
+  Tag,
+  CheckCircle2,
+  Clock3,
+  PackageCheck,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 import useNotificationStore from "../store/notificationStore";
 import useProductStore from "../store/productStore";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { getProductPriceInfo } from "../utils/productPromotions";
+import { isMadeToOrder, MADE_TO_ORDER_NOTICE } from "../utils/productAvailability";
 import { readStoredArray } from "../utils/storage";
+import { Link } from "react-router-dom";
 
 export default function Checkout() {
   const items = useCartStore((state) => state.items);
@@ -15,10 +25,14 @@ export default function Checkout() {
   const now = useCurrentTime(1000, hasTimedProducts);
   const checkoutItems = useMemo(() => items.map((item) => {
     const catalogProduct = products.find((product) => String(product.id) === String(item.id));
-    if (!catalogProduct) return item;
+    if (!catalogProduct) return { ...item, isMadeToOrder: isMadeToOrder(item) };
     const selectedVariation = item.selectedVariation || catalogProduct.variations?.[0];
     const priceInfo = getProductPriceInfo(catalogProduct, selectedVariation, now);
-    return { ...item, price: priceInfo.price };
+    return {
+      ...item,
+      price: priceInfo.price,
+      isMadeToOrder: isMadeToOrder(catalogProduct),
+    };
   }), [items, products, now]);
   const updateVariation = useCartStore((state) => state.updateVariation);
   const clearCart = useCartStore((state) => state.clearCart);
@@ -36,6 +50,13 @@ export default function Checkout() {
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [coupons] = useState(() => readStoredArray("adminCoupons"));
+
+  const madeToOrderItems = useMemo(
+    () => checkoutItems.filter((item) => item.isMadeToOrder),
+    [checkoutItems]
+  );
+  const hasMadeToOrderItems = madeToOrderItems.length > 0;
+  const [orderConfirmation, setOrderConfirmation] = useState(null);
 
   const total = useMemo(
     () => checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -122,36 +143,70 @@ export default function Checkout() {
   };
 
   const finishOrder = (message) => {
+    const orderId = `TML-${Date.now()}`;
+    const orderItems = checkoutItems.map((item) => ({
+      name: item.name || item.title || "Furniture item",
+      quantity: item.quantity,
+      price: Number(item.price),
+      isMadeToOrder: Boolean(item.isMadeToOrder),
+    }));
+    const order = {
+      id: orderId,
+      date: new Date().toISOString(),
+      customerName: formData.fullName,
+      email: formData.email,
+      phone: formData.phone,
+      total: finalTotal,
+      status: "Pending",
+      paymentMethod: hasMadeToOrderItems ? "CONTACT_TO_CONFIRM" : paymentMethod,
+      isMadeToOrder: orderItems.some((item) => item.isMadeToOrder),
+      items: orderItems,
+      shippingAddress: {
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        phone: formData.phone,
+      },
+    };
+    const madeToOrderNames = orderItems
+      .filter((item) => item.isMadeToOrder)
+      .map((item) => `${item.name} (x${item.quantity})`);
+
+    try {
+      const savedOrders = readStoredArray("adminOrders");
+      window.localStorage.setItem("adminOrders", JSON.stringify([order, ...savedOrders]));
+    } catch (error) {
+      console.warn("Unable to save this demo order on this device:", error);
+    }
+
+    addNotification({
+      title: order.isMadeToOrder ? "Made-to-order request received" : "New Order Placed",
+      message: `${formData.fullName} placed an order for ₦${finalTotal.toLocaleString()} via ${paymentMethod}. ${orderItems.length} item(s), delivering to ${formData.city}, ${formData.state}.${madeToOrderNames.length ? ` Please contact the customer to confirm the build timeline for: ${madeToOrderNames.join(", ")}.` : ""}`,
+      type: "order",
+    });
+
     clearCart();
     resetCheckoutForm();
-    toast.success(message);
-    window.location.reload();
+    setOrderConfirmation({ orderId, hasMadeToOrderItems: madeToOrderNames.length > 0, message });
+    toast.success("Your order request has been received.");
   };
 
   const handlePaystack = (e) => {
     e.preventDefault();
+    if (hasMadeToOrderItems) {
+      toast.info("Online payment is unavailable for made-to-order requests until the build timeline is confirmed.");
+      return;
+    }
     if (!validateForm()) return;
 
-    addNotification({
-      title: "New Order Placed",
-      message: `${formData.fullName} placed an order for ₦${finalTotal.toLocaleString()} via Paystack. Items: ${items.length} product(s). Delivery to: ${formData.city}, ${formData.state}.`,
-      type: "order",
-    });
-
-    finishOrder(`Paystack checkout simulated for ₦${finalTotal.toFixed(2)}. This is a frontend-only demo.`);
+    finishOrder("Paystack is currently in demo mode; no payment was charged.");
   };
 
   const handleCodOrder = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    addNotification({
-      title: "New Cash on Delivery Order",
-      message: `${formData.fullName} placed a COD order for ₦${finalTotal.toLocaleString()}. Items: ${items.length} product(s). Delivery to: ${formData.city}, ${formData.state}. Phone: ${formData.phone}.`,
-      type: "order",
-    });
-
-    finishOrder("Cash on Delivery order placed successfully! This is a frontend-only demo.");
+    finishOrder("Your Cash on Delivery order request has been saved.");
   };
 
   const handleContinuePayment = (e) => {
@@ -170,10 +225,46 @@ export default function Checkout() {
     });
   };
 
+  if (orderConfirmation) {
+    return (
+      <div className="px-4 py-16 sm:py-20">
+        <section className="mx-auto max-w-2xl rounded-2xl border border-stone-200 bg-white p-6 text-center shadow-sm sm:p-10">
+          <CheckCircle2 size={48} className="mx-auto mb-4 text-emerald-700" aria-hidden="true" />
+          <h1 className="text-2xl font-bold text-navy sm:text-3xl">Order request received</h1>
+          <p className="mt-3 text-gray-600">Your order reference is <span className="font-semibold text-navy">{orderConfirmation.orderId}</span>.</p>
+          {orderConfirmation.hasMadeToOrderItems && (
+            <div role="status" className="mt-6 flex gap-3 rounded-xl border border-primary/40 bg-[#F7F6F1] p-4 text-left text-sm leading-relaxed text-navy">
+              <Clock3 size={20} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+              <p><span className="font-bold">Made-to-order item(s):</span> {MADE_TO_ORDER_NOTICE}</p>
+            </div>
+          )}
+          <p className="mt-5 text-sm leading-relaxed text-gray-600">
+            {orderConfirmation.hasMadeToOrderItems
+              ? "Our team will use the contact details you provided to confirm the estimated build schedule and next steps."
+              : "We’ll follow up using the contact details you provided with your order update."}
+          </p>
+          {orderConfirmation.message && (
+            <p className="mt-4 rounded-lg bg-gray-50 px-4 py-3 text-xs text-gray-500">{orderConfirmation.message}</p>
+          )}
+          <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link to="/products" className="btn-primary">Continue shopping</Link>
+            <Link to="/" className="rounded-lg border border-navy/20 px-6 py-3 font-semibold text-navy transition hover:bg-gray-50">Back to home</Link>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="py-12">
       <div className="container-custom max-w-4xl">
-        <h1 className="section-heading mb-8">Checkout</h1>
+        <h1 className="section-heading mb-4">Checkout</h1>
+        {hasMadeToOrderItems && (
+          <div role="status" className="mb-8 flex gap-3 rounded-xl border border-primary/40 bg-[#F7F6F1] p-4 text-sm leading-relaxed text-navy">
+            <Clock3 size={20} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+            <p><span className="font-bold">Your order includes furniture made to order.</span> {MADE_TO_ORDER_NOTICE}</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Checkout Form */}
@@ -259,29 +350,34 @@ export default function Checkout() {
                   <div className="flex items-center gap-3 flex-1">
                     <Truck className="text-[#D4AF37]" />
                     <div>
-                      <p className="font-semibold">Cash on Delivery</p>
+                      <p className="font-semibold">{hasMadeToOrderItems ? "Submit build request" : "Cash on Delivery"}</p>
                       <p className="text-sm text-gray-600">
-                        Pay when you receive your order.
+                        {hasMadeToOrderItems
+                          ? "Our team will confirm the build schedule and payment steps with you."
+                          : "Pay when you receive your order."}
                       </p>
                     </div>
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                <label className={`flex items-center gap-3 rounded-lg border p-4 transition ${hasMadeToOrderItems ? "cursor-not-allowed bg-gray-50 opacity-70" : "cursor-pointer hover:bg-gray-50"}`}>
                   <input
                     type="radio"
                     name="paymentMethod"
                     value="paystack"
                     checked={paymentMethod === "paystack"}
                     onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-4 h-4"
+                    disabled={hasMadeToOrderItems}
+                    className="h-4 w-4"
                   />
-                  <div className="flex items-center gap-3 flex-1">
-                    <CreditCard className="text-[#D4AF37]" />
+                  <div className="flex flex-1 items-center gap-3">
+                    <CreditCard className="text-[#D4AF37]" aria-hidden="true" />
                     <div>
                       <p className="font-semibold">Pay with Paystack</p>
                       <p className="text-sm text-gray-600">
-                        Secure payment with Paystack (frontend demo only).
+                        {hasMadeToOrderItems
+                          ? "Online payment is paused until we confirm the build schedule with you."
+                          : "Secure payment with Paystack (frontend demo only)."}
                       </p>
                     </div>
                   </div>
@@ -292,7 +388,7 @@ export default function Checkout() {
                   onClick={handleContinuePayment}
                   className="btn-primary w-full mt-4 text-white font-semibold"
                 >
-                  Continue with Payment
+                  {hasMadeToOrderItems ? "Send build request" : "Continue with Payment"}
                 </button>
               </div>
             </form>
@@ -337,6 +433,11 @@ export default function Checkout() {
                           <p className="text-sm text-gray-600 mt-1">
                             Qty: <span className="font-semibold">{item.quantity}</span>
                           </p>
+                          {item.isMadeToOrder && (
+                            <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                              <PackageCheck size={13} aria-hidden="true" /> Made to order
+                            </span>
+                          )}
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-[#D4AF37]">

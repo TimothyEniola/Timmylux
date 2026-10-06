@@ -52,7 +52,7 @@ export default function AdminOrders() {
 
   const shareOrder = async (order) => {
     const itemsList = order.items
-      .map((item) => `${item.name} (x${item.quantity}) - ₦${item.price.toLocaleString()}`)
+      .map((item) => `${item.name} (x${item.quantity})${item.isMadeToOrder ? " — made to order" : ""} - ₦${item.price.toLocaleString()}`)
       .join("\n");
     const text = `Order #${order.id}\nDate: ${order.date}\nStatus: ${order.status}\nTotal: ₦${order.total.toLocaleString()}\n\nItems:\n${itemsList}`;
     try {
@@ -70,7 +70,15 @@ export default function AdminOrders() {
   const filteredOrders = orders.filter((order) => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return true;
-    const fields = [order.id, order.customerName, order.email, order.status, order.date, order.shippingAddress?.city];
+    const fields = [
+      order.id,
+      order.customerName,
+      order.email,
+      order.status,
+      order.date,
+      order.shippingAddress?.city,
+      order.isMadeToOrder ? "made to order" : "",
+    ];
     return (
       fields.some((f) => f?.toLowerCase().includes(q)) ||
       order.items.some((i) => i.name?.toLowerCase().includes(q))
@@ -166,6 +174,11 @@ export default function AdminOrders() {
                             <StatusIcon size={12} />
                             {order.status}
                           </span>
+                          {(order.isMadeToOrder || order.items.some((item) => item.isMadeToOrder)) && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
+                              <Clock size={12} aria-hidden="true" /> Confirm build timeline
+                            </span>
+                          )}
 
                           {/* Actions */}
                           {order.status !== "Delivered" && order.status !== "Cancelled" && (
@@ -294,6 +307,9 @@ export default function AdminOrders() {
                       <div>
                         <p className="text-sm font-medium text-gray-900">{item.name}</p>
                         <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                        {item.isMadeToOrder && (
+                          <p className="mt-1 text-xs font-semibold text-amber-800">Made to order · confirm build timeline</p>
+                        )}
                       </div>
                       <p className="text-sm font-bold text-[#D4AF37]">₦{item.price.toLocaleString()}</p>
                     </div>

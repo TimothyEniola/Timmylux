@@ -15,6 +15,7 @@ import {
 import useProductStore from "../store/productStore";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { getProductPriceInfo } from "../utils/productPromotions";
+import { isMadeToOrder, MADE_TO_ORDER_NOTICE } from "../utils/productAvailability";
 import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
@@ -90,7 +91,11 @@ export default function ProductDetails() {
       name: currentName
     };
     addToCart(itemToAdd);
-    toast.success(`${currentName} added to cart!`);
+    toast.success(
+      isMadeToOrder(product)
+        ? `${currentName} added as a made-to-order request.`
+        : `${currentName} added to cart!`
+    );
   };
 
   const toggleWishlist = () => {
@@ -183,8 +188,8 @@ export default function ProductDetails() {
                   <span className="text-sm font-bold text-gray-700 ml-1">4.9</span>
                 </div>
                 <span className="text-gray-300">|</span>
-                <span className={`text-sm font-medium ${product.available ? "text-green-600" : "text-red-600"}`}>
-                  {product.available ? "In Stock" : "Out of Stock"}
+                <span className={`text-sm font-medium ${product.available ? "text-green-700" : "text-amber-700"}`}>
+                  {product.available ? "In Stock" : "Made to Order"}
                 </span>
               </div>
             </div>
@@ -262,15 +267,21 @@ export default function ProductDetails() {
               </div>
             )}
 
+            {!product.available && (
+              <div role="status" className="mb-6 rounded-xl border border-primary/40 bg-[#F7F6F1] p-4 text-sm leading-relaxed text-navy">
+                <p className="mb-1 font-bold">Made to order</p>
+                <p>{MADE_TO_ORDER_NOTICE}</p>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 mt-auto">
               <button 
                 onClick={handleAddToCart}
-                disabled={!product.available}
-                className="flex-1 bg-[#011F5B] hover:bg-[#0d2f7a] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex-1 bg-[#011F5B] hover:bg-[#0d2f7a] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95"
               >
                 <ShoppingCart size={20} />
-                Add to Cart
+                {isMadeToOrder(product) ? "Request Build" : "Add to Cart"}
               </button>
               <button
                 onClick={handleShareAsImage}

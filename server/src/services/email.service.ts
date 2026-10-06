@@ -84,23 +84,73 @@ export const sendCustomRequestEmail = async (
   });
 };
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? "").replace(/[&<>\"']/g, (character) => {
+    const entities: Record<string, string> = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;",
+    };
+    return entities[character];
+  });
+}
+
 export const sendOrderConfirmation = async (
   email: string,
   orderDetails: any
 ): Promise<void> => {
+  const madeToOrderItems = (orderDetails.items || []).filter((item: any) => item.isMadeToOrder);
+  const buildNotice = madeToOrderItems.length
+    ? `<h3>Made-to-order items</h3><ul>${madeToOrderItems.map((item: any) => `<li>${escapeHtml(item.productName)} (quantity: ${item.quantity})</li>`).join("")}</ul><p>These items are currently made to order. Our team will contact you using your order details to confirm the estimated build timeline and next steps before production begins. Payment is not collected until we have confirmed the schedule with you.</p>`
+    : "";
   const html = `
-    <div style="font-family: Arial, sans-serif; padding: 20px;">
+    <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
       <h2>Order Confirmation</h2>
       <p>Thank you for your order!</p>
-      <p><strong>Order ID:</strong> ${orderDetails.id}</p>
-      <p><strong>Total:</strong> ₦${orderDetails.totalAmount.toLocaleString()}</p>
+      <p><strong>Order ID:</strong> ${escapeHtml(orderDetails.id)}</p>
+      <p><strong>Total:</strong> ₦${Number(orderDetails.totalAmount).toLocaleString()}</p>
+      ${buildNotice}
       <p>We'll send you another email when your order ships.</p>
     </div>
   `;
 
   await sendEmail({
     to: email,
-    subject: 'Order Confirmation - TIMMYLUX',
+    subject: "Order Confirmation - TIMMYLUX",
+    html,
+  });
+};
+
+export const sendMadeToOrderNotification = async (
+  customer: { email: string; name: string; phone?: string | null },
+  orderDetails: any
+): Promise<void> => {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  const madeToOrderItems = (orderDetails.items || []).filter((item: any) => item.isMadeToOrder);
+  if (!madeToOrderItems.length) return;
+
+  const itemsHtml = madeToOrderItems
+    .map((item: any) => `<li>${escapeHtml(item.productName)} — quantity ${item.quantity}</li>`)
+    .join("");
+  const html = `
+    <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
+      <h2>Made-to-order build timeline required</h2>
+      <p>Contact this customer to agree on an estimated production schedule before collecting payment or beginning work.</p>
+      <p><strong>Order:</strong> ${escapeHtml(orderDetails.id)}</p>
+      <p><strong>Customer:</strong> ${escapeHtml(customer.name)} (${escapeHtml(customer.email)})</p>
+      <p><strong>Phone:</strong> ${escapeHtml(customer.phone || "Not provided")}</p>
+      <h3>Items</h3>
+      <ul>${itemsHtml}</ul>
+    </div>
+  `;
+
+  await sendEmail({
+    to: adminEmail,
+    subject: `Build timeline needed — order ${escapeHtml(orderDetails.id)}`,
     html,
   });
 };

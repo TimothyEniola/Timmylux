@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag, Minus, Plus, Trash2 } from "lucide-react";
+import { Clock3, PackageCheck, ShoppingBag, Minus, Plus, Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import useCartStore from "../store/cartStore";
 import useProductStore from "../store/productStore";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { getProductPriceInfo } from "../utils/productPromotions";
+import { isMadeToOrder, MADE_TO_ORDER_NOTICE } from "../utils/productAvailability";
 
 export default function Cart() {
   const { items, removeItem, updateQuantity } = useCartStore();
@@ -14,11 +15,12 @@ export default function Cart() {
   const now = useCurrentTime(1000, hasTimedProducts);
   const cartItems = useMemo(() => items.map((item) => {
     const product = products.find((entry) => String(entry.id) === String(item.id));
-    if (!product) return item;
+    if (!product) return { ...item, isMadeToOrder: isMadeToOrder(item) };
     const selectedVariation = item.selectedVariation || product.variations?.[0];
     const priceInfo = getProductPriceInfo(product, selectedVariation, now);
-    return { ...item, price: priceInfo.price };
+    return { ...item, price: priceInfo.price, isMadeToOrder: isMadeToOrder(product) };
   }), [items, products, now]);
+  const hasMadeToOrderItems = cartItems.some((item) => item.isMadeToOrder);
   const total = useMemo(
     () => cartItems.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0), 0),
     [cartItems]
@@ -62,9 +64,15 @@ export default function Cart() {
   return (
     <div className="py-8 sm:py-12 px-4 sm:px-0">
       <div className="container-custom">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#011F5B] mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#011F5B] mb-4">
           Shopping Cart
         </h1>
+        {hasMadeToOrderItems && (
+          <div role="status" className="mb-8 flex gap-3 rounded-xl border border-primary/40 bg-[#F7F6F1] p-4 text-sm leading-relaxed text-navy">
+            <Clock3 className="mt-0.5 shrink-0 text-primary" size={20} aria-hidden="true" />
+            <p><span className="font-bold">Some items are made to order.</span> {MADE_TO_ORDER_NOTICE}</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
@@ -89,6 +97,11 @@ export default function Cart() {
                   <p className="text-sm text-gray-500 mb-2">
                     {item.category}
                   </p>
+                  {item.isMadeToOrder && (
+                    <p className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
+                      <PackageCheck size={14} aria-hidden="true" /> Made to order · timeline to be confirmed
+                    </p>
+                  )}
                   <p className="text-lg sm:text-xl font-bold text-[#D4AF37] mb-3">
                     ₦{Number(item.price).toLocaleString()}
                   </p>

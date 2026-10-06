@@ -16,13 +16,13 @@ export const addToCart = async (
   variationId?: string,
   quantity: number = 1
 ) => {
-  // Check if product exists and is available
+  // Out-of-stock furniture can still be requested as made-to-order.
   const product = await prisma.product.findUnique({
     where: { id: productId },
   });
 
-  if (!product || !product.available) {
-    throw new Error('Product not available');
+  if (!product) {
+    throw new Error('Product not found');
   }
 
   // Check if item already exists in cart

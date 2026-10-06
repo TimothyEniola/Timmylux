@@ -90,11 +90,13 @@ model Order {
 model OrderItem {
   id          String   @id @default(uuid())
   orderId     String
-  productId   String
-  variationId String?
-  quantity    Int
-  priceAtBuy  Float
-  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      String
+  productName    String   @default("Furniture item")
+  variationId    String?
+  quantity       Int
+  priceAtBuy     Float
+  isMadeToOrder  Boolean  @default(false)
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model CartItem {

@@ -1,6 +1,7 @@
 import prisma from '../config/database';
 import { PaymentStatus, OrderStatus } from '@prisma/client';
 
+
 export const createOrder = async (
   userId: string,
   paymentMethod: string,
@@ -27,19 +28,23 @@ export const createOrder = async (
 
     return {
       productId: item.productId,
+      productName: item.product.name,
       variationId: item.variationId,
       quantity: item.quantity,
       priceAtBuy: price,
+      isMadeToOrder: !item.product.available,
     };
   });
 
-  // Create order
+  const containsMadeToOrderItems = orderItems.some((item) => item.isMadeToOrder);
+
+  // Save the request as contact-first if any product needs to be built.
   const order = await prisma.order.create({
     data: {
       userId,
       totalAmount,
-      paymentMethod,
-      paystackRef,
+      paymentMethod: containsMadeToOrderItems ? 'CONTACT_TO_CONFIRM' : paymentMethod,
+      paystackRef: containsMadeToOrderItems ? undefined : paystackRef,
       items: {
         create: orderItems,
       },
@@ -51,6 +56,7 @@ export const createOrder = async (
           id: true,
           email: true,
           name: true,
+          phone: true,
         },
       },
     },

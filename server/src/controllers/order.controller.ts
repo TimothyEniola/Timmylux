@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 import * as orderService from '../services/order.service';
 import * as paymentService from '../services/payment.service';
-import { sendOrderConfirmation } from '../services/email.service';
+import {
+  sendMadeToOrderNotification,
+  sendOrderConfirmation,
+} from '../services/email.service';
 import prisma from '../config/database';
 
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
@@ -17,14 +20,18 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Generate unique reference
     const reference = `TML-${Date.now()}-${userId.substring(0, 8)}`;
-
-    // Create order
     const order = await orderService.createOrder(userId, paymentMethod, reference);
+    const containsMadeToOrderItems = order.items.some((item) => item.isMadeToOrder);
 
-    // If Paystack, initialize payment
-    if (paymentMethod === 'PAYSTACK') {
+    if (containsMadeToOrderItems) {
+      res.status(201).json({
+        success: true,
+        message: 'Made-to-order request received. Our team will contact you to confirm the estimated build timeline and payment steps.',
+        data: { order, madeToOrder: true },
+      });
+    // If Paystack, initialize payment for in-stock products only.
+    } else if (paymentMethod === 'PAYSTACK') {
       const paymentData = await paymentService.initializePayment(
         order.user.email,
         order.totalAmount,
@@ -49,8 +56,11 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       });
     }
 
-    // Send confirmation email (async)
+    // Send confirmation and production follow-up emails asynchronously.
     sendOrderConfirmation(order.user.email, order).catch(console.error);
+    if (containsMadeToOrderItems) {
+      sendMadeToOrderNotification(order.user, order).catch(console.error);
+    }
   } catch (error: any) {
     res.status(400).json({
       success: false,
