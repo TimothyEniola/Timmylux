@@ -1,12 +1,18 @@
-import * as PrismaClientModule from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
 
-const PrismaClient = (PrismaClientModule as unknown as {
-  PrismaClient: new (options?: { log?: string[] }) => InstanceType<
-    typeof PrismaClientModule extends { PrismaClient: infer T } ? T : never
-  >;
-}).PrismaClient;
+// 1. Initialize the PostgreSQL connection pool
+const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL 
+});
 
+// 2. Wrap it in the Prisma adapter
+const adapter = new PrismaPg(pool);
+
+// 3. Instantiate PrismaClient with both the adapter and your logging configuration
 const prisma = new PrismaClient({
+  adapter,
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
 });
 
