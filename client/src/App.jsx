@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useState } from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -79,6 +79,19 @@ export default function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [readyPath, setReadyPath] = useState(location.pathname);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setReadyPath(location.pathname);
+    }, 400);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [location.pathname]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -86,6 +99,7 @@ export default function App() {
       {isAdminRoute && <AdminTopBar collapsed={sidebarCollapsed} />}
       {isAdminRoute ? <AdminSidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} /> : <Navbar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />}
       <div className={`flex-grow transition-all duration-300 ${sidebarCollapsed ? 'xl:ml-16' : 'xl:ml-64'}`}>
+        {readyPath !== location.pathname && <Loader text="Loading page..." />}
         <AppErrorBoundary>
           <Suspense fallback={<Loader text="Loading page..." />}>
           <Routes>

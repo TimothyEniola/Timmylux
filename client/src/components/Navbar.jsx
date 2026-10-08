@@ -168,9 +168,9 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
           </div>
 
           {/* MOBILE QUICK ACTIONS */}
-          <div className="xl:hidden px-4 py-4 border-b border-white/10 flex justify-between">
+          <div className="xl:hidden px-4 py-4 border-b border-white/10 flex items-center justify-between">
             {/* Notifications */}
-            <Link to="/notifications" className="relative">
+            <Link to="/notifications" className="relative flex h-10 w-10 items-center justify-center">
               <Bell size={20} />
 
               {unreadCount > 0 && (
@@ -181,7 +181,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
             </Link>
 
             {/* Wishlist */}
-            <Link to="/wishlist" className="relative">
+            <Link to="/wishlist" className="relative flex h-10 w-10 items-center justify-center">
               <Heart size={20} />
 
               {wishlistCount > 0 && (
@@ -192,7 +192,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
             </Link>
 
             {/* Cart */}
-            <Link to="/cart" className="relative">
+            <Link to="/cart" className="relative flex h-10 w-10 items-center justify-center">
               <ShoppingCart size={20} />
 
               {cartCount > 0 && (
