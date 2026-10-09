@@ -204,8 +204,8 @@ export default function OrderHistory() {
 
         {/* ✅ Creative Modal */}
         {selectedOrder && (
-          <div className="fixed inset-0 flex items-center justify-center p-4 z-50 animate-fadeIn">
-            <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 animate-slideUp">
+          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 animate-fadeIn sm:items-center">
+            <div role="dialog" aria-modal="true" aria-labelledby="order-detail-title" className="my-auto w-full max-w-4xl max-h-[90vh] overflow-y-auto overscroll-contain rounded-2xl border border-gray-200 bg-white shadow-2xl animate-slideUp">
               {/* Header with gradient background */}
               <div className="bg-gradient-to-r from-[#011F5B] to-[#D4AF37] text-white p-6 relative overflow-hidden">
                 <div className="absolute inset-0 bg-black/10"></div>
@@ -214,7 +214,7 @@ export default function OrderHistory() {
                     <div className="flex items-center gap-4">
                       {getStatusIcon(selectedOrder.status)}
                       <div>
-                        <h2 className="text-3xl font-bold">
+                        <h2 id="order-detail-title" className="text-3xl font-bold">
                           Order #{selectedOrder.id}
                         </h2>
                         <p className="text-white/80 mt-1">

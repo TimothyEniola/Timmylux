@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { ArrowUp, Mail, Phone, MapPin } from "lucide-react";
 import {
   FaFacebook,
   FaInstagram,
@@ -127,6 +127,19 @@ export default function Footer() {
               <FaLinkedin size={24} />
             </a>
           </div>
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          <button
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="inline-flex items-center gap-2 text-gray-300 transition-colors hover:text-[#D4AF37]"
+            aria-label="Back to top"
+            title="Back to top"
+          >
+            <ArrowUp size={16} aria-hidden="true" />
+            Back to top
+          </button>
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
