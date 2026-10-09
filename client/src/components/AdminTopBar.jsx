@@ -34,7 +34,7 @@ export default function AdminTopBar({ collapsed }) {
             <div className="relative">
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="hover:text-[#D4AF37]"
+                className="relative inline-flex h-10 w-10 items-center justify-center border-0 bg-transparent p-0 text-inherit hover:text-[#D4AF37]"
               >
                 <Bell size={18} />
                 {unreadCount > 0 && (
@@ -99,12 +99,12 @@ export default function AdminTopBar({ collapsed }) {
             </div>
 
             {/* Settings */}
-            <Link to="/admin/settings" className="hover:text-[#D4AF37]">
+            <Link to="/admin/settings" className="inline-flex h-10 w-10 items-center justify-center hover:text-[#D4AF37]">
               <Settings size={18} />
             </Link>
 
             {/* Profile */}
-            <Link to="/admin/profile" className="hover:text-[#D4AF37]">
+            <Link to="/admin/profile" className="inline-flex h-10 w-10 items-center justify-center hover:text-[#D4AF37]">
               <User size={18} />
             </Link>
           </div>
@@ -117,7 +117,7 @@ export default function AdminTopBar({ collapsed }) {
           <div className="relative">
             <button
               onClick={() => setNotificationsOpen(!notificationsOpen)}
-              className="hover:text-[#D4AF37]"
+                className="relative inline-flex h-10 w-10 items-center justify-center border-0 bg-transparent p-0 text-inherit hover:text-[#D4AF37]"
             >
               <Bell size={18} />
               {unreadCount > 0 && (
@@ -184,12 +184,12 @@ export default function AdminTopBar({ collapsed }) {
           </div>
 
           {/* Settings */}
-          <Link to="/admin/settings" className="hover:text-[#D4AF37]">
+          <Link to="/admin/settings" className="inline-flex h-10 w-10 items-center justify-center hover:text-[#D4AF37]">
             <Settings size={18} />
           </Link>
 
           {/* Profile */}
-          <Link to="/admin/profile" className="hover:text-[#D4AF37]">
+          <Link to="/admin/profile" className="inline-flex h-10 w-10 items-center justify-center hover:text-[#D4AF37]">
             <User size={18} />
           </Link>
         </div>

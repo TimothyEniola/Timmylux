@@ -80,7 +80,7 @@ export default function TopBar({ collapsed }) {
         {/* DESKTOP RIGHT SIDE */}
         <div className="hidden md:flex items-center gap-6">
           {/* Wishlist */}
-          <Link to="/wishlist" className="relative">
+          <Link to="/wishlist" className="relative inline-flex h-10 w-10 items-center justify-center">
             <Heart size={20} />
             {wishlistCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
@@ -90,7 +90,7 @@ export default function TopBar({ collapsed }) {
           </Link>
 
           {/* Cart */}
-          <Link to="/cart" className="relative">
+          <Link to="/cart" className="relative inline-flex h-10 w-10 items-center justify-center">
             <ShoppingCart size={20} />
             {cartCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
@@ -100,10 +100,10 @@ export default function TopBar({ collapsed }) {
           </Link>
 
           {/* Notification */}
-          <div ref={notifRef} className="relative">
+          <div ref={notifRef} className="relative flex h-10 w-10 items-center justify-center">
             <button
               onClick={() => setNotificationsOpen((prev) => !prev)}
-              className="relative"
+              className="inline-flex h-full w-full items-center justify-center border-0 bg-transparent p-0 text-inherit"
             >
               <Bell size={20} />
               {unreadCount > 0 && (

@@ -1,4 +1,4 @@
-export const products = [
+const productCatalog = [
   {
     id: 1,
     name: "Luxury King Bed Frame",
@@ -720,6 +720,11 @@ export const products = [
     available: true,
   },
 ];
+
+export const products = productCatalog.map((product) => ({
+  ...product,
+  images: product.variations?.map((variation) => variation.image).filter(Boolean) ?? [],
+}));
 
 export const categories = [
   "All",
