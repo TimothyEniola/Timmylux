@@ -63,16 +63,16 @@ export const sendCustomRequestEmail = async (
   requestDetails: any,
   imageUrls: string[]
 ): Promise<void> => {
-  const imagesHtml = imageUrls.map(url => 
-    `<img src="${url}" style="max-width: 200px; margin: 10px;" />`
+  const imagesHtml = imageUrls.map(url =>
+    `<a href="${escapeHtml(url)}"><img src="${escapeHtml(url)}" alt="Customer reference image" style="max-width: 200px; max-height: 200px; object-fit: contain; margin: 10px;" /></a>`
   ).join('');
 
   const html = `
     <div style="font-family: Arial, sans-serif; padding: 20px;">
-      <h2>New Custom Request from ${customerName}</h2>
-      <p><strong>Email:</strong> ${customerEmail}</p>
+      <h2>New Custom Request from ${escapeHtml(customerName)}</h2>
+      <p><strong>Email:</strong> <a href="mailto:${escapeHtml(customerEmail)}">${escapeHtml(customerEmail)}</a></p>
       <p><strong>Details:</strong></p>
-      <pre>${JSON.stringify(requestDetails, null, 2)}</pre>
+      <pre>${escapeHtml(JSON.stringify(requestDetails, null, 2))}</pre>
       ${imagesHtml ? `<h3>Attached Images:</h3>${imagesHtml}` : ''}
     </div>
   `;

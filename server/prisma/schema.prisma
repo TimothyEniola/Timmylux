@@ -135,16 +135,48 @@ model Event {
   title              String
   description        String
   type               String
+  startTime          String?
+  endTime            String?
   startDate          DateTime?
   endDate            DateTime?
   location           String?
   image              String?
   isActive           Boolean  @default(true)
-  discountPercentage Float?
+  gameEnabled              Boolean  @default(false)
+  branchEnabled            Boolean  @default(false)
+  participatingLocationIds String[] @default([])
+  participatingLocations   Json?
+  ticketPrice              Float?
+  ticketPrizes             Json?
+  discountPercentage       Float?
   promoCode          String?
   maxAttendees       Int?
   contactInfo        String?
   targetUrl          String?
+  tickets            EventTicket[]
+}
+
+model EventTicket {
+  id            String   @id @default(uuid())
+  eventId       String
+  number        String
+  prize         String
+  customerName  String
+  customerEmail String
+  customerPhone String?
+  amount        Int
+  paymentMethod String
+  status        String   @default("RESERVED")
+  reference     String?
+  expiresAt     DateTime?
+  branchId      String?
+  branchName    String?
+  createdAt     DateTime @default(now())
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, number])
+  @@index([reference])
+  @@index([eventId, status, expiresAt])
 }
 
 model AcademyApplication {
@@ -157,4 +189,21 @@ model AcademyApplication {
   availability String
   status       String   @default("pending")
   submittedAt  DateTime @default(now())
+}
+
+model CustomRequestSubmission {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  phone       String
+  roomType    String?
+  topic       String?
+  address     String?
+  description String
+  budget      String?
+  imageUrls   String[] @default([])
+  read        Boolean  @default(false)
+  submittedAt DateTime @default(now())
+
+  @@index([submittedAt])
 }

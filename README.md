@@ -1,6 +1,6 @@
 # Timmy Lux Furniture - E-Commerce Furniture Store
 
-A modern, fully responsive frontend-only React.js e-commerce application for browsing, purchasing, and managing premium furniture products. This project is built as a frontend prototype and demo, with no backend API required. Features a complete admin panel for inventory management, product variations, collections, and featured items showcase.
+A modern, fully responsive React.js furniture storefront and admin interface. Most store data and checkout flows remain frontend demos; event management and ticket games use the PostgreSQL-backed server API for shared availability and verified Paystack ticket payments.
 
 ## 🚀 Technology Stack
 
@@ -18,7 +18,9 @@ A modern, fully responsive frontend-only React.js e-commerce application for bro
 
 ## 📋 Architecture
 
-**Frontend-Only Application**: This is a purely frontend application with no backend API. All data persists using browser localStorage, making it ideal for:
+**Hybrid Application**: The storefront includes frontend demo workflows that persist using browser localStorage. Event management and paid ticket games require the Express/Prisma server and PostgreSQL database. Ticket purchases reserve numbered tickets server-side and are only confirmed after Paystack verification.
+
+The frontend-only portions are useful for:
 - Prototyping and demonstrations
 - Learning React, Zustand, and Tailwind CSS
 - Portfolio projects
@@ -50,6 +52,8 @@ npm run build
 # Preview production build
 npm run preview
 ```
+
+For ticket games, also configure and run the server in `server/`. Apply Prisma migrations, set `DATABASE_URL`, `JWT_SECRET`, `CLIENT_URL=http://localhost:5173`, and `PAYSTACK_SECRET_KEY` in the server environment, then start the API on port 5000. Vite proxies `/api` to that local server. In production, set `VITE_API_URL` to the API base ending in `/api`, set `CLIENT_URL` to the deployed frontend origin, and configure the Paystack webhook URL as `https://<api-host>/api/webhooks/paystack`. Keep the Paystack secret only on the server.
 
 ## 📱 Features
 

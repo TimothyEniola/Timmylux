@@ -16,6 +16,7 @@ import {
   Store,
   Search,
   Images,
+  MapPin,
 } from "lucide-react";
 
 import { useState, useEffect } from "react";
@@ -81,6 +82,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
     { path: "/products", label: "Shop", icon: Store },
     { path: "/academy", label: "Academy", icon: GraduationCap },
     { path: "/about", label: "About", icon: Info },
+    { path: "/locations", label: "Locations", icon: MapPin },
     {
       path: "/custom-request",
       label: "Custom Request",

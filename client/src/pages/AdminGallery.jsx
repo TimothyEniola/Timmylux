@@ -30,8 +30,6 @@ const BADGE_OPTIONS = [
   { label: "📚 Student", value: "📚 Student" },
 ];
 
-const ADMIN_PASS = "admin123";
-
 const INITIAL_IMAGES = [
   { id: 1, title: "Annual Gala 2024", category: "Events", badge: null, featured: true, date: "2024-12-15", description: "A night of celebration with our staff, partners and stakeholders.", thumb: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=40&q=20", url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=900&q=80" },
   { id: 2, title: "Mrs. Adaeze Obi", category: "Best Customer", badge: "⭐ Best Customer", featured: true, date: "2024-11-20", description: "Loyal partner for 5+ years and our top client of 2024.", thumb: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=40&q=20", url: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=900&q=80" },
@@ -270,51 +268,6 @@ function Lightbox({ img, all, onClose }) {
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Admin Login ─── */
-function AdminLogin({ onLogin, onBack }) {
-  const [pass, setPass] = useState("");
-  const [err, setErr] = useState(false);
-  const submit = () => {
-    if (pass === ADMIN_PASS) { onLogin(); setErr(false); }
-    else setErr(true);
-  };
-  return (
-    <div style={{ minHeight: "100vh", background: "#080808", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "'DM Sans', sans-serif" }}>
-      <div style={{ width: "100%", maxWidth: 380, background: "#111", borderRadius: 20, padding: 36, border: "1px solid rgba(255,255,255,0.08)" }}>
-        <div style={{ textAlign: "center", marginBottom: 28 }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 16, margin: "0 auto 14px",
-            background: "linear-gradient(135deg, #D4AF37, #011F5B)",
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22,
-          }}>🔐</div>
-          <h2 style={{ fontFamily: "'Playfair Display', serif", color: "#fff", fontSize: "1.4rem", fontWeight: 700, marginBottom: 4 }}>Admin Panel</h2>
-          <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13 }}>Enter your password to manage the gallery</p>
-        </div>
-
-        <div style={{ marginBottom: 12 }}>
-          <input type="password" value={pass}
-            onChange={e => setPass(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && submit()}
-            placeholder="Password (hint: admin123)"
-            style={{ ...S.input }}
-            onFocus={e => e.target.style.borderColor = "#D4AF37"}
-            onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.12)"}
-          />
-        </div>
-
-        {err && <p style={{ color: "#F87171", fontSize: 12, marginBottom: 10 }}>Incorrect password. Try again.</p>}
-
-        <button onClick={submit} style={{ ...S.goldBtn, width: "100%", marginBottom: 10 }}>
-          Login to Admin
-        </button>
-        <button onClick={onBack} style={{ ...S.ghostBtn, width: "100%", textAlign: "center" }}>
-          ← Back to Gallery
-        </button>
       </div>
     </div>
   );
@@ -848,7 +801,7 @@ export default function GalleryApp() {
   const [cat, setCat] = useState("All");
   const [search, setSearch] = useState("");
   const [lightbox, setLightbox] = useState(null);
-  const [view, setView] = useState("gallery"); // gallery | admin-login | admin
+  const [view, setView] = useState("gallery"); // gallery | admin
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => { setTimeout(() => setLoaded(true), 100); }, []);
@@ -864,7 +817,6 @@ export default function GalleryApp() {
     return matchesCategory && matchesSearch;
   });
 
-  if (view === "admin-login") return <AdminLogin onLogin={() => setView("admin")} onBack={() => setView("gallery")} />;
   if (view === "admin") return <AdminPanel images={images} setImages={setImages} onBack={() => setView("gallery")} />;
 
   const counts = CATEGORIES.reduce((acc, c) => {
@@ -913,7 +865,7 @@ export default function GalleryApp() {
           </div>
 
           {/* Admin button */}
-          <button onClick={() => setView("admin-login")}
+          <button onClick={() => setView("admin")}
             style={{
               display: "flex", alignItems: "center", gap: 6,
               background: "#FCD34D", color: "#78350F",

@@ -48,6 +48,9 @@ const AdminAcademy = lazy(() => import("./pages/AdminAcademy"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 const Gallery = lazy(() => import("./pages/Gallery"));
 const AdminGallery = lazy(() => import("./pages/AdminGallery"));
+const EventGame = lazy(() => import("./pages/EventGame"));
+const AdminLocations = lazy(() => import("./pages/AdminLocations"));
+const Locations = lazy(() => import("./pages/Locations"));
 
 class AppErrorBoundary extends React.Component {
   constructor(props) {
@@ -105,6 +108,7 @@ export default function App() {
           <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/locations" element={<Locations />} />
           <Route path="/products" element={<Products />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
@@ -117,6 +121,8 @@ export default function App() {
           <Route path="/track-order" element={<ProtectedRoute><TrackOrder /></ProtectedRoute>} />
           <Route path="/custom-request" element={<CustomRequest />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/events/:id" element={<EventGame />} />
+          <Route path="/games/:id" element={<EventGame />} />
           <Route path="/academy" element={<Academy />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
@@ -135,6 +141,7 @@ export default function App() {
           <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
           <Route path="/admin/academy" element={<AdminRoute><AdminAcademy /></AdminRoute>} />
           <Route path="/admin/gallery" element={<AdminRoute><AdminGallery /></AdminRoute>} />
+          <Route path="/admin/locations" element={<AdminRoute><AdminLocations /></AdminRoute>} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/error" element={<ErrorPage />} />

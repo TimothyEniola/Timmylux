@@ -39,4 +39,12 @@ const useNotificationStore = create(
   )
 );
 
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (event) => {
+    if (event.key === "notification-storage") {
+      useNotificationStore.persist.rehydrate();
+    }
+  });
+}
+
 export default useNotificationStore;

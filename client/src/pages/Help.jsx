@@ -23,9 +23,10 @@ import {
   Star,
   Home,
   Images,
+  Ticket,
 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { createElement, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { createElement, useEffect, useState } from "react";
 import { readStoredJson } from "../utils/storage";
 
 const FAQItem = ({ question, answer }) => {
@@ -71,6 +72,7 @@ const SectionCard = ({ icon, title, children, accent = false }) => (
 );
 
 export default function Help() {
+  const location = useLocation();
   const [activePolicy, setActivePolicy] = useState("repair");
   const [policies] = useState(() => ({
     repairPolicy:
@@ -79,6 +81,14 @@ export default function Help() {
       "Items must be returned within 1-2 weeks after delivery. Contact our support team to arrange collection. We only accept returns for goods purchased from us.",
     ...readStoredJson("adminPolicies", {}),
   }));
+
+  useEffect(() => {
+    if (!location.hash) return undefined;
+    const frameId = window.requestAnimationFrame(() => {
+      document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
+    });
+    return () => window.cancelAnimationFrame(frameId);
+  }, [location.hash]);
 
   const siteFeatures = [
     {
@@ -104,7 +114,7 @@ export default function Help() {
     {
       icon: CreditCard,
       title: "Checkout & Payment",
-      desc: "At checkout, fill in your delivery details. We accept payment via Paystack (card, bank transfer) and Cash on Delivery. Your order is confirmed immediately after payment.",
+      desc: "Furniture checkout is currently a demo and does not charge your card. Ticket games can accept Paystack when online sales are enabled, or you can pay at the listed branch.",
     },
     {
       icon: Package,
@@ -130,6 +140,11 @@ export default function Help() {
       icon: GraduationCap,
       title: "TimmyLux Academy",
       desc: "Our Academy offers hands-on furniture design and craftsmanship training. Learn woodworking, interior design basics, and how to run a furniture business. Visit the Academy page to apply.",
+    },
+    {
+      icon: Ticket,
+      title: "Events & Ticket Games",
+      desc: "Explore promotions, awards, programs, and ticket games. For a ticket game, choose an available number online and pay through Paystack, or visit the listed branch to choose a paper ticket.",
     },
     {
       icon: ClipboardList,
@@ -177,7 +192,17 @@ export default function Help() {
     {
       question: "What payment methods do you accept?",
       answer:
-        "We accept Paystack (debit/credit cards and bank transfers) and Cash on Delivery. All online payments are secured by Paystack.",
+        "Furniture checkout is currently a frontend demo and no payment is charged. For ticket games with online sales enabled, payment is processed by Paystack. Branch ticket sales are paid in person.",
+    },
+    {
+      question: "How do I join a ticket game?",
+      answer:
+        "Open the game from Programs & Events, choose available numbers, enter your name and email, then pay the ticket price through Paystack. No account or password is needed. After payment is confirmed, each number reveals its assigned prize. You can also visit a branch, pay for a ticket, and open an available numbered paper there.",
+    },
+    {
+      question: "Can I see which prize belongs to my ticket number?",
+      answer:
+        "Yes. Once your online ticket payment is confirmed, or your branch ticket purchase is recorded, the prize assigned to that number is revealed. The ticket is the only purchase; the revealed prize belongs to you at no additional prize charge. Collect it at the branch or contact the event team to arrange delivery.",
     },
     {
       question: "How do I change or cancel my order?",
@@ -245,8 +270,7 @@ export default function Help() {
             <div>
               <h1 className="text-3xl font-bold text-[#011F5B]">Help Center</h1>
               <p className="text-gray-500 mt-2 max-w-2xl text-sm leading-relaxed">
-                Everything you need to know about using TimmyLux Furniture — from
-                shopping and checkout to your account, orders, and the academy.
+                Find help for shopping, orders, programs, ticket games, and support.
               </p>
             </div>
           </div>
@@ -256,9 +280,10 @@ export default function Help() {
             {[
               { label: "Shop", to: "/products", icon: ShoppingCart },
               { label: "Gallery", to: "/gallery", icon: Images },
+              { label: "Locations", to: "/locations", icon: MapPin },
               { label: "Track Order", to: "/track-order", icon: Truck },
               { label: "Academy", to: "/academy", icon: GraduationCap },
-              { label: "Contact Us", to: "/custom-request", icon: MessageSquare },
+              { label: "Contact Support", to: "/help#contact", icon: MessageSquare },
             ].map(({ label, to, icon }) => (
               <Link
                 key={label}

@@ -1,6 +1,5 @@
 const AdminRoute = ({ children }) => {
-  // Always render since auth is removed
-  return <>{children}</>;
+  return children;
 };
 
 export default AdminRoute;

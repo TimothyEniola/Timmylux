@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Check, Calendar, Package, Sparkles, ShoppingCart, Archive } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Check, Calendar, Package, Sparkles, ShoppingCart, ArrowRight } from "lucide-react";
 import useNotificationStore from "../store/notificationStore";
 
 export default function Notifications() {
@@ -209,6 +210,15 @@ export default function Notifications() {
                             minute: "2-digit",
                           })}
                         </p>
+                        {notif.eventType === "game" && /^\/games\/[a-zA-Z0-9_-]+$/.test(notif.actionUrl || "") && (
+                          <Link
+                            to={notif.actionUrl}
+                            onClick={() => markAsRead(notif.id)}
+                            className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                          >
+                            Buy ticket & play <ArrowRight size={16} aria-hidden="true" />
+                          </Link>
+                        )}
                       </div>
 
                       {/* Actions */}

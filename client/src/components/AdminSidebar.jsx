@@ -19,6 +19,7 @@ import {
   User,
   Settings,
   Images,
+  MapPin,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import useNotificationStore from "../store/notificationStore";
@@ -60,6 +61,7 @@ export default function AdminSidebar({ collapsed, setCollapsed }) {
     { path: "/admin/add-product", label: "Add Product", icon: Plus },
     { path: "/admin/orders", label: "Orders", icon: ShoppingCart },
     { path: "/admin/gallery", label: "Gallery", icon: Images },
+    { path: "/admin/locations", label: "Locations", icon: MapPin },
   ];
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MessageSquare,
   User,
@@ -7,9 +7,14 @@ import {
   Home,
   CheckCircle,
 } from "lucide-react";
+import { apiRequest } from "../utils/api";
 
 export default function CustomRequest() {
   const [submitted, setSubmitted] = useState(false);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -18,10 +23,10 @@ export default function CustomRequest() {
     topic: "",
     address: "",
     description: "",
-    image: null,
-    imageType: null,
     budget: "",
   });
+
+  useEffect(() => () => previewUrls.forEach((url) => URL.revokeObjectURL(url)), [previewUrls]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,26 +36,29 @@ export default function CustomRequest() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
+    setError("");
+    const body = new FormData();
+    body.append("name", formData.name.trim());
+    body.append("email", formData.email.trim());
+    body.append("phone", formData.phone.trim());
+    body.append("message", formData.description.trim());
+    body.append("requestDetails", JSON.stringify({
+      roomType: formData.roomType,
+      topic: formData.topic,
+      address: formData.address,
+      budget: formData.budget,
+    }));
+    imageFiles.forEach((file) => body.append("images", file));
 
-    if (
-      formData.name &&
-      formData.email &&
-      formData.phone &&
-      formData.description
-    ) {
-      localStorage.setItem(
-        `customRequest_${Date.now()}`,
-        JSON.stringify({
-          ...formData,
-          submittedAt: new Date().toISOString(),
-        })
-      );
-
+    try {
+      await apiRequest("/custom-request", { method: "POST", body });
       setSubmitted(true);
-
-      setTimeout(() => {
+      setImageFiles([]);
+      setPreviewUrls([]);
+      window.setTimeout(() => {
         setSubmitted(false);
         setFormData({
           name: "",
@@ -60,27 +68,38 @@ export default function CustomRequest() {
           topic: "",
           address: "",
           description: "",
-          image: null,
           budget: "",
         });
       }, 3000);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    const isImage = file.type.startsWith("image");
-    const isVideo = file.type.startsWith("video");
-    const isPdf = file.type === "application/pdf";
-    reader.onload = () => {
-      setFormData((p) => ({ ...p, image: reader.result, imageType: isImage ? "image" : isVideo ? "video" : isPdf ? "pdf" : "file" }));
-    };
-    reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 5) {
+      setError("Choose up to five reference images.");
+      e.target.value = "";
+      return;
+    }
+    if (files.some((file) => !file.type.startsWith("image/") || file.size > 5 * 1024 * 1024)) {
+      setError("Each reference must be an image no larger than 5 MB.");
+      e.target.value = "";
+      return;
+    }
+    setError("");
+    setImageFiles(files);
+    setPreviewUrls(files.map((file) => URL.createObjectURL(file)));
   };
 
-  const removeImage = () => setFormData((p) => ({ ...p, image: null }));
+  const removeImages = () => {
+    setImageFiles([]);
+    setPreviewUrls([]);
+    setError("");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-[#D4AF37]/5 py-12">
@@ -235,35 +254,32 @@ export default function CustomRequest() {
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
                       onChange={handleImageChange}
                       className="w-full"
                     />
-                    {formData.image && (
-                      <div className="mt-3 flex items-center gap-3">
-                        {formData.imageType === "image" && (
-                          <img src={formData.image} alt="preview" className="w-28 h-20 object-cover rounded-md border" />
-                        )}
-                        {formData.imageType === "video" && (
-                          <video src={formData.image} controls className="w-36 h-24 rounded-md border" />
-                        )}
-                        {formData.imageType === "pdf" && (
-                          <a href={formData.image} target="_blank" rel="noreferrer" className="text-sm underline">Open uploaded PDF</a>
-                        )}
-                        {formData.imageType === "file" && (
-                          <a href={formData.image} target="_blank" rel="noreferrer" className="text-sm underline">Open file</a>
-                        )}
-                        <button type="button" onClick={removeImage} className="text-sm text-red-600 underline">Remove</button>
+                    <p className="mt-1 text-xs text-gray-500">Up to 5 images, maximum 5 MB each.</p>
+                    {previewUrls.length > 0 && (
+                      <div className="mt-3 flex flex-wrap items-start gap-3">
+                        {previewUrls.map((url, index) => (
+                          <div key={url} className="relative">
+                            <img src={url} alt={`Reference preview ${index + 1}`} className="h-24 w-28 rounded-md border object-cover" />
+                          </div>
+                        ))}
+                        <button type="button" onClick={removeImages} className="text-sm text-red-600 underline">Remove images</button>
                       </div>
                     )}
                   </div>
                 </div>
 
                 {/* Submit */}
+                {error && <p role="alert" className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</p>}
                 <button
                   type="submit"
-                  className="w-full bg-[#D4AF37] text-white py-3 rounded-xl"
+                  disabled={submitting}
+                  className="w-full rounded-xl bg-[#D4AF37] py-3 text-white disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Submit Request
+                  {submitting ? "Sending request..." : "Submit Request"}
                 </button>
               </form>
             )}

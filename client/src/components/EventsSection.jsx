@@ -6,6 +6,7 @@ import {
   Gift,
   MapPin,
   PartyPopper,
+  Dices,
   Percent,
   Sparkles,
   Star,
@@ -25,6 +26,7 @@ import {
   getEventShareUrl,
 } from "../utils/eventSharing";
 import { readStoredArray } from "../utils/storage";
+import { apiRequest } from "../utils/api";
 import useCurrentTime from "../hooks/useCurrentTime";
 
 const MS_IN_SECOND = 1000;
@@ -43,6 +45,8 @@ const eventIcons = {
   customer_year: Award,
   promo_season: Calendar,
   program: BookOpen,
+  raffle: Dices,
+  game: Dices,
 };
 
 function isCurrentOrUpcoming(event, now) {
@@ -54,8 +58,11 @@ function isCurrentOrUpcoming(event, now) {
 }
 
 function getEventTarget(event) {
+  if (event.type === "game") return `/games/${event.id}`;
   if (event.targetUrl) return event.targetUrl;
-  return event.type === "program" ? "/academy" : "/products";
+  if (event.type === "program") return "/academy";
+  if (["award", "customer_year", "party"].includes(event.type)) return "/gallery";
+  return "/products";
 }
 
 function getDateTime(dateValue, timeValue) {
@@ -133,11 +140,44 @@ function getCountdownStyle(timeLeftMs, status) {
 
 export default function EventsSection() {
   const location = useLocation();
-  const [events] = useState(() => readStoredArray("adminEvents"));
+  const [events, setEvents] = useState(() => readStoredArray("adminEvents").map((event) => ({ ...event, _localOnly: true })));
   const hasTimedEvents = events.some((event) => event.startDate || event.endDate);
   const now = useCurrentTime(1000, hasTimedEvents);
   const [copiedCode, setCopiedCode] = useState(null);
-  const visibleEvents = useMemo(() => events.filter((event) => isCurrentOrUpcoming(event, now)), [events, now]);
+  const visibleEvents = useMemo(() => events.filter((event) =>
+    event.type !== "raffle" &&
+    isCurrentOrUpcoming(event, now)
+  ), [events, now]);
+
+  useEffect(() => {
+    let active = true;
+    apiRequest("/events")
+      .then(({ data }) => {
+        if (!active) return;
+        const remoteIds = new Set(data.map((event) => String(event.id)));
+        const localEvents = readStoredArray("adminEvents")
+          .filter((event) => !remoteIds.has(String(event.id)))
+          .map((event) => ({ ...event, _localOnly: true }));
+        setEvents([...data, ...localEvents]);
+      })
+      .catch(() => undefined);
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    const syncLocalEvents = (storageEvent) => {
+      if (storageEvent.key !== "adminEvents") return;
+      const localEvents = readStoredArray("adminEvents")
+        .filter((event) => event.type !== "raffle")
+        .map((event) => ({ ...event, _localOnly: true }));
+      setEvents((current) => [
+        ...current.filter((event) => !event._localOnly && event.type !== "raffle"),
+        ...localEvents,
+      ]);
+    };
+    window.addEventListener("storage", syncLocalEvents);
+    return () => window.removeEventListener("storage", syncLocalEvents);
+  }, []);
 
   useEffect(() => {
     if (!location.hash) return undefined;
@@ -190,6 +230,9 @@ export default function EventsSection() {
               const target = getEventTarget(event);
               const isExternal = /^https?:\/\//i.test(target);
               const actionClass = "flex items-center justify-between rounded-lg border border-primary/50 px-4 py-3 text-navy transition-colors hover:bg-primary hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+              const actionLabel = event.type === "game"
+                ? event.gameEnabled ? "Buy ticket & play" : "View participating branches"
+                : event.type === "program" ? "View program" : "Explore event";
               const shareTitle = event.title || "TimmyLux event";
               const shareText = createEventShareText(event);
               const shareUrl = getEventShareUrl(event);
@@ -204,11 +247,16 @@ export default function EventsSection() {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-navy/90 to-transparent" />
                     <div className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-navy/80 px-3 py-1 text-xs uppercase text-primary">
-                      <Icon size={12} aria-hidden="true" /> {String(event.type || "event").replaceAll("_", " ")}
+                      <Icon size={12} aria-hidden="true" /> {event.type === "game" ? "Game" : String(event.type || "event").replaceAll("_", " ")}
                     </div>
                     {Number(event.discountPercentage) > 0 && (
                       <div className="absolute bottom-4 right-4 rounded-lg bg-primary px-3 py-1 font-bold text-navy">
                         {event.discountPercentage}% off
+                      </div>
+                    )}
+                    {event.type === "game" && Number(event.ticketPrice) > 0 && (
+                      <div className="absolute bottom-4 left-4 rounded-lg bg-white px-3 py-1 text-sm font-semibold text-navy">
+                        ₦{Number(event.ticketPrice).toLocaleString()} / ticket
                       </div>
                     )}
                   </div>
@@ -259,11 +307,11 @@ export default function EventsSection() {
                     <div className="flex flex-col gap-3">
                       {isExternal ? (
                         <a href={target} target="_blank" rel="noreferrer" className={actionClass}>
-                          <span>{event.type === "program" ? "View program" : "Explore offer"}</span><ArrowRight size={16} aria-hidden="true" />
+                          <span>{actionLabel}</span><ArrowRight size={16} aria-hidden="true" />
                         </a>
                       ) : (
                         <Link to={target} className={actionClass}>
-                          <span>{event.type === "program" ? "View program" : "Explore offer"}</span><ArrowRight size={16} aria-hidden="true" />
+                          <span>{actionLabel}</span><ArrowRight size={16} aria-hidden="true" />
                         </Link>
                       )}
                       <ShareButton title={shareTitle} text={shareText} url={shareUrl} className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-navy/15 px-4 py-2 text-sm font-semibold text-navy transition-colors hover:border-primary hover:bg-[#F7F6F1] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" />

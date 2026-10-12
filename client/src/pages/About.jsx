@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import CompanyLocations from "../components/CompanyLocations";
 
 const About = () => {
   return (
@@ -87,6 +88,8 @@ const About = () => {
           </div>
         </div>
       </section>
+
+      <CompanyLocations />
 
       {/* Portfolio / Resume Section */}
       <section className="py-16 px-6 bg-white">

@@ -91,6 +91,8 @@ CREATE DATABASE timmylux;
 npx prisma migrate dev --name init
 ```
 
+The `20261010120000_add_event_game_tickets` migration adds numbered ticket prizes and shared reservations. The `20261012110500_add_paid_game_event_fields` migration extends paid Game events with participating branch metadata and links in-person ticket records to their branch. Game ticket prices and prize assignments use the existing event ticket fields. Apply all migrations and regenerate Prisma Client before starting the server. Ticketed `Game` and `One Ticket / Game` events require a connected API/database. For live online ticket payments, set `PAYSTACK_SECRET_KEY` on the server, set `CLIENT_URL` to the frontend origin, and configure the Paystack webhook to post to `/api/webhooks/paystack`. The frontend must use the API base ending in `/api`; the development Vite proxy targets `http://localhost:5000` by default. Keep the Paystack secret on the server only.
+
 ## Seed Database
 
 ```bash

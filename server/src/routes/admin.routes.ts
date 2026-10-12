@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as adminController from '../controllers/admin.controller';
+import * as eventController from '../controllers/event.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { requireRole } from '../middlewares/rbac.middleware';
 
@@ -27,10 +28,12 @@ router.get('/coupons/verify/:code', adminController.verifyCoupon);
 router.patch('/coupons/:id/toggle', adminController.toggleCoupon);
 
 // Events
-router.post('/events', adminController.createEvent);
-router.get('/events', adminController.getEvents);
-router.put('/events/:id', adminController.updateEvent);
-router.delete('/events/:id', adminController.deleteEvent);
+router.post('/events', eventController.createEvent);
+router.get('/events', eventController.getAdminEvents);
+router.put('/events/:id', eventController.updateEvent);
+router.delete('/events/:id', eventController.deleteEvent);
+router.get('/events/:id/tickets', eventController.getEventTickets);
+router.post('/events/:id/tickets/branch', eventController.recordBranchTicket);
 
 // Academy Applications
 router.get('/academy/applications', adminController.getAcademyApplications);

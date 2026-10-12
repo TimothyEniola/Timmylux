@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Mail, Lock, Eye, EyeOff, User, ArrowLeft, CheckCircle } from "lucide-react";
 import { setCurrentUser, getCurrentUser, getDisplayNameFromEmail } from "../utils/userHelpers";
+import { apiRequest } from "../utils/api";
 
 export default function SignIn() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [view, setView] = useState("signin"); // "signin" | "forgot" | "sent"
 
@@ -16,8 +18,24 @@ export default function SignIn() {
 
   const [resetEmail, setResetEmail] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const { data: serverUser } = await apiRequest("/auth/login", {
+        method: "POST",
+        body: formData,
+      });
+      setCurrentUser(serverUser);
+      toast.success("Sign in successful!");
+      navigate(location.state?.from?.pathname || "/");
+      return;
+    } catch (error) {
+      if (error.status) {
+        toast.error(error.message);
+        return;
+      }
+    }
+
     const existingUser = getCurrentUser();
     const user =
       existingUser?.email === formData.email.trim()
@@ -30,7 +48,7 @@ export default function SignIn() {
 
     setCurrentUser(user);
     toast.success("Sign in successful!");
-    navigate("/");
+    navigate(location.state?.from?.pathname || "/");
   };
 
   const handleForgotSubmit = (e) => {
