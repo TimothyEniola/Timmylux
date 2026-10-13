@@ -45,7 +45,7 @@ export default function EventGame() {
       const localEvent = readStoredArray("adminEvents").find((item) => String(item.id) === String(id));
       if (localEvent) {
         const storedTickets = readStoredArray("adminEventTickets").filter((ticket) => String(ticket.eventId) === String(id));
-        const prizeMap = new Map((Array.isArray(localEvent.ticketPrizes) ? localEvent.ticketPrizes : []).map((item) => [String(item.number), item.prize]));
+        const prizeMap = new Map((Array.isArray(localEvent.ticketPrizes) ? localEvent.ticketPrizes : []).map((item) => [String(item.number), { prize: item.prize || "Prize pending", imageUrl: item.imageUrl || "" }]));
         const totalNumbers = Number(localEvent.totalNumbers) || Math.max((Array.isArray(localEvent.ticketPrizes) ? localEvent.ticketPrizes.length : 0), 1);
         const localTicketNumbers = Array.from({ length: totalNumbers }, (_, index) => String(index + 1));
         setEvent({ ...localEvent, isOpenForTickets: true, isCurrentlyOpen: true, gameEnabled: Boolean(localEvent.gameEnabled || localEvent.onlineEnabled), participatingLocations: Array.isArray(localEvent.participatingLocations) ? localEvent.participatingLocations : [] });
@@ -91,7 +91,7 @@ export default function EventGame() {
 
     const localEvent = readStoredArray("adminEvents").find((item) => String(item.id) === String(id));
     if (localEvent) {
-      const prizeMap = new Map((Array.isArray(localEvent.ticketPrizes) ? localEvent.ticketPrizes : []).map((item) => [String(item.number), item.prize]));
+      const prizeMap = new Map((Array.isArray(localEvent.ticketPrizes) ? localEvent.ticketPrizes : []).map((item) => [String(item.number), { prize: item.prize || "Prize pending", imageUrl: item.imageUrl || "" }]));
       const nextSales = readStoredArray("adminEventTickets");
       const usedNumbers = new Set(nextSales.filter((ticket) => String(ticket.eventId) === String(id)).map((ticket) => String(ticket.number)));
       const validNumbers = selectedNumbers.filter((number) => !usedNumbers.has(String(number)));
@@ -103,10 +103,14 @@ export default function EventGame() {
       }
 
       const referenceCode = `local-${Date.now()}`;
-      const tickets = validNumbers.map((number) => ({
-        number,
-        prize: prizeMap.get(String(number)) || "Prize pending",
-      }));
+      const tickets = validNumbers.map((number) => {
+        const prizeInfo = prizeMap.get(String(number)) || { prize: "Prize pending", imageUrl: "" };
+        return {
+          number,
+          prize: prizeInfo.prize,
+          prizeImage: prizeInfo.imageUrl || "",
+        };
+      });
       const receiptPayload = {
         eventId: String(id),
         reference: referenceCode,
@@ -123,17 +127,21 @@ export default function EventGame() {
       window.localStorage.setItem("localGameReceipts", JSON.stringify([receiptPayload, ...savedReceipts]));
       window.localStorage.setItem("adminEventTickets", JSON.stringify([
         ...nextSales,
-        ...validNumbers.map((number) => ({
-          eventId: String(id),
-          number,
-          prize: prizeMap.get(String(number)) || "Prize pending",
-          customerName: customer.name,
-          customerEmail: customer.email,
-          customerPhone: customer.phone,
-          paymentMethod: "LOCAL",
-          status: "PAID",
-          createdAt: new Date().toISOString(),
-        })),
+        ...validNumbers.map((number) => {
+          const prizeInfo = prizeMap.get(String(number)) || { prize: "Prize pending", imageUrl: "" };
+          return {
+            eventId: String(id),
+            number,
+            prize: prizeInfo.prize,
+            prizeImage: prizeInfo.imageUrl || "",
+            customerName: customer.name,
+            customerEmail: customer.email,
+            customerPhone: customer.phone,
+            paymentMethod: "LOCAL",
+            status: "PAID",
+            createdAt: new Date().toISOString(),
+          };
+        }),
       ]));
 
       setUnavailableNumbers((current) => [...new Set([...current, ...validNumbers.map(String)])]);
@@ -260,10 +268,14 @@ export default function EventGame() {
               <div className="mt-4 space-y-3 text-left">
                 {(receipt.tickets || []).map((ticket) => (
                   <div key={ticket.number} className="border border-emerald-200 bg-emerald-50 p-4">
+                    {ticket.prizeImage && <img src={ticket.prizeImage} alt={`Prize for ticket ${ticket.number}`} className="mb-3 h-28 w-full rounded-lg object-cover" />}
                     <p className="text-sm text-gray-700">Ticket number <strong>{ticket.number}</strong></p>
                     <p className="mt-1 text-lg font-bold text-navy">Prize: {ticket.prize}</p>
                   </div>
                 ))}
+              </div>
+              <div className="mt-4 flex flex-wrap justify-center gap-3">
+                <button type="button" onClick={() => window.print()} className="rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">Print claim receipt</button>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-gray-600">Keep this confirmation for your records. Collect your prize at a participating branch or contact the event team to arrange delivery.</p>
               {event.contactInfo && <p className="mt-2 text-sm text-gray-600">Questions? {event.contactInfo}</p>}

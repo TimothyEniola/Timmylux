@@ -161,6 +161,7 @@ model EventTicket {
   eventId       String
   number        String
   prize         String
+  prizeImage    String?
   customerName  String
   customerEmail String
   customerPhone String?

@@ -58,6 +58,7 @@ const emptyForm = {
 export default function AdminEvents() {
   const { addNotification } = useNotificationStore();
   const [events, setEvents] = useState([]);
+  const [eventParticipants, setEventParticipants] = useState({});
   const [locations] = useState(() => readStoredArray("companyLocations"));
   const [useBackend, setUseBackend] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -111,6 +112,35 @@ export default function AdminEvents() {
     loadEvents();
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    if (!useBackend || !events.some((event) => event.type === "game")) return;
+    const controller = new AbortController();
+    const loadParticipants = async () => {
+      const nextParticipants = {};
+      await Promise.all(events.filter((event) => event.type === "game").map(async (event) => {
+        try {
+          const { data } = await apiRequest(`/admin/events/${event.id}/tickets`, { signal: controller.signal });
+          nextParticipants[event.id] = Array.isArray(data)
+            ? data
+                .filter((ticket) => ticket?.customerName)
+                .slice(0, 20)
+            : [];
+        } catch {
+          const fallback = readStoredArray("adminEventTickets")
+            .filter((ticket) => String(ticket.eventId) === String(event.id))
+            .filter((ticket) => ticket.customerName || ticket.customerEmail || ticket.number)
+            .slice(0, 20);
+          nextParticipants[event.id] = fallback;
+        }
+      }));
+      if (!controller.signal.aborted) {
+        setEventParticipants(nextParticipants);
+      }
+    };
+    loadParticipants();
+    return () => controller.abort();
+  }, [useBackend, events]);
 
   const saveLocalEvents = (newEvents) => {
     try {
@@ -187,7 +217,11 @@ export default function AdminEvents() {
 
     try {
       const normalizedGamePrizes = isGameEvent
-        ? gamePrizes.slice(0, gameTotal).map((item, index) => ({ number: String(index + 1), prize: item.prize.trim() }))
+        ? gamePrizes.slice(0, gameTotal).map((item, index) => ({
+            number: String(index + 1),
+            prize: item.prize.trim(),
+            imageUrl: item.imageUrl?.trim() || "",
+          }))
         : [];
       const payload = {
         ...formData,
@@ -200,7 +234,11 @@ export default function AdminEvents() {
         ticketPrice: isTicketedEvent ? Number(formData.ticketPrice) : null,
         ticketPrizes: isGameEvent ? normalizedGamePrizes : raffleTicketPrizes,
         totalNumbers: isGameEvent ? gameTotal : formData.totalNumbers,
-        gamePrizes: isGameEvent ? gamePrizes.slice(0, gameTotal).map((item, index) => ({ number: index + 1, prize: item.prize.trim() })) : formData.gamePrizes,
+        gamePrizes: isGameEvent ? gamePrizes.slice(0, gameTotal).map((item, index) => ({
+          number: index + 1,
+          prize: item.prize.trim(),
+          imageUrl: item.imageUrl?.trim() || "",
+        })) : formData.gamePrizes,
       };
       let savedEvent;
       if (useBackend) {
@@ -252,7 +290,7 @@ export default function AdminEvents() {
     const gameTotal = Number(event.totalNumbers) || storedTicketPrizes.length;
     const gamePrizes = Array.isArray(event.gamePrizes) && event.gamePrizes.length
       ? event.gamePrizes
-      : storedTicketPrizes.map(({ number, prize }) => ({ number: Number(number), prize }));
+      : storedTicketPrizes.map(({ number, prize, imageUrl }) => ({ number: Number(number), prize, imageUrl: imageUrl || "" }));
     setFormData({
       ...emptyForm,
       ...event,
@@ -266,6 +304,7 @@ export default function AdminEvents() {
       gamePrizes: Array.from({ length: event.type === "game" ? gameTotal : 0 }, (_, index) => ({
         number: index + 1,
         prize: gamePrizes.find((item) => Number(item.number) === index + 1)?.prize || "",
+        imageUrl: gamePrizes.find((item) => Number(item.number) === index + 1)?.imageUrl || "",
       })),
       onlineEnabled: event.type === "game" ? Boolean(event.onlineEnabled ?? event.gameEnabled) : true,
       branchEnabled: Boolean(event.branchEnabled),
@@ -330,8 +369,9 @@ export default function AdminEvents() {
       if (event.type === "game" && !branchSale.branchId) {
         throw new Error("Choose a participating branch before recording this ticket.");
       }
-      const assignedPrize = (Array.isArray(event.ticketPrizes) ? event.ticketPrizes : [])
-        .find((ticket) => String(ticket.number) === String(branchSale.number))?.prize;
+      const assignedPrizeInfo = (Array.isArray(event.ticketPrizes) ? event.ticketPrizes : [])
+        .find((ticket) => String(ticket.number) === String(branchSale.number));
+      const assignedPrize = assignedPrizeInfo?.prize;
       if (!assignedPrize) throw new Error("No prize is assigned to that number.");
 
       if (useBackend) {
@@ -351,6 +391,7 @@ export default function AdminEvents() {
         const ticket = {
           ...branchSale,
           prize: assignedPrize,
+          prizeImage: assignedPrizeInfo?.imageUrl || "",
           id: Date.now().toString(),
           eventId: event.id,
           status: "PAID",
@@ -366,6 +407,7 @@ export default function AdminEvents() {
           eventId: event.id,
           number: branchSale.number,
           prize: assignedPrize,
+          prizeImage: assignedPrizeInfo?.imageUrl || "",
           customerName: branchSale.name,
         });
       }
@@ -458,6 +500,7 @@ export default function AdminEvents() {
               .filter((ticket) => String(ticket.eventId) === String(event.id))
               .filter((ticket) => ticket.customerName || ticket.customerEmail || ticket.number)
               .slice(0, 4);
+            const participantRecords = eventParticipants[String(event.id)] || payerRecords;
 
             return (
               <div
@@ -538,13 +581,13 @@ export default function AdminEvents() {
                     </div>
                   )}
 
-                  {event.type === "game" && payerRecords.length > 0 && (
+                  {event.type === "game" && participantRecords.length > 0 && (
                     <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900">
-                      <p className="font-semibold">Paying customers</p>
+                      <p className="font-semibold">Participants</p>
                       <ul className="mt-2 space-y-1">
-                        {payerRecords.map((record) => (
-                          <li key={`${record.eventId}-${record.number}-${record.customerEmail || record.customerName || record.reference || "record"}`}>
-                            {record.customerName || "Customer"} • Ticket {record.number}
+                        {participantRecords.map((record) => (
+                          <li key={`${record.eventId || event.id}-${record.number}-${record.customerEmail || record.customerName || record.reference || "record"}`}>
+                            {record.customerName || record.customerEmail || "Customer"} • Ticket {record.number}
                           </li>
                         ))}
                       </ul>
@@ -631,6 +674,7 @@ export default function AdminEvents() {
                           <div role="status" className="mt-3 border-t border-primary/20 pt-3">
                             <p className="font-semibold">Ticket {branchResult.number} belongs to {branchResult.customerName}.</p>
                             {branchResult.branchName && <p className="mt-1">Branch: {branchResult.branchName}</p>}
+                            {branchResult.prizeImage && <img src={branchResult.prizeImage} alt={`Prize for ticket ${branchResult.number}`} className="mt-2 h-24 w-full rounded-lg object-cover" />}
                             <p className="mt-1">Prize revealed: <strong>{branchResult.prize}</strong></p>
                             <p className="mt-1 text-xs">The prize is theirs at no extra charge. They can collect it at the branch or contact you to arrange delivery.</p>
                           </div>
@@ -929,6 +973,7 @@ export default function AdminEvents() {
                               gamePrizes: Array.from({ length: safeTotal }, (_, index) => ({
                                 number: index + 1,
                                 prize: current.gamePrizes?.[index]?.prize || "",
+                                imageUrl: current.gamePrizes?.[index]?.imageUrl || "",
                               })),
                             }));
                           }}
@@ -943,22 +988,37 @@ export default function AdminEvents() {
                           <h3 className="mb-2 text-sm font-medium text-gray-700">Prize for each number *</h3>
                           <div className="grid max-h-72 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
                             {formData.gamePrizes.map((item, index) => (
-                              <label key={item.number} className="flex items-center gap-2 rounded border border-gray-200 bg-white px-3 py-2 text-sm text-navy">
-                                <span className="w-8 shrink-0 font-semibold">{item.number}.</span>
-                                <input
-                                  type="text"
-                                  maxLength={160}
-                                  required
-                                  value={item.prize}
-                                  onChange={(e) => setFormData((current) => ({
-                                    ...current,
-                                    gamePrizes: current.gamePrizes.map((prize, prizeIndex) => prizeIndex === index ? { ...prize, prize: e.target.value } : prize),
-                                  }))}
-                                  placeholder={`Prize for ${item.number}`}
-                                  aria-label={`Prize for number ${item.number}`}
-                                  className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                                />
-                              </label>
+                              <div key={item.number} className="rounded border border-gray-200 bg-white p-3 text-sm text-navy">
+                                <div className="mb-2 flex items-center gap-2">
+                                  <span className="w-8 shrink-0 font-semibold">{item.number}.</span>
+                                  <input
+                                    type="text"
+                                    maxLength={160}
+                                    required
+                                    value={item.prize}
+                                    onChange={(e) => setFormData((current) => ({
+                                      ...current,
+                                      gamePrizes: current.gamePrizes.map((prize, prizeIndex) => prizeIndex === index ? { ...prize, prize: e.target.value } : prize),
+                                    }))}
+                                    placeholder={`Prize for ${item.number}`}
+                                    aria-label={`Prize for number ${item.number}`}
+                                    className="min-w-0 flex-1 rounded border border-gray-300 px-2 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                  />
+                                </div>
+                                <label className="block text-xs text-gray-600">
+                                  Prize image URL (optional)
+                                  <input
+                                    type="url"
+                                    value={item.imageUrl || ""}
+                                    onChange={(e) => setFormData((current) => ({
+                                      ...current,
+                                      gamePrizes: current.gamePrizes.map((prize, prizeIndex) => prizeIndex === index ? { ...prize, imageUrl: e.target.value } : prize),
+                                    }))}
+                                    placeholder="https://example.com/prize-image.jpg"
+                                    className="mt-1 w-full rounded border border-gray-300 px-2 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                                  />
+                                </label>
+                              </div>
                             ))}
                           </div>
                         </div>

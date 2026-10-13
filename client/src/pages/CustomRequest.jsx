@@ -40,16 +40,28 @@ export default function CustomRequest() {
     e.preventDefault();
     setSubmitting(true);
     setError("");
+
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const phone = formData.phone.trim();
+    const description = formData.description.trim();
+
+    if (!name || !email || !phone || !description || !/^\S+@\S+\.\S+$/.test(email)) {
+      setError("Please complete all required fields with a valid email address before submitting.");
+      setSubmitting(false);
+      return;
+    }
+
     const body = new FormData();
-    body.append("name", formData.name.trim());
-    body.append("email", formData.email.trim());
-    body.append("phone", formData.phone.trim());
-    body.append("message", formData.description.trim());
+    body.append("name", name);
+    body.append("email", email);
+    body.append("phone", phone);
+    body.append("message", description);
     body.append("requestDetails", JSON.stringify({
       roomType: formData.roomType,
       topic: formData.topic,
-      address: formData.address,
-      budget: formData.budget,
+      address: formData.address.trim(),
+      budget: formData.budget.trim(),
     }));
     imageFiles.forEach((file) => body.append("images", file));
 
@@ -72,7 +84,7 @@ export default function CustomRequest() {
         });
       }, 3000);
     } catch (requestError) {
-      setError(requestError.message);
+      setError(requestError.message || "The request could not be completed. Please try again.");
     } finally {
       setSubmitting(false);
     }

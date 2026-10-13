@@ -3,16 +3,20 @@ import { Request, Response } from 'express';
 import prisma from '../config/database';
 import * as paymentService from '../services/payment.service';
 
-type TicketPrize = { number: string; prize: string };
+type TicketPrize = { number: string; prize: string; imageUrl?: string };
 
 const reservationSweepTimestamps = new Map<string, number>();
 const RESERVATION_SWEEP_INTERVAL_MS = 60 * 1000;
 
 const getTicketPrizes = (value: unknown): TicketPrize[] => {
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is TicketPrize =>
-    Boolean(item && typeof item.number === 'string' && typeof item.prize === 'string')
-  );
+  return value
+    .filter((item): item is TicketPrize => Boolean(item && typeof item.number === 'string' && typeof item.prize === 'string'))
+    .map((item) => ({
+      number: item.number.trim(),
+      prize: item.prize.trim(),
+      imageUrl: typeof item.imageUrl === 'string' ? item.imageUrl.trim() : '',
+    }));
 };
 
 const getEventBoundary = (date: Date | null, time: string | null, fallback: string) => {
@@ -34,9 +38,10 @@ const isEventOpen = (
 };
 
 const normalizeEventData = (body: any) => {
-  const ticketPrizes = getTicketPrizes(body.ticketPrizes).map(({ number, prize }) => ({
+  const ticketPrizes = getTicketPrizes(body.ticketPrizes).map(({ number, prize, imageUrl }) => ({
     number: number.trim(),
     prize: prize.trim(),
+    imageUrl: imageUrl || '',
   }));
   const numbers = ticketPrizes.map(({ number }) => number.trim());
   const type = String(body.type || 'promo');
@@ -44,6 +49,9 @@ const normalizeEventData = (body: any) => {
   const ticketPrice = Number(body.ticketPrice);
   if (numbers.some((number) => !number) || ticketPrizes.some(({ prize }) => !prize) || new Set(numbers).size !== numbers.length) {
     throw new Error('Game ticket numbers must be unique and cannot be blank.');
+  }
+  if (ticketPrizes.some(({ imageUrl }) => imageUrl && !/^https?:\/\//i.test(imageUrl))) {
+    throw new Error('Prize images must be valid http or https URLs.');
   }
   if (isTicketedEvent && (!Number.isFinite(ticketPrice) || Math.round(ticketPrice * 100) < 1 || !ticketPrizes.length)) {
     throw new Error('A ticket game needs a price of at least ₦0.01 and at least one numbered prize.');
@@ -302,7 +310,7 @@ export const initializeTicketPayment = async (req: Request, res: Response): Prom
       return;
     }
     await releaseExpiredReservations(event.id);
-    const prizeMap = new Map(getTicketPrizes(event.ticketPrizes).map(({ number, prize }) => [number.trim(), prize.trim()]));
+    const prizeMap = new Map(getTicketPrizes(event.ticketPrizes).map((ticket) => [ticket.number.trim(), ticket]));
     if (selectedNumbers.some((number) => !prizeMap.has(number))) {
       res.status(400).json({ success: false, message: 'One or more selected ticket numbers are invalid.' });
       return;
@@ -312,18 +320,22 @@ export const initializeTicketPayment = async (req: Request, res: Response): Prom
     const amount = Math.round(event.ticketPrice * 100);
     await prisma.$transaction(async (transaction) => {
       await transaction.eventTicket.createMany({
-        data: selectedNumbers.map((number) => ({
-          eventId: event.id,
-          number,
-          prize: prizeMap.get(number)!,
-          customerName: normalizedName,
-          customerEmail: normalizedEmail,
-          customerPhone: normalizedPhone || null,
-          amount,
-          paymentMethod: 'PAYSTACK',
-          reference,
-          expiresAt,
-        })),
+        data: selectedNumbers.map((number) => {
+          const prizeInfo = prizeMap.get(number)!;
+          return {
+            eventId: event.id,
+            number,
+            prize: prizeInfo.prize,
+            prizeImage: prizeInfo.imageUrl || null,
+            customerName: normalizedName,
+            customerEmail: normalizedEmail,
+            customerPhone: normalizedPhone || null,
+            amount,
+            paymentMethod: 'PAYSTACK',
+            reference,
+            expiresAt,
+          };
+        }),
       });
     });
 
@@ -356,7 +368,7 @@ export const verifyTicketPayment = async (req: Request, res: Response): Promise<
         data: {
           status: 'success',
           numbers: tickets.map(({ number }) => number),
-          tickets: tickets.map(({ number, prize }) => ({ number, prize })),
+          tickets: tickets.map(({ number, prize, prizeImage }) => ({ number, prize, prizeImage })),
         },
       });
       return;
@@ -389,7 +401,7 @@ export const verifyTicketPayment = async (req: Request, res: Response): Promise<
       data: {
         status: 'success',
         numbers: confirmedTickets.map(({ number }) => number),
-        tickets: confirmedTickets.map(({ number, prize }) => ({ number, prize })),
+        tickets: confirmedTickets.map(({ number, prize, prizeImage }) => ({ number, prize, prizeImage })),
       },
     });
   } catch (error: any) {
@@ -435,6 +447,7 @@ export const recordBranchTicket = async (req: Request, res: Response): Promise<v
         eventId: event.id,
         number: prize.number.trim(),
         prize: prize.prize.trim(),
+        prizeImage: prize.imageUrl || null,
         customerName: normalizedName,
         customerEmail: normalizedEmail,
         customerPhone: normalizedPhone || null,
@@ -451,7 +464,7 @@ export const recordBranchTicket = async (req: Request, res: Response): Promise<v
     });
     res.status(201).json({
       success: true,
-      data: { id: ticket.id, number: ticket.number, prize: ticket.prize, branchId: ticket.branchId, branchName: ticket.branchName },
+      data: { id: ticket.id, number: ticket.number, prize: ticket.prize, prizeImage: ticket.prizeImage, branchId: ticket.branchId, branchName: ticket.branchName },
     });
   } catch (error: any) {
     res.status(error.code === 'P2002' ? 409 : 400).json({
@@ -468,7 +481,7 @@ export const getEventTickets = async (req: Request, res: Response): Promise<void
         eventId: req.params.id,
         OR: [{ status: 'PAID' }, { status: 'RESERVED', expiresAt: { gt: new Date() } }],
       },
-      select: { id: true, number: true, prize: true, customerName: true, customerEmail: true, customerPhone: true, paymentMethod: true, status: true, createdAt: true },
+      select: { id: true, number: true, prize: true, prizeImage: true, customerName: true, customerEmail: true, customerPhone: true, paymentMethod: true, status: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
     });
     res.json({ success: true, data: tickets });
