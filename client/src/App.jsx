@@ -15,6 +15,12 @@ import Footer from "./components/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 
+import useAuthStore from "./store/authStore";
+import useCartStore from "./store/cartStore";        
+import useWishlistStore from "./store/wishlistStore"; 
+import useProductStore from "./store/productStore";
+// import { useEffect } from "react";
+
 const Home = lazy(() => import("./pages/Home"));
 const About = lazy(() => import("./pages/About"));
 const Products = lazy(() => import("./pages/Products"));
@@ -72,7 +78,12 @@ class AppErrorBoundary extends React.Component {
 
   render() {
     if (this.state.error) {
-      return <ErrorPage error={this.state.error} resetErrorBoundary={this.resetError} />;
+      return (
+        <ErrorPage
+          error={this.state.error}
+          resetErrorBoundary={this.resetError}
+        />
+      );
     }
     return this.props.children;
   }
@@ -84,73 +95,269 @@ export default function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [readyPath, setReadyPath] = useState(location.pathname);
 
+  const checkAuth = useAuthStore((state) => state.checkAuth);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const fetchProducts = useProductStore((state) => state.fetchProducts);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
   useEffect(() => {
+    checkAuth();
+    fetchProducts(); 
+  }, [checkAuth, fetchProducts]);
+
+  const fetchCart = useCartStore((state) => state.fetchCart);
+  const fetchWishlist = useWishlistStore((state) => state.fetchWishlist);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCart();
+      fetchWishlist();
+    }
+  }, [isAuthenticated, fetchCart, fetchWishlist]);
+
+  // MOVE THIS UP: All hooks must execute before any early returns
+  useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       setReadyPath(location.pathname);
     }, 400);
-
     return () => window.clearTimeout(timeoutId);
   }, [location.pathname]);
+
+  // MOVE THIS DOWN: Early return happens after all hooks are declared
+  if (isLoading) {
+    return <Loader text="Checking authentication..." />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
       {!isAdminRoute && <TopBar collapsed={sidebarCollapsed} />}
       {isAdminRoute && <AdminTopBar collapsed={sidebarCollapsed} />}
-      {isAdminRoute ? <AdminSidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} /> : <Navbar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />}
-      <div className={`flex-grow transition-all duration-300 ${sidebarCollapsed ? 'xl:ml-16' : 'xl:ml-64'}`}>
+      {isAdminRoute ? (
+        <AdminSidebar
+          collapsed={sidebarCollapsed}
+          setCollapsed={setSidebarCollapsed}
+        />
+      ) : (
+        <Navbar
+          collapsed={sidebarCollapsed}
+          setCollapsed={setSidebarCollapsed}
+        />
+      )}
+      <div
+        className={`flex-grow transition-all duration-300 ${sidebarCollapsed ? "xl:ml-16" : "xl:ml-64"}`}
+      >
         {readyPath !== location.pathname && <Loader text="Loading page..." />}
         <AppErrorBoundary>
           <Suspense fallback={<Loader text="Loading page..." />}>
-          <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/locations" element={<Locations />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><UserProfile /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><UserSettings /></ProtectedRoute>} />
-          <Route path="/orders" element={<ProtectedRoute><OrderHistory /></ProtectedRoute>} />
-          <Route path="/track-order" element={<ProtectedRoute><TrackOrder /></ProtectedRoute>} />
-          <Route path="/custom-request" element={<CustomRequest />} />
-          <Route path="/help" element={<Help />} />
-          <Route path="/events/:id" element={<EventGame />} />
-          <Route path="/games/:id" element={<EventGame />} />
-          <Route path="/academy" element={<Academy />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/admin/content" element={<AdminRoute><AdminContentEditor /></AdminRoute>} />
-          <Route path="/admin/events" element={<AdminRoute><AdminEvents /></AdminRoute>} />
-          <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
-          <Route path="/admin/coupons" element={<AdminRoute><AdminCoupons /></AdminRoute>} />
-          <Route path="/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
-          <Route path="/admin/add-product" element={<AdminRoute><AdminAddProduct /></AdminRoute>} />
-          <Route path="/admin/edit-product/:id" element={<AdminRoute><AdminEditProduct /></AdminRoute>} />
-          <Route path="/admin/collections" element={<AdminRoute><AdminCollections /></AdminRoute>} />
-          <Route path="/admin/featured" element={<AdminRoute><AdminFeatured /></AdminRoute>} />
-          <Route path="/admin/profile" element={<AdminRoute><AdminProfile /></AdminRoute>} />
-          <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
-          <Route path="/admin/notifications" element={<AdminRoute><AdminNotifications /></AdminRoute>} />
-          <Route path="/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
-          <Route path="/admin/academy" element={<AdminRoute><AdminAcademy /></AdminRoute>} />
-          <Route path="/admin/gallery" element={<AdminRoute><AdminGallery /></AdminRoute>} />
-          <Route path="/admin/locations" element={<AdminRoute><AdminLocations /></AdminRoute>} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/product/:id" element={<ProductDetails />} />
-          <Route path="/error" element={<ErrorPage />} />
-          <Route path="*" element={<NotFound />} />
-          </Routes>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/locations" element={<Locations />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route
+                path="/wishlist"
+                element={
+                  <ProtectedRoute>
+                    <Wishlist />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <UserProfile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <UserSettings />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <OrderHistory />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/track-order"
+                element={
+                  <ProtectedRoute>
+                    <TrackOrder />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/custom-request" element={<CustomRequest />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/events/:id" element={<EventGame />} />
+              <Route path="/games/:id" element={<EventGame />} />
+              <Route path="/academy" element={<Academy />} />
+              <Route path="/notifications" element={<Notifications />} />
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/content"
+                element={
+                  <AdminRoute>
+                    <AdminContentEditor />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/events"
+                element={
+                  <AdminRoute>
+                    <AdminEvents />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/analytics"
+                element={
+                  <AdminRoute>
+                    <AdminAnalytics />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/coupons"
+                element={
+                  <AdminRoute>
+                    <AdminCoupons />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/products"
+                element={
+                  <AdminRoute>
+                    <AdminProducts />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/add-product"
+                element={
+                  <AdminRoute>
+                    <AdminAddProduct />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/edit-product/:id"
+                element={
+                  <AdminRoute>
+                    <AdminEditProduct />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/collections"
+                element={
+                  <AdminRoute>
+                    <AdminCollections />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/featured"
+                element={
+                  <AdminRoute>
+                    <AdminFeatured />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/profile"
+                element={
+                  <AdminRoute>
+                    <AdminProfile />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/settings"
+                element={
+                  <AdminRoute>
+                    <AdminSettings />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/notifications"
+                element={
+                  <AdminRoute>
+                    <AdminNotifications />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/orders"
+                element={
+                  <AdminRoute>
+                    <AdminOrders />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/academy"
+                element={
+                  <AdminRoute>
+                    <AdminAcademy />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/gallery"
+                element={
+                  <AdminRoute>
+                    <AdminGallery />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/locations"
+                element={
+                  <AdminRoute>
+                    <AdminLocations />
+                  </AdminRoute>
+                }
+              />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
+              <Route path="/error" element={<ErrorPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </Suspense>
         </AppErrorBoundary>
       </div>
-      <div className={`transition-all duration-300 ${sidebarCollapsed ? 'xl:ml-16' : 'xl:ml-64'}`}><Footer /></div>
+      <div
+        className={`transition-all duration-300 ${sidebarCollapsed ? "xl:ml-16" : "xl:ml-64"}`}
+      >
+        <Footer />
+      </div>
       <ToastContainer
         position="top-right"
         autoClose={3000}

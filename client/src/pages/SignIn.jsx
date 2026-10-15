@@ -1,60 +1,72 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { Mail, Lock, Eye, EyeOff, User, ArrowLeft, CheckCircle } from "lucide-react";
-import { setCurrentUser, getCurrentUser, getDisplayNameFromEmail } from "../utils/userHelpers";
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  User,
+  ArrowLeft,
+  LogIn,
+  CheckCircle,
+} from "lucide-react";
 import { apiRequest } from "../utils/api";
+import useAuthStore from "../store/authStore";
 
 export default function SignIn() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
   const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
+
   const [showPassword, setShowPassword] = useState(false);
   const [view, setView] = useState("signin"); // "signin" | "forgot" | "sent"
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
   const [resetEmail, setResetEmail] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
     try {
-      const { data: serverUser } = await apiRequest("/auth/login", {
-        method: "POST",
-        body: formData,
-      });
-      setCurrentUser(serverUser);
-      toast.success("Sign in successful!");
-      navigate(location.state?.from?.pathname || "/");
-      return;
-    } catch (error) {
-      if (error.status) {
-        toast.error(error.message);
-        return;
+      const response = await login(email, password);
+      toast.success("Login successful!");
+
+      // Route based on role
+      if (
+        response.data.role === "ADMIN" ||
+        response.data.role === "SUPERADMIN"
+      ) {
+        navigate("/admin");
+      } else {
+        navigate(from, { replace: true });
       }
+    } catch (error) {
+      toast.error(error.message || "Invalid email or password");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const existingUser = getCurrentUser();
-    const user =
-      existingUser?.email === formData.email.trim()
-        ? existingUser
-        : {
-            name: getDisplayNameFromEmail(formData.email),
-            email: formData.email.trim(),
-            profileImage: existingUser?.profileImage || null,
-          };
-
-    setCurrentUser(user);
-    toast.success("Sign in successful!");
-    navigate(location.state?.from?.pathname || "/");
   };
 
-  const handleForgotSubmit = (e) => {
+  const handleForgotSubmit = async (e) => {
     e.preventDefault();
-    // Frontend-only: just show the "email sent" confirmation view
-    setView("sent");
+    setIsSubmitting(true);
+    try {
+      // Connect to the backend forgot-password endpoint
+      await apiRequest("/auth/forgot-password", {
+        method: "POST",
+        body: { email: resetEmail },
+      });
+      setView("sent");
+    } catch (error) {
+      toast.error(error.message || "Failed to process request");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // ── Forgot Password Form ──────────────────────────────────────────────────
@@ -66,7 +78,9 @@ export default function SignIn() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#D4AF37] rounded-full mb-4">
               <Mail className="text-white" size={32} />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">Forgot Password</h2>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Forgot Password
+            </h2>
             <p className="text-gray-600 mt-2">
               Enter your email and we'll send you a reset link
             </p>
@@ -96,9 +110,10 @@ export default function SignIn() {
 
               <button
                 type="submit"
-                className="w-full bg-[#D4AF37] text-white py-3 rounded-lg font-semibold hover:bg-[#b8942a] transition-colors"
+                disabled={isSubmitting}
+                className="w-full bg-[#D4AF37] text-white py-3 rounded-lg font-semibold hover:bg-[#b8942a] transition-colors disabled:opacity-70"
               >
-                Send Reset Link
+                {isSubmitting ? "Sending..." : "Send Reset Link"}
               </button>
             </form>
 
@@ -126,7 +141,9 @@ export default function SignIn() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-[#D4AF37] rounded-full mb-4">
               <CheckCircle className="text-white" size={32} />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900">Check Your Email</h2>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Check Your Email
+            </h2>
             <p className="text-gray-600 mt-2">
               We've sent a password reset link to
             </p>
@@ -167,7 +184,7 @@ export default function SignIn() {
             <User className="text-white" size={32} />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-          <p className="text-gray-600 mt-2">Sign in to your account</p>
+          <p className="text-gray-600 mt-2">Sign in to your TimmyLux account</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-8">
@@ -183,12 +200,10 @@ export default function SignIn() {
                 />
                 <input
                   type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
-                  placeholder="Enter your email"
+                  placeholder="Email Address"
                   required
                 />
               </div>
@@ -214,12 +229,10 @@ export default function SignIn() {
                 />
                 <input
                   type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
-                  placeholder="Enter your password"
+                  placeholder="Password"
                   required
                 />
                 <button
@@ -234,9 +247,17 @@ export default function SignIn() {
 
             <button
               type="submit"
-              className="w-full bg-[#D4AF37] text-white py-3 rounded-lg font-semibold hover:bg-[#b8942a] transition-colors"
+              disabled={isSubmitting}
+              className="w-full bg-[#D4AF37] text-white py-3 rounded-lg font-semibold hover:bg-[#b8942a] transition-colors flex justify-center items-center gap-2"
             >
-              Sign In
+              {isSubmitting ? (
+                <span className="animate-pulse">Signing in...</span>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <LogIn size={20} />
+                </>
+              )}
             </button>
           </form>
 
