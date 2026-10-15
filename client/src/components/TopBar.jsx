@@ -5,6 +5,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
 import useNotificationStore from "../store/notificationStore";
+import useAuthStore from "../store/authStore";
 
 export default function TopBar({ collapsed }) {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ export default function TopBar({ collapsed }) {
   const searchQuery = searchParams.get("q") || "";
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notifRef = useRef(null);
+
+  const { isAuthenticated } = useAuthStore();
 
   // Close notification dropdown on outside click
   useEffect(() => {
@@ -21,7 +24,8 @@ export default function TopBar({ collapsed }) {
       }
     };
     document.addEventListener("pointerdown", handleClickOutside);
-    return () => document.removeEventListener("pointerdown", handleClickOutside);
+    return () =>
+      document.removeEventListener("pointerdown", handleClickOutside);
   }, []);
 
   // CART
@@ -53,7 +57,9 @@ export default function TopBar({ collapsed }) {
           onSubmit={(e) => {
             e.preventDefault();
             const query = searchQuery.trim();
-            navigate(query ? `/products?q=${encodeURIComponent(query)}` : "/products");
+            navigate(
+              query ? `/products?q=${encodeURIComponent(query)}` : "/products",
+            );
           }}
           className="flex w-full md:max-w-xl bg-white rounded-full overflow-hidden shadow-sm"
         >
@@ -79,107 +85,142 @@ export default function TopBar({ collapsed }) {
 
         {/* DESKTOP RIGHT SIDE */}
         <div className="hidden md:flex items-center gap-6">
-          {/* Wishlist */}
-          <Link to="/wishlist" className="relative inline-flex h-10 w-10 items-center justify-center">
-            <Heart size={20} />
-            {wishlistCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
-                {wishlistCount}
-              </span>
-            )}
-          </Link>
+          {isAuthenticated ? (
+            <>
+              {/* Wishlist */}
+              <Link
+                to="/wishlist"
+                className="relative inline-flex h-10 w-10 items-center justify-center hover:text-[#D4AF37] transition"
+              >
+                <Heart size={20} />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-white">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
 
-          {/* Cart */}
-          <Link to="/cart" className="relative inline-flex h-10 w-10 items-center justify-center">
-            <ShoppingCart size={20} />
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
-                {cartCount}
-              </span>
-            )}
-          </Link>
+              {/* Cart */}
+              <Link
+                to="/cart"
+                className="relative inline-flex h-10 w-10 items-center justify-center hover:text-[#D4AF37] transition"
+              >
+                <ShoppingCart size={20} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-white">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
 
-          {/* Notification */}
-          <div ref={notifRef} className="relative flex h-10 w-10 items-center justify-center">
-            <button
-              onClick={() => setNotificationsOpen((prev) => !prev)}
-              className="inline-flex h-full w-full items-center justify-center border-0 bg-transparent p-0 text-inherit"
-            >
-              <Bell size={20} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
-                  {unreadCount}
-                </span>
-              )}
-            </button>
-
-            {notificationsOpen && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-white text-black rounded-xl shadow-xl z-[9999] overflow-hidden">
-                <div className="p-3 border-b flex justify-between items-center bg-gray-50">
-                  <span className="font-semibold text-sm">Notifications</span>
+              {/* Notification */}
+              <div
+                ref={notifRef}
+                className="relative flex h-10 w-10 items-center justify-center"
+              >
+                <button
+                  onClick={() => setNotificationsOpen((prev) => !prev)}
+                  className="inline-flex h-full w-full items-center justify-center border-0 bg-transparent p-0 text-inherit hover:text-[#D4AF37] transition"
+                >
+                  <Bell size={20} />
                   {unreadCount > 0 && (
-                    <button
-                      onClick={markAllAsRead}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      Mark all read
-                    </button>
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] font-medium px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full text-white">
+                      {unreadCount}
+                    </span>
                   )}
-                </div>
+                </button>
 
-                <div className="max-h-72 overflow-y-auto">
-                  {notifications.length === 0 ? (
-                    <p className="p-6 text-sm text-gray-500 text-center">
-                      No notifications yet
-                    </p>
-                  ) : (
-                    notifications.slice(0, 20).map((notif) => (
-                      <div
-                        key={notif.id}
-                        onClick={() => {
-                          markAsRead(notif.id);
-                          setNotificationsOpen(false);
-                          navigate("/notifications");
-                        }}
-                        className={`p-3 border-b text-sm cursor-pointer hover:bg-gray-50 transition-colors ${
-                          !notif.read ? "bg-navy/5" : ""
-                        }`}
-                      >
-                        <div className="flex gap-3 items-start">
+                {notificationsOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white text-black rounded-xl shadow-xl z-[9999] overflow-hidden">
+                    <div className="p-3 border-b flex justify-between items-center bg-gray-50">
+                      <span className="font-semibold text-sm">
+                        Notifications
+                      </span>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={markAllAsRead}
+                          className="text-xs text-[#D4AF37] hover:underline font-medium"
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="max-h-72 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <p className="p-6 text-sm text-gray-500 text-center">
+                          No notifications yet
+                        </p>
+                      ) : (
+                        notifications.slice(0, 20).map((notif) => (
                           <div
-                            className={`w-2 h-2 mt-1.5 rounded-full flex-shrink-0 ${
-                              notif.read ? "bg-gray-300" : "bg-primary"
+                            key={notif.id}
+                            onClick={() => {
+                              markAsRead(notif.id);
+                              setNotificationsOpen(false);
+                              navigate("/notifications");
+                            }}
+                            className={`p-3 border-b text-sm cursor-pointer hover:bg-gray-50 transition-colors ${
+                              !notif.read ? "bg-[#011F5B]/5" : ""
                             }`}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">{notif.title}</p>
-                            <p className="text-gray-500 text-xs mt-0.5 line-clamp-2">
-                              {notif.message}
-                            </p>
+                          >
+                            <div className="flex gap-3 items-start">
+                              <div
+                                className={`w-2 h-2 mt-1.5 rounded-full flex-shrink-0 ${
+                                  notif.read ? "bg-gray-300" : "bg-[#D4AF37]"
+                                }`}
+                              />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-gray-900 truncate">
+                                  {notif.title}
+                                </p>
+                                <p className="text-gray-500 text-xs mt-0.5 line-clamp-2">
+                                  {notif.message}
+                                </p>
+                              </div>
+                              {!notif.read && (
+                                <Check
+                                  size={14}
+                                  className="mt-0.5 flex-shrink-0 text-[#D4AF37]"
+                                />
+                              )}
+                            </div>
                           </div>
-                          {!notif.read && (
-                            <Check size={14} className="mt-0.5 flex-shrink-0 text-primary" />
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
+                        ))
+                      )}
+                    </div>
 
-                {notifications.length > 0 && (
-                  <div className="p-2 border-t bg-gray-50">
-                    <Link
-                      to="/notifications"
-                      onClick={() => setNotificationsOpen(false)}
-                      className="block text-center text-xs text-[#011F5B] font-medium hover:text-[#D4AF37] transition py-1"
-                    >
-                      View all notifications →
-                    </Link>
+                    {notifications.length > 0 && (
+                      <div className="p-2 border-t bg-gray-50">
+                        <Link
+                          to="/notifications"
+                          onClick={() => setNotificationsOpen(false)}
+                          className="block text-center text-xs text-[#011F5B] font-medium hover:text-[#D4AF37] transition py-1"
+                        >
+                          View all notifications →
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-4 ml-4">
+              <Link
+                to="/signin"
+                className="font-medium text-white hover:text-[#D4AF37] transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                className="bg-[#D4AF37] text-[#011F5B] px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-[#b8942a] hover:text-white transition-all shadow-md"
+              >
+                Sign Up
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

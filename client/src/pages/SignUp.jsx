@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   Mail,
@@ -26,16 +26,26 @@ export default function SignUp() {
   const [otp, setOtp] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const register = useAuthStore((state) => state.register);
-  const verifyEmail = useAuthStore((state) => state.verifyEmail);
+  const { register, verifyEmail, isAuthenticated, user } = useAuthStore();
 
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  if (isAuthenticated) {
+    return (
+      <Navigate
+        to={
+          user?.role === "ADMIN" || user?.role === "SUPERADMIN" ? "/admin" : "/"
+        }
+        replace
+      />
+    );
+  }
+
   const handleRegister = async (e) => {
     e.preventDefault();
-    
+
     // Frontend validation for password match
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match");
@@ -48,7 +58,7 @@ export default function SignUp() {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        phone: formData.phone
+        phone: formData.phone,
       });
       toast.success(
         "Registration successful! Please check your email for the OTP.",
@@ -177,7 +187,10 @@ export default function SignUp() {
                     className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent"
                     value={formData.confirmPassword}
                     onChange={(e) =>
-                      setFormData({ ...formData, confirmPassword: e.target.value })
+                      setFormData({
+                        ...formData,
+                        confirmPassword: e.target.value,
+                      })
                     }
                   />
                   <button
@@ -185,7 +198,11 @@ export default function SignUp() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showConfirmPassword ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
                   </button>
                 </div>
               </div>

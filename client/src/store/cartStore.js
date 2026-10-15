@@ -1,130 +1,134 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { apiRequest } from '../utils/api';
-import useAuthStore from './authStore';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { apiRequest } from "../utils/api";
+import useAuthStore from "./authStore";
 
 const useCartStore = create(
   persist(
     (set, get) => ({
       items: [],
 
-      // 1. Fetch Cart from Database
       fetchCart: async () => {
         const { isAuthenticated } = useAuthStore.getState();
         if (!isAuthenticated) return;
-        
+
         try {
-          const response = await apiRequest('/cart', { method: 'GET' });
-          // Format backend data to match the frontend structure
-          const formattedItems = response.data.map(item => ({
+          const response = await apiRequest("/cart", { method: "GET" });
+          const formattedItems = response.data.map((item) => ({
             ...item.product,
-            cartItemId: item.id, // Save the DB cart item ID for updates/deletes
+            cartItemId: item.id,
             quantity: item.quantity,
             selectedVariation: item.variation || null,
           }));
           set({ items: formattedItems });
         } catch (error) {
-          console.error('Failed to fetch cart from database:', error);
+          console.error("Failed to fetch cart from database:", error);
         }
       },
 
-      // 2. Add Item
       addItem: async (product) => {
         const { isAuthenticated } = useAuthStore.getState();
         const items = get().items;
-        const existingItem = items.find(item => item.id === product.id);
+
+        // FLaw Fix: Match by BOTH Product ID and Variation Name
+        const existingItem = items.find(
+          (item) =>
+            item.id === product.id &&
+            item.selectedVariation?.name === product.selectedVariation?.name,
+        );
 
         if (isAuthenticated) {
           try {
-            await apiRequest('/cart', {
-              method: 'POST',
-              body: { 
-                productId: product.id, 
+            await apiRequest("/cart", {
+              method: "POST",
+              body: {
+                productId: product.id,
                 variationId: product.selectedVariation?.id || undefined,
-                quantity: 1 
-              }
+                quantity: 1,
+              },
             });
-            await get().fetchCart(); // Re-sync perfectly with DB
+            await get().fetchCart();
           } catch (error) {
-            console.error('Failed to add to database cart:', error);
+            console.error("Failed to add to database cart:", error);
           }
         } else {
-          // Guest Fallback
           if (existingItem) {
             set({
-              items: items.map(item =>
-                item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-              )
+              items: items.map((item) =>
+                item.id === product.id &&
+                item.selectedVariation?.name === product.selectedVariation?.name
+                  ? { ...item, quantity: item.quantity + 1 }
+                  : item,
+              ),
             });
           } else {
-            set({ items: [...items, { ...product, quantity: 1, selectedVariation: product.selectedVariation || null }] });
+            // Generate a temporary local ID for guest cart management
+            const localCartItemId = `local-${Date.now()}`;
+            set({
+              items: [
+                ...items,
+                {
+                  ...product,
+                  cartItemId: localCartItemId,
+                  quantity: 1,
+                  selectedVariation: product.selectedVariation || null,
+                },
+              ],
+            });
           }
         }
       },
 
-      // 3. Update Quantity
-      updateQuantity: async (id, quantity) => {
+      updateQuantity: async (cartItemId, quantity) => {
         const { isAuthenticated } = useAuthStore.getState();
-        const item = get().items.find(i => i.id === id);
 
         if (quantity <= 0) {
-          return get().removeItem(id);
+          return get().removeItem(cartItemId);
         }
 
-        if (isAuthenticated && item?.cartItemId) {
+        if (isAuthenticated && !String(cartItemId).startsWith("local-")) {
           try {
-            await apiRequest(`/cart/${item.cartItemId}`, {
-              method: 'PUT',
-              body: { quantity }
+            await apiRequest(`/cart/${cartItemId}`, {
+              method: "PUT",
+              body: { quantity },
             });
             await get().fetchCart();
           } catch (error) {
-            console.error('Failed to update quantity in database:', error);
+            console.error("Failed to update quantity in database:", error);
           }
         } else {
-          // Guest Fallback
           set({
-            items: get().items.map(item => item.id === id ? { ...item, quantity } : item)
+            items: get().items.map((item) =>
+              item.cartItemId === cartItemId ? { ...item, quantity } : item,
+            ),
           });
         }
       },
 
-      // 4. Remove Item
-      removeItem: async (id) => {
+      removeItem: async (cartItemId) => {
         const { isAuthenticated } = useAuthStore.getState();
-        const item = get().items.find(i => i.id === id);
 
-        if (isAuthenticated && item?.cartItemId) {
+        if (isAuthenticated && !String(cartItemId).startsWith("local-")) {
           try {
-            await apiRequest(`/cart/${item.cartItemId}`, { method: 'DELETE' });
+            await apiRequest(`/cart/${cartItemId}`, { method: "DELETE" });
             await get().fetchCart();
           } catch (error) {
-            console.error('Failed to remove item from database:', error);
+            console.error("Failed to remove item from database:", error);
           }
         } else {
-          // Guest Fallback
-          set({ items: get().items.filter(item => item.id !== id) });
+          set({
+            items: get().items.filter((item) => item.cartItemId !== cartItemId),
+          });
         }
-      },
-
-      updateVariation: (id, variation) => {
-        // Kept as a local UI adjustment for flexibility
-        set({
-          items: get().items.map(item =>
-            item.id === id 
-              ? { ...item, selectedVariation: variation, price: variation?.price || item.price, image: variation?.image || item.image, color: variation?.color }
-              : item
-          )
-        });
       },
 
       clearCart: async () => {
         const { isAuthenticated } = useAuthStore.getState();
         if (isAuthenticated) {
           try {
-            await apiRequest('/cart', { method: 'DELETE' });
+            await apiRequest("/cart", { method: "DELETE" });
           } catch (error) {
-            console.error('Failed to clear database cart:', error);
+            console.error("Failed to clear database cart:", error);
           }
         }
         set({ items: [] });
@@ -139,12 +143,12 @@ const useCartStore = create(
 
       getItemCount: () => {
         return get().items.reduce((count, item) => count + item.quantity, 0);
-      }
+      },
     }),
     {
-      name: 'cart-storage',
-    }
-  )
+      name: "cart-storage",
+    },
+  ),
 );
 
 export default useCartStore;

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import * as authService from '../services/auth.service';
 import { generateToken } from '../utils/jwt';
+import { uploadToCloudinary } from '../services/upload.service';
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -152,14 +153,33 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
 
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    res.json({
-      success: true,
-      data: req.user,
+    const user = await authService.getUserProfile(req.user!.userId);
+    if (!user) throw new Error('User not found');
+    res.json({ success: true, data: user });
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user!.userId;
+    const { name, phone } = req.body;
+    let profileImage;
+
+    // Handle Cloudinary upload if a file was attached
+    if (req.file) {
+      profileImage = await uploadToCloudinary(req.file.buffer, 'timmylux/profiles');
+    }
+
+    const updatedUser = await authService.updateProfile(userId, { name, phone, profileImage });
+    
+    res.json({ 
+      success: true, 
+      message: 'Profile updated successfully', 
+      data: updatedUser 
     });
   } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(400).json({ success: false, message: error.message });
   }
 };

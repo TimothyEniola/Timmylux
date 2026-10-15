@@ -2,23 +2,37 @@ import ProductCard from "../components/ProductCard";
 import { categories } from "../data/Products";
 import useProductStore from "../store/productStore";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-// import { useSearchParams } from "react-router-dom";
 import { useSearchParams, Link } from "react-router-dom";
+import Loader from "../components/loader";
+import EmptyState from "../components/EmptyState";
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
   const selectedCategory = searchParams.get("category") || "All";
+
   const products = useProductStore((state) => state.products);
+  const isLoading = useProductStore((state) => state.isLoading);
+  const error = useProductStore((state) => state.error);
 
   const filteredProducts = products.filter((product) => {
     const query = searchQuery.trim().toLowerCase();
-    const categoryMatch = selectedCategory === "All" || product.category === selectedCategory;
-    const searchMatch = query === "" ||
-      String(product.name || "").toLowerCase().includes(query) ||
-      String(product.category || "").toLowerCase().includes(query) ||
-      String(product.description || "").toLowerCase().includes(query) ||
-      String(product.collection || "").toLowerCase().includes(query);
+    const categoryMatch =
+      selectedCategory === "All" || product.category === selectedCategory;
+    const searchMatch =
+      query === "" ||
+      String(product.name || "")
+        .toLowerCase()
+        .includes(query) ||
+      String(product.category || "")
+        .toLowerCase()
+        .includes(query) ||
+      String(product.description || "")
+        .toLowerCase()
+        .includes(query) ||
+      String(product.collection || "")
+        .toLowerCase()
+        .includes(query);
 
     return categoryMatch && searchMatch;
   });
@@ -32,14 +46,16 @@ export default function Products() {
     return acc;
   }, {});
 
+  const handleClearFilters = () => {
+    setSearchParams(new URLSearchParams(), { replace: true });
+  };
+
   return (
     <div className="py-12">
       <div className="container-custom">
         {/* Header */}
         <div className="text-center mb-6">
-          <h1 className="section-heading">
-            Our Premium Collections
-          </h1>
+          <h1 className="section-heading">Our Premium Collections</h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
             Explore our curated collections with multiple design variations
           </p>
@@ -95,56 +111,73 @@ export default function Products() {
           </div>
         </div>
 
-        {/* Collections Display */}
-        {Object.keys(collections).length > 0 ? (
+        {/* Database Status Handling */}
+        {error ? (
+          <EmptyState
+            title="Connection Error"
+            message="Unable to load the catalog. Please check your connection and try again."
+            actionText="Refresh Page"
+            onActionClick={() => window.location.reload()}
+          />
+        ) : isLoading && products.length === 0 ? (
+          <div className="py-24 flex justify-center">
+            <Loader text="Loading premium catalog..." />
+          </div>
+        ) : Object.keys(collections).length > 0 ? (
           <div className="space-y-12">
-            {Object.entries(collections).map(([collectionName, collectionProducts]) => (
-              <div key={collectionName} className="collection-section">
-                {/* Collection Header */}
-                <div className="mb-6">
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
-                    {collectionName}
-                  </h3>
-                  <p className="text-sm sm:text-base text-gray-600">
-                    {collectionProducts.length} design{collectionProducts.length > 1 ? 's' : ''} available
-                  </p>
-                </div>
+            {Object.entries(collections).map(
+              ([collectionName, collectionProducts]) => (
+                <div key={collectionName} className="collection-section">
+                  {/* Collection Header */}
+                  <div className="mb-6">
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                      {collectionName}
+                    </h3>
+                    <p className="text-sm sm:text-base text-gray-600">
+                      {collectionProducts.length} design
+                      {collectionProducts.length > 1 ? "s" : ""} available
+                    </p>
+                  </div>
 
-                {/* Collection Products */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {collectionProducts.map((product) => (
-                    <div key={product.id} className="space-y-4">
-                      {/* Main Product Card */}
-                      <ProductCard
-                        product={product}
-                        showDiscount={product.featured}
-                      />
-                      
-                      <Link 
-                        to={`/product/${product.id}#variations`}
-                        className="block w-full text-center py-2 px-4 rounded-xl border border-gray-200 text-sm font-semibold text-[#011F5B] hover:bg-[#011F5B] hover:text-white hover:border-[#011F5B] transition-all"
-                      >
-                        {product.variations?.length > 0 ? "View Design Variations" : "View Details"}
-                      </Link>
-                    </div>
-                  ))}
+                  {/* Collection Products */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    {collectionProducts.map((product) => (
+                      <div key={product.id} className="space-y-4">
+                        <ProductCard
+                          product={product}
+                          showDiscount={product.featured}
+                        />
+
+                        <Link
+                          to={`/product/${product.id}#variations`}
+                          className="block w-full text-center py-2 px-4 rounded-xl border border-gray-200 text-sm font-semibold text-[#011F5B] hover:bg-[#011F5B] hover:text-white hover:border-[#011F5B] transition-all"
+                        >
+                          {product.variations?.length > 0
+                            ? "View Design Variations"
+                            : "View Details"}
+                        </Link>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ),
+            )}
           </div>
         ) : (
-          <div className="rounded-3xl border border-dashed border-gray-300 p-12 text-center text-gray-500">
-            <p className="text-lg mb-2">No collections found</p>
-            <p className="text-sm">
-              {searchQuery && selectedCategory !== "All"
-                ? `for "${searchQuery}" in ${selectedCategory}`
+          <EmptyState
+            title="No collections found"
+            message={
+              searchQuery && selectedCategory !== "All"
+                ? `No results for "${searchQuery}" in ${selectedCategory}`
                 : searchQuery
-                ? `for "${searchQuery}"`
-                : selectedCategory !== "All"
-                ? `in ${selectedCategory}`
-                : "Try adjusting your search or filters"}
-            </p>
-          </div>
+                  ? `No results for "${searchQuery}"`
+                  : selectedCategory !== "All"
+                    ? `No items found in ${selectedCategory}`
+                    : "Try adjusting your search or filters"
+            }
+            actionText="Clear Filters"
+            onActionClick={handleClearFilters}
+          />
         )}
       </div>
     </div>

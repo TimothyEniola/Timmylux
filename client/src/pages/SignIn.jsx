@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   Mail,
@@ -19,7 +19,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const login = useAuthStore((state) => state.login);
+  const { login, isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
@@ -27,6 +27,10 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [view, setView] = useState("signin"); // "signin" | "forgot" | "sent"
   const [resetEmail, setResetEmail] = useState("");
+
+  if (isAuthenticated) {
+    return <Navigate to={user?.role === 'ADMIN' || user?.role === 'SUPERADMIN' ? '/admin' : '/'} replace />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

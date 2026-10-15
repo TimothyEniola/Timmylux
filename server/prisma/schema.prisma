@@ -33,6 +33,7 @@ model User {
   passwordHash     String
   name             String
   phone            String?
+  profileImage     String?
   role             Role         @default(CUSTOMER)
   isVerified       Boolean      @default(false)
   resetToken       String?

@@ -1,18 +1,18 @@
-import bcrypt from 'bcryptjs';
-import prisma from '../config/database';
-import { generateToken, generateOTP, generateResetToken } from '../utils/jwt';
-import { sendVerificationEmail, sendPasswordResetEmail } from './email.service';
+import bcrypt from "bcryptjs";
+import prisma from "../config/database";
+import { generateToken, generateOTP, generateResetToken } from "../utils/jwt";
+import { sendVerificationEmail, sendPasswordResetEmail } from "./email.service";
 
 export const registerUser = async (
   email: string,
   password: string,
   name: string,
-  phone?: string
+  phone?: string,
 ) => {
   // Check if user exists
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
-    throw new Error('Email already registered');
+    throw new Error("Email already registered");
   }
 
   // Hash password
@@ -36,7 +36,9 @@ export const registerUser = async (
   });
 
   // Send verification email
-  await sendVerificationEmail(email, otp);
+  // await sendVerificationEmail(email, otp);
+  // Send verification email (Mocked for local development)
+  console.log(`\n🔑 DEV MOCK EMAIL: Your OTP for ${email} is: ${otp}\n`);
 
   return {
     id: user.id,
@@ -49,19 +51,19 @@ export const verifyEmail = async (email: string, otp: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 
   if (user.isVerified) {
-    throw new Error('Email already verified');
+    throw new Error("Email already verified");
   }
 
   if (user.resetToken !== otp) {
-    throw new Error('Invalid OTP');
+    throw new Error("Invalid OTP");
   }
 
   if (user.resetTokenExpiry && user.resetTokenExpiry < new Date()) {
-    throw new Error('OTP expired');
+    throw new Error("OTP expired");
   }
 
   // Update user
@@ -74,24 +76,24 @@ export const verifyEmail = async (email: string, otp: string) => {
     },
   });
 
-  return { message: 'Email verified successfully' };
+  return { message: "Email verified successfully" };
 };
 
 export const loginUser = async (email: string, password: string) => {
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (!user) {
-    throw new Error('Invalid credentials');
+    throw new Error("Invalid credentials");
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
   if (!isPasswordValid) {
-    throw new Error('Invalid credentials');
+    throw new Error("Invalid credentials");
   }
 
   if (!user.isVerified) {
-    throw new Error('Please verify your email first');
+    throw new Error("Please verify your email first");
   }
 
   const token = generateToken({
@@ -106,6 +108,7 @@ export const loginUser = async (email: string, password: string) => {
       email: user.email,
       name: user.name,
       role: user.role,
+      profileImage: user.profileImage,
     },
   };
 };
@@ -115,7 +118,7 @@ export const requestPasswordReset = async (email: string) => {
 
   if (!user) {
     // Don't reveal if user exists
-    return { message: 'If the email exists, a reset link has been sent' };
+    return { message: "If the email exists, a reset link has been sent" };
   }
 
   const resetToken = generateResetToken();
@@ -128,7 +131,7 @@ export const requestPasswordReset = async (email: string) => {
 
   await sendPasswordResetEmail(email, resetToken);
 
-  return { message: 'If the email exists, a reset link has been sent' };
+  return { message: "If the email exists, a reset link has been sent" };
 };
 
 export const resetPassword = async (token: string, newPassword: string) => {
@@ -140,7 +143,7 @@ export const resetPassword = async (token: string, newPassword: string) => {
   });
 
   if (!user) {
-    throw new Error('Invalid or expired reset token');
+    throw new Error("Invalid or expired reset token");
   }
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
@@ -154,5 +157,37 @@ export const resetPassword = async (token: string, newPassword: string) => {
     },
   });
 
-  return { message: 'Password reset successful' };
+  return { message: "Password reset successful" };
+};
+
+export const getUserProfile = async (userId: string) => {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      phone: true,
+      role: true,
+      profileImage: true,
+    },
+  });
+};
+
+export const updateProfile = async (
+  userId: string,
+  data: { name?: string; phone?: string; profileImage?: string },
+) => {
+  return prisma.user.update({
+    where: { id: userId },
+    data,
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      phone: true,
+      role: true,
+      profileImage: true,
+    },
+  });
 };

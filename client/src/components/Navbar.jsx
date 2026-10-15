@@ -24,6 +24,7 @@ import { useState, useEffect } from "react";
 import useCartStore from "../store/cartStore";
 import useWishlistStore from "../store/wishlistStore";
 import useNotificationStore from "../store/notificationStore";
+import useAuthStore from "../store/authStore";
 
 import logo from "../assets/reallogo.png";
 
@@ -36,11 +37,13 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
   const navigate = useNavigate();
   const location = useLocation();
   const open = openForPath === location.pathname;
-  const setOpen = (nextOpen) => setOpenForPath(nextOpen ? location.pathname : null);
+  const setOpen = (nextOpen) =>
+    setOpenForPath(nextOpen ? location.pathname : null);
 
   const { items: cartItems } = useCartStore();
   const { items: wishlistItems } = useWishlistStore();
   const { getUnreadCount } = useNotificationStore();
+  const { isAuthenticated } = useAuthStore();
 
   const cartCount =
     cartItems?.reduce((total, item) => total + (item.quantity || 1), 0) || 0;
@@ -48,7 +51,6 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
   const wishlistCount = wishlistItems?.length || 0;
 
   const unreadCount = getUnreadCount();
-
 
   // Lock body scroll on mobile sidebar open
   useEffect(() => {
@@ -70,11 +72,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
 
     setOpen(false);
 
-    navigate(
-      query
-        ? `/products?q=${encodeURIComponent(query)}`
-        : "/products"
-    );
+    navigate(query ? `/products?q=${encodeURIComponent(query)}` : "/products");
   };
 
   const navItems = [
@@ -121,9 +119,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
         <div className="flex h-full flex-col">
           {/* HEADER */}
           <div className="flex items-center justify-between px-4 h-16 border-b border-[#D4AF37]/30">
-            {!collapsed && (
-              <img src={logo} alt="Logo" className="h-9" />
-            )}
+            {!collapsed && <img src={logo} alt="Logo" className="h-9" />}
 
             <div className="flex items-center gap-2">
               <button
@@ -137,10 +133,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
                 )}
               </button>
 
-              <button
-                className="xl:hidden"
-                onClick={() => setOpen(false)}
-              >
+              <button className="xl:hidden" onClick={() => setOpen(false)}>
                 <X size={22} />
               </button>
             </div>
@@ -171,38 +164,65 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
 
           {/* MOBILE QUICK ACTIONS */}
           <div className="xl:hidden px-4 py-4 border-b border-white/10 flex items-center justify-between">
-            {/* Notifications */}
-            <Link to="/notifications" className="relative flex h-10 w-10 items-center justify-center">
-              <Bell size={20} />
+            {isAuthenticated ? (
+              <>
+                {/* Notifications */}
+                <Link
+                  to="/notifications"
+                  className="relative flex h-10 w-10 items-center justify-center hover:text-[#D4AF37] transition"
+                >
+                  <Bell size={20} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
 
-              {unreadCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-[10px] px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
+                {/* Wishlist */}
+                <Link
+                  to="/wishlist"
+                  className="relative flex h-10 w-10 items-center justify-center hover:text-[#D4AF37] transition"
+                >
+                  <Heart size={20} />
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-[#D4AF37] text-black text-[10px] px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
 
-            {/* Wishlist */}
-            <Link to="/wishlist" className="relative flex h-10 w-10 items-center justify-center">
-              <Heart size={20} />
-
-              {wishlistCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#D4AF37] text-black text-[10px] px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
-
-            {/* Cart */}
-            <Link to="/cart" className="relative flex h-10 w-10 items-center justify-center">
-              <ShoppingCart size={20} />
-
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#D4AF37] text-black text-[10px] px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+                {/* Cart */}
+                <Link
+                  to="/cart"
+                  className="relative flex h-10 w-10 items-center justify-center hover:text-[#D4AF37] transition"
+                >
+                  <ShoppingCart size={20} />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-[#D4AF37] text-black text-[10px] px-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+              </>
+            ) : (
+              <div className="flex w-full items-center justify-end gap-3">
+                <Link
+                  to="/signin"
+                  onClick={() => setOpen(false)}
+                  className="text-sm font-medium hover:text-[#D4AF37] transition"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  to="/signup"
+                  onClick={() => setOpen(false)}
+                  className="bg-[#D4AF37] text-[#011F5B] px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-[#b8942a] transition"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* NAV ITEMS */}
@@ -210,8 +230,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
             {navItems.map((item) => {
               const Icon = item.icon;
 
-              const isActive =
-                location.pathname === item.path;
+              const isActive = location.pathname === item.path;
 
               return (
                 <Link
@@ -221,7 +240,7 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
                   ${collapsed ? "justify-center" : ""}
                   ${
                     isActive
-                      ? "bg-[#D4AF37] text-black"
+                      ? "bg-[#D4AF37] text-[#011F5B]"
                       : "hover:bg-[#D4AF37]/20"
                   }`}
                 >
@@ -233,21 +252,32 @@ export default function UserSidebar({ collapsed, setCollapsed }) {
             })}
           </nav>
 
-          {/* PROFILE */}
+          {/* PROFILE / AUTH FOOTER */}
           <div className="border-t border-[#D4AF37]/30 p-4 flex-shrink-0">
-            {/* MOBILE */}
-            <div className="xl:hidden">
-              <ProfileDropdown />
-            </div>
-
-            {/* DESKTOP */}
-            <div className="hidden xl:block">
-              {!collapsed ? (
-                <ProfileDropdown />
-              ) : (
-                <ProfileDropdown compact />
-              )}
-            </div>
+            {isAuthenticated ? (
+              <>
+                <div className="xl:hidden">
+                  <ProfileDropdown />
+                </div>
+                <div className="hidden xl:block">
+                  {!collapsed ? (
+                    <ProfileDropdown />
+                  ) : (
+                    <ProfileDropdown compact />
+                  )}
+                </div>
+              </>
+            ) : (
+              <Link
+                to="/signin"
+                onClick={() => setOpen(false)}
+                className={`flex items-center justify-center gap-3 w-full py-2.5 bg-[#D4AF37] text-[#011F5B] font-semibold rounded-lg hover:bg-[#b8942a] transition
+                ${collapsed ? "px-0" : "px-4"}`}
+              >
+                <User size={18} />
+                {!collapsed && "Sign In"}
+              </Link>
+            )}
           </div>
         </div>
       </aside>

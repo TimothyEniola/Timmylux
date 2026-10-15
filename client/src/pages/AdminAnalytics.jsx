@@ -1,337 +1,143 @@
 import { useState, useEffect } from "react";
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Share2, Copy, Check as CheckIcon } from "lucide-react";
 import { toast } from "react-toastify";
 import { FaWhatsapp } from "react-icons/fa6";
+import { apiRequest } from "../utils/api";
+import Loader from "../components/loader";
 
 export default function AdminAnalytics() {
-  const [orders, setOrders] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("adminOrders") || "null");
-      return Array.isArray(saved) && saved.length ? saved : null;
-    } catch {
-      return null;
-    }
-  });
-
-  useEffect(() => {
-    const syncOrders = () => {
-      try {
-        const saved = JSON.parse(localStorage.getItem("adminOrders") || "null");
-        setOrders(Array.isArray(saved) && saved.length ? saved : null);
-      } catch {
-        setOrders(null);
-      }
-    };
-
-    syncOrders();
-    window.addEventListener("storage", syncOrders);
-    return () => window.removeEventListener("storage", syncOrders);
-  }, []);
-
-  const analyticsOrders = orders || [
-    {
-      id: 1,
-      customer: "Esther Adebayo",
-      product: "Luxury King Bed Frame",
-      amount: 485000,
-      status: "Pending",
-      date: "2026-01-15",
-    },
-    {
-      id: 2,
-      customer: "Daniel Okonkwo",
-      product: "Premium Velvet Sofa",
-      amount: 420000,
-      status: "Delivered",
-      date: "2026-01-14",
-    },
-    {
-      id: 3,
-      customer: "Faith Olamide",
-      product: "Elegant Dining Set",
-      amount: 380000,
-      status: "Pending",
-      date: "2026-01-15",
-    },
-    {
-      id: 4,
-      customer: "Michael Eze",
-      product: "Premium Wardrobe",
-      amount: 650000,
-      status: "Delivered",
-      date: "2026-01-13",
-    },
-    {
-      id: 5,
-      customer: "Grace Nnamdi",
-      product: "Executive Office Desk",
-      amount: 385000,
-      status: "Pending",
-      date: "2026-01-16",
-    },
-    {
-      id: 6,
-      customer: "Samuel Ade",
-      product: "Designer Bedroom Suite",
-      amount: 890000,
-      status: "Delivered",
-      date: "2026-01-12",
-    },
-    {
-      id: 7,
-      customer: "Jennifer Bello",
-      product: "Luxury Armchair",
-      amount: 185000,
-      status: "Cancelled",
-      date: "2026-01-14",
-    },
-  ];
-
-  const currentOrders = analyticsOrders.map((o) => ({
-    ...o,
-    amount: Number(o.total || o.amount || 0),
-    customer: o.customerName || o.customer || "Customer",
-    product: o.items?.map((item) => item.name).join(", ") || o.product || "Furniture Order",
-    status: o.status || "Pending",
-    date: o.date || new Date().toISOString(),
-  }));
-
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [copiedAnalytics, setCopiedAnalytics] = useState(false);
 
-  // Calculate statistics
-  const totalSales = currentOrders
-    .filter((o) => o.status === "Delivered")
-    .reduce((sum, o) => sum + o.amount, 0);
-  const pendingOrders = currentOrders.filter((o) => o.status === "Pending").length;
-  const deliveredOrders = currentOrders.filter((o) => o.status === "Delivered").length;
-  const cancelledOrders = currentOrders.filter((o) => o.status === "Cancelled").length;
-  const totalOrders = currentOrders.length;
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await apiRequest('/admin/analytics');
+        setData(response.data);
+      } catch (error) {
+        toast.error("Failed to load analytics data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, []);
 
-  // Data for charts
-  const orderStatusData = [
-    { name: "Pending", value: pendingOrders, color: "#fbbf24" },
-    { name: "Delivered", value: deliveredOrders, color: "#D4AF37" },
-    {
-      name: "Cancelled",
-      value: cancelledOrders,
-      color: "#DC2626",
-    },
-  ];
+  if (isLoading || !data) {
+    return <div className="py-24 flex justify-center"><Loader text="Gathering analytics..." /></div>;
+  }
 
-  const salesTrendData = [
-    { month: "Aug", sales: 2150000 },
-    { month: "Sep", sales: 2850000 },
-    { month: "Oct", sales: 3200000 },
-    { month: "Nov", sales: 3650000 },
-    { month: "Dec", sales: 4100000 },
-    { month: "Jan", sales: 3210000 },
-  ];
+  // Format data for Recharts
+  const orderStatusData = data.ordersByStatus.map(status => ({
+    name: status.status.replace(/_/g, ' '),
+    value: status._count,
+    color: status.status === 'DELIVERED' ? '#D4AF37' : status.status === 'CANCELLED' ? '#DC2626' : '#fbbf24'
+  }));
 
-  const categoryData = [
-    { category: "Bedroom", sales: 8, amount: 2850000 },
-    { category: "Living Room", sales: 12, amount: 3450000 },
-    { category: "Dining", sales: 6, amount: 1680000 },
-    { category: "Office", sales: 4, amount: 1280000 },
-  ];
+  const salesTrendData = data.revenueByMonth.map(item => {
+    const date = new Date(item.createdAt);
+    return {
+      month: date.toLocaleString('default', { month: 'short' }),
+      sales: item._sum.totalAmount || 0
+    };
+  }).reverse(); // Most recent on right
+
+  const categoryData = data.categoryBreakdown.map(cat => ({
+    category: cat.category,
+    amount: cat._count
+  }));
 
   const formatAnalyticsSummary = () => {
-    const cancelledAmount = currentOrders
-      .filter((o) => o.status === "Cancelled")
-      .reduce((sum, o) => sum + o.amount, 0);
-    const summary = `
+    const cancelledCount = data.ordersByStatus.find(o => o.status === 'CANCELLED')?._count || 0;
+    const deliveredCount = data.ordersByStatus.find(o => o.status === 'DELIVERED')?._count || 0;
+    const pendingCount = data.ordersByStatus.find(o => o.status === 'PENDING')?._count || 0;
+
+    return `
 Store Analytics Summary:
-📊 Total Sales: ₦${(totalSales / 1000000).toFixed(1)}M (+12.5% from last month)
-📦 Total Orders: ${totalOrders} (+8% from last month)
-⏰ Pending Orders: ${pendingOrders}
-✅ Delivered Orders: ${deliveredOrders}
-❌ Cancelled Orders: ${cancelledOrders} (₦${(cancelledAmount / 1000).toFixed(0)}K)
+📊 Total Paid Sales: ₦${(data.sales.total / 1000000).toFixed(1)}M
+📦 Total Paid Orders: ${data.sales.orderCount}
+⏰ Pending Orders: ${pendingCount}
+✅ Delivered Orders: ${deliveredCount}
+❌ Cancelled Orders: ${cancelledCount}
+👥 Total Users: ${data.users.total} (${data.users.verified} verified)
 
-Sales by Category:
-🏠 Bedroom: ₦${(2850000 / 1000000).toFixed(1)}M (${8} sales)
-🛋️ Living Room: ₦${(3450000 / 1000000).toFixed(1)}M (${12} sales)
-🍽️ Dining: ₦${(1680000 / 1000000).toFixed(1)}M (${6} sales)
-💼 Office: ₦${(1280000 / 1000000).toFixed(1)}M (${4} sales)
-
-Recent Orders:
-${currentOrders.slice(0, 5).map(order => `- ${order.customer}: ${order.product} (₦${(order.amount / 1000).toFixed(0)}K) - ${order.status}`).join('\n')}
+Recent Paid Orders:
+${data.recentOrders.slice(0, 5).map(order => `- ${order.user?.name || 'Guest'} (₦${(order.totalAmount / 1000).toFixed(0)}K) -${order.status}`).join('\n')}
     `.trim();
-    return summary;
   };
 
   const shareViaWhatsApp = () => {
     const summary = formatAnalyticsSummary();
-    const message = encodeURIComponent(`Store Analytics Report:\n\n${summary}`);
-    const url = `https://wa.me/?text=${message}`;
-    window.open(url, '_blank');
-  };
-
-  const shareViaEmail = () => {
-    const summary = formatAnalyticsSummary();
-    const subject = encodeURIComponent("Store Analytics Report");
-    const body = encodeURIComponent(`Hi,\n\nHere's the latest store analytics report:\n\n${summary}\n\nBest regards`);
-    const url = `mailto:?subject=${subject}&body=${body}`;
-    window.open(url, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(`Store Analytics Report:\n\n${summary}`)}`, '_blank');
   };
 
   const copyToClipboard = async () => {
-    const summary = formatAnalyticsSummary();
     try {
-      await navigator.clipboard.writeText(summary);
+      await navigator.clipboard.writeText(formatAnalyticsSummary());
       setCopiedAnalytics(true);
       setTimeout(() => setCopiedAnalytics(false), 2000);
+      toast.success("Analytics copied!");
     } catch (err) {
-      console.error('Failed to copy: ', err);
-      toast.error('Failed to copy to clipboard');
+      toast.error('Failed to copy');
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container-custom py-8">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 className="section-heading">Analytics</h1>
-              <p className="text-gray-600">
-                Monitor your store performance and analytics
-              </p>
+              <p className="text-gray-600">Monitor your store performance and analytics</p>
             </div>
             <div className="flex gap-2">
-              <button
-                onClick={shareViaWhatsApp}
-                className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                title="Share via WhatsApp"
-              >
+              <button onClick={shareViaWhatsApp} className="p-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
                 <FaWhatsapp size={16} />
               </button>
-              <button
-                onClick={shareViaEmail}
-                className="p-2 rounded-lg bg-[#011F5B] text-white transition-colors hover:bg-[#0d2f7a]"
-                title="Share via Email"
-              >
-                <span className="text-sm font-bold">✉</span>
-              </button>
-              <button
-                onClick={copyToClipboard}
-                className="p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                title="Copy to Clipboard"
-              >
-                {copiedAnalytics ? (
-                  <CheckIcon size={16} />
-                ) : (
-                  <Copy size={16} />
-                )}
+              <button onClick={copyToClipboard} className="p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                {copiedAnalytics ? <CheckIcon size={16} /> : <Copy size={16} />}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#fbbf24]">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-gray-600 text-sm font-medium">Total Sales</h3>
-              <div className="text-[#fbbf24]">$</div>
-            </div>
-            <p className="text-3xl font-bold text-[#D4AF37]">
-              ₦{(totalSales / 1000000).toFixed(1)}M
-            </p>
-            <p className="text-xs text-gray-600 mt-1">+12.5% from last month</p>
+            <h3 className="text-gray-600 text-sm font-medium mb-2">Total Paid Revenue</h3>
+            <p className="text-3xl font-bold text-[#D4AF37]">₦{(data.sales.total / 1000000).toFixed(1)}M</p>
           </div>
-
           <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#D4AF37]">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-gray-600 text-sm font-medium">Total Orders</h3>
-              <div className="text-[#D4AF37]">📦</div>
-            </div>
-            <p className="text-3xl font-bold text-[#D4AF37]">{totalOrders}</p>
-            <p className="text-xs mt-1">+8% from last month</p>
+            <h3 className="text-gray-600 text-sm font-medium mb-2">Total Paid Orders</h3>
+            <p className="text-3xl font-bold text-[#D4AF37]">{data.sales.orderCount}</p>
           </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#fbbf24]">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-gray-600 text-sm font-medium">
-                Pending Orders
-              </h3>
-              <div className="text-[#fbbf24]">⏰</div>
-            </div>
-            <p className="text-3xl font-bold text-[#D4AF37]">{pendingOrders}</p>
-            <p className="text-xs text-gray-500 mt-1">Awaiting delivery</p>
+          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#011F5B]">
+            <h3 className="text-gray-600 text-sm font-medium mb-2">Registered Users</h3>
+            <p className="text-3xl font-bold text-[#011F5B]">{data.users.total}</p>
           </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-[#D4AF37]">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-gray-600 text-sm font-medium">Delivered</h3>
-              <div className="text-[#D4AF37]">✅</div>
-            </div>
-            <p className="text-3xl font-bold text-[#D4AF37]">
-              {deliveredOrders}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Successfully completed</p>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-gray-600 text-sm font-medium">Cancelled</h3>
-              <div className="text-red-500">❌</div>
-            </div>
-            <p className="text-3xl font-bold text-red-600">
-              {cancelledOrders}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Orders cancelled</p>
+          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+            <h3 className="text-gray-600 text-sm font-medium mb-2">Verified Users</h3>
+            <p className="text-3xl font-bold text-green-600">{data.users.verified}</p>
           </div>
         </div>
 
-        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Order Status Pie Chart */}
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-xl font-bold text-[#D4AF37] mb-6">
-              Order Status Distribution
-            </h2>
+            <h2 className="text-xl font-bold text-[#D4AF37] mb-6">Order Status Distribution</h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
-                <Pie
-                  data={orderStatusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={100}
-                  stroke="none"
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {orderStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
+                <Pie data={orderStatusData} cx="50%" cy="50%" labelLine={false} label={({ name, value }) => `${name}: ${value}`} outerRadius={100} fill="#8884d8" dataKey="value">
+                  {orderStatusData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                 </Pie>
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Sales Trend Line Chart */}
           <div className="bg-white rounded-xl shadow-sm p-6">
-            <h2 className="text-xl font-bold text-[#D4AF37] mb-6">
-              Sales Trend
-            </h2>
+            <h2 className="text-xl font-bold text-[#D4AF37] mb-6">Paid Sales Trend</h2>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={salesTrendData}>
                 <CartesianGrid strokeDasharray="3 3" />
@@ -339,34 +145,41 @@ ${currentOrders.slice(0, 5).map(order => `- ${order.customer}: ${order.product} 
                 <YAxis />
                 <Tooltip formatter={(value) => `₦${(value / 1000000).toFixed(1)}M`} />
                 <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="sales"
-                  stroke="#D4AF37"
-                  strokeWidth={3}
-                  dot={{ fill: "#D4AF37", strokeWidth: 2, r: 6 }}
-                />
+                <Line type="monotone" dataKey="sales" stroke="#D4AF37" strokeWidth={3} dot={{ fill: "#D4AF37", strokeWidth: 2, r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Category Sales Bar Chart */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-xl font-bold text-[#D4AF37] mb-6">
-            Sales by Category
-          </h2>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={categoryData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="category" />
-              <YAxis />
-              <Tooltip formatter={(value) => `₦${(value / 1000000).toFixed(1)}M`} />
-              <Legend />
-              <Bar dataKey="amount" fill="#D4AF37" stroke="none" />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-bold text-[#D4AF37] mb-6">Top Selling Products</h2>
+            <div className="space-y-4 max-h-[300px] overflow-y-auto">
+              {data.topProducts.map((p, i) => (
+                <div key={i} className="flex justify-between items-center border-b pb-2">
+                  <div>
+                    <p className="font-semibold text-gray-900">{p.name || 'Deleted Product'}</p>
+                    <p className="text-xs text-gray-500">{p.category}</p>
+                  </div>
+                  <p className="text-[#D4AF37] font-bold">{p.totalSold} sold</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <h2 className="text-xl font-bold text-[#D4AF37] mb-6">Catalog Breakdown</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={categoryData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="category" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="amount" fill="#011F5B" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
+
       </div>
     </div>
   );

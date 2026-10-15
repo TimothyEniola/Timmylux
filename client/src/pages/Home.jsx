@@ -1,35 +1,47 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Package, CreditCard, Headphones, Star, ArrowRight } from "lucide-react";
+import {
+  Package,
+  CreditCard,
+  Headphones,
+  Star,
+  ArrowRight,
+} from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import EventsSection from "../components/EventsSection";
 import useProductStore from "../store/productStore";
 import useCurrentTime from "../hooks/useCurrentTime";
 import { getPromotionStatus } from "../utils/productPromotions";
 import { loadHomeContent } from "../data/homepageContent";
+import Loader from "../components/loader";
 
 export default function Home() {
   const navigate = useNavigate();
   const content = useMemo(() => loadHomeContent(), []);
+
   const products = useProductStore((state) => state.products);
-  const hasTimedProducts = products.some((product) => product.promotion || product.featuredExpiry);
+  const isLoading = useProductStore((state) => state.isLoading);
+
+  const hasTimedProducts = products.some(
+    (product) => product.promotion || product.featuredExpiry,
+  );
   const now = useCurrentTime(1000, hasTimedProducts);
 
   const homepageProducts = useMemo(
     () =>
       products
-        .filter((product) =>
-          product.featured &&
-          (!product.featuredExpiry || Number(product.featuredExpiry) > now)
+        .filter(
+          (product) =>
+            product.featured &&
+            (!product.featuredExpiry || Number(product.featuredExpiry) > now),
         )
         .slice(0, 4),
-    [products, now]
+    [products, now],
   );
 
   const activeSalesCount = homepageProducts.filter(
-    (product) => getPromotionStatus(product.promotion, now) === "active"
+    (product) => getPromotionStatus(product.promotion, now) === "active",
   ).length;
-
 
   return (
     <div className="home-page">
@@ -599,32 +611,41 @@ export default function Home() {
       <section className="hero-section py-16 md:py-24">
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-
             {/* Left */}
             <div className="fade-up">
               <div className="hero-badge">The Best Online Furniture Store</div>
 
-              <h1 className="hero-title mb-6">
-                {content.hero.title}
-              </h1>
+              <h1 className="hero-title mb-6">{content.hero.title}</h1>
 
               <p className="hero-subtitle mb-10">{content.hero.subtitle}</p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="btn-primary-enhanced" onClick={() => navigate("/products")}>
+                <button
+                  className="btn-primary-enhanced"
+                  onClick={() => navigate("/products")}
+                >
                   {content.hero.ctaText}
                 </button>
-                <button className="btn-outline-enhanced" onClick={() => navigate("/products")}>
+                <button
+                  className="btn-outline-enhanced"
+                  onClick={() => navigate("/products")}
+                >
                   {content.hero.secondaryCtaText}
                 </button>
               </div>
             </div>
 
             {/* Right — image with floating stats */}
-            <div className="hero-image-frame fade-up fade-up-delay-2" style={{ position: "relative" }}>
+            <div
+              className="hero-image-frame fade-up fade-up-delay-2"
+              style={{ position: "relative" }}
+            >
               {/* Floating stat: Customers */}
               <div className="stat-card top-right">
-                <div className="stat-icon" style={{ background: "rgba(212,175,55,0.12)" }}>
+                <div
+                  className="stat-icon"
+                  style={{ background: "rgba(212,175,55,0.12)" }}
+                >
                   <Star size={18} fill="#D4AF37" color="#D4AF37" />
                 </div>
                 <div>
@@ -635,7 +656,10 @@ export default function Home() {
 
               {/* Floating stat: Items */}
               <div className="stat-card bottom-left">
-                <div className="stat-icon" style={{ background: "rgba(1,31,91,0.08)" }}>
+                <div
+                  className="stat-icon"
+                  style={{ background: "rgba(1,31,91,0.08)" }}
+                >
                   <Package size={18} color="#011F5B" />
                 </div>
                 <div>
@@ -645,21 +669,44 @@ export default function Home() {
               </div>
 
               <div className="img-wrap">
-                <img src={content.hero.backgroundImage} alt="Curated TimmyLux living room furniture" loading="eager" fetchPriority="high" decoding="async" />
+                <img
+                  src={content.hero.backgroundImage}
+                  alt="Curated TimmyLux living room furniture"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                />
                 <div
                   style={{
                     position: "absolute",
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    background: "linear-gradient(to top, rgba(1,31,91,0.75), transparent)",
+                    background:
+                      "linear-gradient(to top, rgba(1,31,91,0.75), transparent)",
                     padding: "28px 24px",
                   }}
                 >
-                  <h3 style={{ color: "#fff", fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", fontWeight: 700, margin: 0 }}>
+                  <h3
+                    style={{
+                      color: "#fff",
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: "1.5rem",
+                      fontWeight: 700,
+                      margin: 0,
+                    }}
+                  >
                     Living Room
                   </h3>
-                  <p style={{ color: "rgba(255,255,255,0.85)", marginTop: 4, fontSize: "0.9rem" }}>2,500+ Items</p>
+                  <p
+                    style={{
+                      color: "rgba(255,255,255,0.85)",
+                      marginTop: 4,
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    2,500+ Items
+                  </p>
                 </div>
               </div>
             </div>
@@ -673,15 +720,21 @@ export default function Home() {
           <div className="text-center mb-14">
             <span className="section-eyebrow">Our Promise</span>
             <h2 className="section-title">{content.features.title}</h2>
-            <p className="text-gray-500 mt-3 text-sm">{content.features.subtitle}</p>
+            <p className="text-gray-500 mt-3 text-sm">
+              {content.features.subtitle}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {content.features.features.map((feature, index) => {
               const IconComponent =
-                feature.icon === "Package" ? Package :
-                feature.icon === "CreditCard" ? CreditCard :
-                feature.icon === "Headphones" ? Headphones : Star;
+                feature.icon === "Package"
+                  ? Package
+                  : feature.icon === "CreditCard"
+                    ? CreditCard
+                    : feature.icon === "Headphones"
+                      ? Headphones
+                      : Star;
 
               const iconStyles = [
                 { bg: "rgba(251,191,36,0.12)", color: "#D4AF37" },
@@ -702,10 +755,23 @@ export default function Home() {
                     <IconComponent color={iconStyles[index].color} size={22} />
                   </div>
                   <div>
-                    <h3 style={{ fontWeight: 700, fontSize: "1rem", color: "#0d1117", marginBottom: 6 }}>
+                    <h3
+                      style={{
+                        fontWeight: 700,
+                        fontSize: "1rem",
+                        color: "#0d1117",
+                        marginBottom: 6,
+                      }}
+                    >
                       {feature.title}
                     </h3>
-                    <p style={{ fontSize: "0.83rem", color: "#6b7280", lineHeight: 1.6 }}>
+                    <p
+                      style={{
+                        fontSize: "0.83rem",
+                        color: "#6b7280",
+                        lineHeight: 1.6,
+                      }}
+                    >
                       {feature.description}
                     </p>
                   </div>
@@ -722,12 +788,17 @@ export default function Home() {
           <div className="text-center mb-14">
             <span className="section-eyebrow">Collections</span>
             <h2 className="section-title">{content.categories.title}</h2>
-            <p className="text-gray-500 mt-3 text-sm">{content.categories.subtitle}</p>
+            <p className="text-gray-500 mt-3 text-sm">
+              {content.categories.subtitle}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
             {content.categories.categories.map((category, index) => (
-              <div key={index} className={`category-card fade-up fade-up-delay-${index + 1}`}>
+              <div
+                key={index}
+                className={`category-card fade-up fade-up-delay-${index + 1}`}
+              >
                 <div className="category-card-inner">
                   <div style={{ flex: 1 }}>
                     <div className="category-count-badge">
@@ -741,13 +812,19 @@ export default function Home() {
                     </ul>
                     <button
                       className="category-view-btn"
-                      onClick={() => navigate(`/products?category=${category.name}`)}
+                      onClick={() =>
+                        navigate(`/products?category=${category.name}`)
+                      }
                     >
                       View Collection <ArrowRight size={14} />
                     </button>
                   </div>
                   <div className="category-image-wrap">
-                    <img src={category.image} alt={category.name} loading="lazy" />
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      loading="lazy"
+                    />
                   </div>
                 </div>
               </div>
@@ -755,7 +832,10 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-10">
-            <button className="view-all-link" onClick={() => navigate("/products")}>
+            <button
+              className="view-all-link"
+              onClick={() => navigate("/products")}
+            >
               View All Categories <ArrowRight size={15} />
             </button>
           </div>
@@ -780,21 +860,34 @@ export default function Home() {
               <div className="dot" />
               <span>{content.products.flashSaleText}</span>
             </div>
-            <h3>{activeSalesCount > 0 ? `${activeSalesCount} featured ${activeSalesCount === 1 ? "offer" : "offers"} live now` : content.products.description}</h3>
+            <h3>
+              {activeSalesCount > 0
+                ? `${activeSalesCount} featured ${activeSalesCount === 1 ? "offer" : "offers"} live now`
+                : content.products.description}
+            </h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {homepageProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                showDiscount={product.featured}
-              />
-            ))}
-          </div>
+          {isLoading && homepageProducts.length === 0 ? (
+            <div className="py-12 flex justify-center">
+              <Loader text="Loading featured products..." />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {homepageProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  showDiscount={product.featured}
+                />
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-12">
-            <button className="view-all-link" onClick={() => navigate("/products")}>
+            <button
+              className="view-all-link"
+              onClick={() => navigate("/products")}
+            >
               View All Products <ArrowRight size={15} />
             </button>
           </div>

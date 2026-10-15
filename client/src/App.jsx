@@ -92,7 +92,7 @@ class AppErrorBoundary extends React.Component {
 export default function App() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [readyPath, setReadyPath] = useState(location.pathname);
 
   const checkAuth = useAuthStore((state) => state.checkAuth);

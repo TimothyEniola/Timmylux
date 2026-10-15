@@ -43,6 +43,16 @@ const useAuthStore = create((set, get) => ({
     });
   },
 
+  updateProfile: async (formData) => {
+    const response = await apiRequest('/auth/profile', {
+      method: 'PUT',
+      body: formData
+    });
+    set({ user: response.data });
+    setCurrentUser(response.data); // Keeps local storage synced for Navbar dropdowns
+    return response;
+  },
+
   logout: async () => {
     try {
       await apiRequest('/auth/logout', { method: 'POST' });
