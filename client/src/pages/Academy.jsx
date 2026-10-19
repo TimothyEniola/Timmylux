@@ -54,21 +54,23 @@ const Academy = () => {
       toast.error("Please fill in all required fields");
       return;
     }
-    const application = {
-      id: Date.now().toString(),
-      ...formData,
-      submittedAt: new Date().toISOString(),
-      status: "pending",
-    };
-    const existingApps = readStoredArray("academyApplications");
-    existingApps.push(application);
-    localStorage.setItem("academyApplications", JSON.stringify(existingApps));
-    setApplicationSubmitted(true);
-    setFormData({ fullName: "", email: "", phone: "", experience: "", motivation: "", availability: "" });
-    setTimeout(() => {
-      setApplicationSubmitted(false);
-      setShowApplicationForm(false);
-    }, 3000);
+    // const application = {
+    //   id: Date.now().toString(),
+    //   ...formData,
+    //   submittedAt: new Date().toISOString(),
+    //   status: "pending",
+    // };
+    // const existingApps = readStoredArray("academyApplications");
+    // existingApps.push(application);
+    // localStorage.setItem("academyApplications", JSON.stringify(existingApps));
+    // setApplicationSubmitted(true);
+    // setFormData({ fullName: "", email: "", phone: "", experience: "", motivation: "", availability: "" });
+    // setTimeout(() => {
+    //   setApplicationSubmitted(false);
+    //   setShowApplicationForm(false);
+    // }, 3000);
+    toast.info("Thank you for your interest! The TimmyLux Academy application portal is launching soon. Please check back later.");
+    setShowApplicationForm(false);
   };
 
   const learnIcons = ["🛋️", "🪚", "🏠", "💼"];

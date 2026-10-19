@@ -1,71 +1,89 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { Plus, Trash2, Copy } from "lucide-react";
-import { readStoredArray } from "../utils/storage";
+import { Plus, Copy, Power } from "lucide-react";
+import { apiRequest } from "../utils/api";
+import Loader from "../components/loader";
 
 export default function AdminCoupons() {
-  const [coupons, setCoupons] = useState(() => readStoredArray("adminCoupons"));
+  const [coupons, setCoupons] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newCoupon, setNewCoupon] = useState({
     code: "",
     discount: "",
-    type: "percentage", // percentage or fixed
+    type: "percentage",
     expiryDate: "",
     active: true,
   });
 
-
-  const saveCoupons = (updatedCoupons) => {
-    setCoupons(updatedCoupons);
-    localStorage.setItem("adminCoupons", JSON.stringify(updatedCoupons));
-  };
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        const response = await apiRequest("/admin/coupons");
+        setCoupons(response.data);
+      } catch (error) {
+        toast.error("Failed to load coupons");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCoupons();
+  }, []);
 
   const generateCouponCode = () => {
-    const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const randomNum = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, "0");
     return `TUX${randomNum}`;
   };
 
-  const handleAddCoupon = () => {
+  const handleAddCoupon = async () => {
     if (!newCoupon.discount || !newCoupon.expiryDate) {
       toast.error("Please fill in discount and expiry date");
       return;
     }
 
-    const code = newCoupon.code || generateCouponCode();
-    const coupon = {
-      id: Date.now(),
-      code,
-      discount: parseFloat(newCoupon.discount),
-      type: newCoupon.type,
-      expiryDate: newCoupon.expiryDate,
-      active: newCoupon.active,
-      createdAt: new Date().toISOString(),
-    };
+    setIsSubmitting(true);
+    try {
+      const code = newCoupon.code || generateCouponCode();
+      const payload = {
+        code,
+        discount: parseFloat(newCoupon.discount),
+        type: newCoupon.type,
+        expiryDate: new Date(newCoupon.expiryDate).toISOString(),
+      };
 
-    const updatedCoupons = [...coupons, coupon];
-    saveCoupons(updatedCoupons);
+      const response = await apiRequest("/admin/coupons", {
+        method: "POST",
+        body: payload,
+      });
 
-    setNewCoupon({
-      code: "",
-      discount: "",
-      type: "percentage",
-      expiryDate: "",
-      active: true,
-    });
-
-    toast.success("Coupon created successfully!");
+      setCoupons([response.data, ...coupons]);
+      setNewCoupon({
+        code: "",
+        discount: "",
+        type: "percentage",
+        expiryDate: "",
+        active: true,
+      });
+      toast.success("Coupon created successfully!");
+    } catch (error) {
+      toast.error(error.message || "Failed to create coupon");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDeleteCoupon = (id) => {
-    const updatedCoupons = coupons.filter(coupon => coupon.id !== id);
-    saveCoupons(updatedCoupons);
-    toast.success("Coupon deleted!");
-  };
-
-  const toggleCouponStatus = (id) => {
-    const updatedCoupons = coupons.map(coupon =>
-      coupon.id === id ? { ...coupon, active: !coupon.active } : coupon
-    );
-    saveCoupons(updatedCoupons);
+  const toggleCouponStatus = async (id) => {
+    try {
+      const response = await apiRequest(`/admin/coupons/${id}/toggle`, {
+        method: "PATCH",
+      });
+      setCoupons(coupons.map((c) => (c.id === id ? response.data : c)));
+      toast.success("Coupon status updated!");
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
   };
 
   const copyToClipboard = (code) => {
@@ -74,41 +92,58 @@ export default function AdminCoupons() {
   };
 
   return (
-    <div className="container-custom py-8">
+    <div className="container-custom py-8 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#011F5B] mb-4">Manage Coupons</h1>
-        <p className="text-gray-600">Create and manage discount coupons for your customers.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#011F5B] mb-4">
+          Manage Coupons
+        </h1>
+        <p className="text-gray-600">
+          Create and manage discount coupons for your customers.
+        </p>
       </div>
 
-      {/* Add New Coupon */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold text-[#011F5B] mb-4">Create New Coupon</h2>
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-100">
+        <h2 className="text-xl font-semibold text-[#011F5B] mb-4">
+          Create New Coupon
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Coupon Code</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Coupon Code
+            </label>
             <input
               type="text"
               value={newCoupon.code}
-              onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value })}
+              onChange={(e) =>
+                setNewCoupon({ ...newCoupon, code: e.target.value })
+              }
               placeholder="Leave empty to auto-generate"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Discount</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Discount
+            </label>
             <input
               type="number"
               value={newCoupon.discount}
-              onChange={(e) => setNewCoupon({ ...newCoupon, discount: e.target.value })}
+              onChange={(e) =>
+                setNewCoupon({ ...newCoupon, discount: e.target.value })
+              }
               placeholder="e.g., 10"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Type
+            </label>
             <select
               value={newCoupon.type}
-              onChange={(e) => setNewCoupon({ ...newCoupon, type: e.target.value })}
+              onChange={(e) =>
+                setNewCoupon({ ...newCoupon, type: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
             >
               <option value="percentage">Percentage (%)</option>
@@ -116,66 +151,86 @@ export default function AdminCoupons() {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Expiry Date</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Expiry Date
+            </label>
             <input
               type="date"
               value={newCoupon.expiryDate}
-              onChange={(e) => setNewCoupon({ ...newCoupon, expiryDate: e.target.value })}
+              onChange={(e) =>
+                setNewCoupon({ ...newCoupon, expiryDate: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#D4AF37]"
             />
           </div>
         </div>
         <button
           onClick={handleAddCoupon}
-          className="bg-[#D4AF37] text-white px-6 py-2 rounded-md hover:bg-[#B8952A] transition-colors flex items-center gap-2"
+          disabled={isSubmitting}
+          className="bg-[#D4AF37] text-white px-6 py-2.5 rounded-md hover:bg-[#B8952A] transition-colors flex items-center gap-2 disabled:opacity-70"
         >
           <Plus size={16} />
-          Create Coupon
+          {isSubmitting ? "Creating..." : "Create Coupon"}
         </button>
       </div>
 
-      {/* Existing Coupons */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold text-[#011F5B] mb-4">Existing Coupons</h2>
-        {coupons.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No coupons created yet.</p>
+      <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100 min-h-[300px]">
+        <h2 className="text-xl font-semibold text-[#011F5B] mb-6">
+          Existing Coupons
+        </h2>
+
+        {isLoading ? (
+          <div className="py-12 flex justify-center">
+            <Loader text="Loading coupons..." />
+          </div>
+        ) : coupons.length === 0 ? (
+          <p className="text-gray-500 text-center py-8">
+            No coupons created yet.
+          </p>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {coupons.map((coupon) => (
-              <div key={coupon.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-md">
+              <div
+                key={coupon.id}
+                className="flex items-center justify-between p-4 border border-gray-100 bg-gray-50 rounded-lg hover:shadow-sm transition"
+              >
                 <div className="flex items-center gap-4">
                   <div>
-                    <p className="font-semibold text-[#011F5B]">{coupon.code}</p>
-                    <p className="text-sm text-gray-600">
-                      {coupon.discount}{coupon.type === 'percentage' ? '%' : '₦'} off • Expires: {new Date(coupon.expiryDate).toLocaleDateString()}
+                    <p className="font-bold text-[#011F5B] text-lg tracking-wide">
+                      {coupon.code}
+                    </p>
+                    <p className="text-xs font-medium text-gray-600 mt-0.5">
+                      {coupon.type === "percentage"
+                        ? `${coupon.discount}% off`
+                        : `₦${coupon.discount} off`}{" "}
+                      • Expires:{" "}
+                      {new Date(coupon.expiryDate).toLocaleDateString()}
                     </p>
                   </div>
-                  <button
-                    onClick={() => copyToClipboard(coupon.code)}
-                    className="text-gray-500 hover:text-[#D4AF37] transition-colors"
-                    title="Copy code"
-                  >
-                    <Copy size={16} />
-                  </button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className={`px-2 py-1 rounded text-xs font-semibold ${coupon.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {coupon.active ? 'Active' : 'Inactive'}
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`px-2.5 py-1 rounded text-[10px] uppercase tracking-wider font-bold ${coupon.active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+                  >
+                    {coupon.active ? "Active" : "Inactive"}
                   </span>
-                  <button
-                    onClick={() => toggleCouponStatus(coupon.id)}
-                    className="text-gray-500 hover:text-[#D4AF37] transition-colors"
-                    title={coupon.active ? 'Deactivate' : 'Activate'}
-                  >
-                    {coupon.active ? 'Deactivate' : 'Activate'}
-                  </button>
-                  <button
-                    onClick={() => handleDeleteCoupon(coupon.id)}
-                    className="text-red-500 hover:text-red-700 transition-colors"
-                    title="Delete coupon"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+
+                  <div className="flex border-l pl-3 ml-1 gap-2">
+                    <button
+                      onClick={() => copyToClipboard(coupon.code)}
+                      className="p-1.5 text-gray-400 hover:text-[#D4AF37] bg-white border border-gray-200 rounded transition-colors"
+                      title="Copy Code"
+                    >
+                      <Copy size={14} />
+                    </button>
+                    <button
+                      onClick={() => toggleCouponStatus(coupon.id)}
+                      className={`p-1.5 bg-white border border-gray-200 rounded transition-colors ${coupon.active ? "text-amber-500 hover:bg-amber-50" : "text-green-600 hover:bg-green-50"}`}
+                      title={coupon.active ? "Deactivate" : "Activate"}
+                    >
+                      <Power size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

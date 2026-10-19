@@ -58,7 +58,11 @@ const useAuthStore = create((set, get) => ({
       await apiRequest('/auth/logout', { method: 'POST' });
     } finally {
       set({ user: null, isAuthenticated: false });
-      clearCurrentUser();
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("adminCurrentUser");
+      localStorage.removeItem("userProfileImage");
+      localStorage.removeItem("adminProfileImage");
+      window.dispatchEvent(new Event("userDataChanged"));
     }
   }
 }));

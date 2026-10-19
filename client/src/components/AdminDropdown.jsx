@@ -7,20 +7,14 @@ import {
   ChevronRight,
   ChevronUp,
 } from "lucide-react";
-import { Link } from "react-router-dom";
-import { getCurrentAdminUser, clearCurrentUser, clearCurrentAdminUser } from "../utils/userHelpers";
+import { Link, useNavigate } from "react-router-dom";
+import useAuthStore from "../store/authStore";
 
 export default function AdminDropdown({ compact = false }) {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(getCurrentAdminUser());
   const ref = useRef(null);
-
-  // Sync user when account changes
-  useEffect(() => {
-    const syncUser = () => setUser(getCurrentAdminUser());
-    window.addEventListener("userDataChanged", syncUser);
-    return () => window.removeEventListener("userDataChanged", syncUser);
-  }, []);
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
 
   // Close on outside click
   useEffect(() => {
@@ -31,6 +25,12 @@ export default function AdminDropdown({ compact = false }) {
     document.addEventListener("pointerdown", handleClick);
     return () => document.removeEventListener("pointerdown", handleClick);
   }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setOpen(false);
+    navigate("/signin", { replace: true });
+  };
 
   const adminName = user?.name || "Admin User";
   const profileImage = user?.profileImage || null;
@@ -51,13 +51,19 @@ export default function AdminDropdown({ compact = false }) {
           <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-br from-[#011F5B]/5 to-[#D4AF37]/10 border-b border-[#D4AF37]/20">
             <div className="w-10 h-10 rounded-full bg-[#011F5B] border-2 border-[#D4AF37]/50 flex items-center justify-center text-white font-semibold text-sm overflow-hidden flex-shrink-0">
               {profileImage ? (
-                <img src={profileImage} alt={adminName} className="w-full h-full object-cover" />
+                <img
+                  src={profileImage}
+                  alt={adminName}
+                  className="w-full h-full object-cover"
+                />
               ) : (
                 <span>{initials}</span>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{adminName}</p>
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {adminName}
+              </p>
               {user?.email && (
                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
               )}
@@ -70,9 +76,21 @@ export default function AdminDropdown({ compact = false }) {
           {/* MAIN LINKS */}
           <div className="py-1">
             {[
-              { to: "/admin/profile", icon: <User size={14} />, label: "My Profile" },
-              { to: "/admin/settings", icon: <Settings size={14} />, label: "Settings" },
-              { to: "/admin/orders", icon: <Package size={14} />, label: "Orders" },
+              {
+                to: "/admin/profile",
+                icon: <User size={14} />,
+                label: "My Profile",
+              },
+              {
+                to: "/admin/settings",
+                icon: <Settings size={14} />,
+                label: "Settings",
+              },
+              {
+                to: "/admin/orders",
+                icon: <Package size={14} />,
+                label: "Orders",
+              },
             ].map(({ to, icon, label }) => (
               <Link
                 key={to}
@@ -91,12 +109,7 @@ export default function AdminDropdown({ compact = false }) {
           {/* SIGN OUT */}
           <div className="py-1">
             <button
-              onClick={() => {
-                clearCurrentUser();
-                clearCurrentAdminUser();
-                setOpen(false);
-                // no redirect — allow browsing pages after sign out
-              }}
+              onClick={handleLogout}
               className="flex items-center gap-2.5 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
             >
               <LogOut size={14} />
@@ -111,9 +124,15 @@ export default function AdminDropdown({ compact = false }) {
         onClick={() => setOpen((prev) => !prev)}
         className={`flex items-center gap-3 rounded-lg transition ${compact ? "p-0" : "w-full px-3 py-2 hover:bg-[#D4AF37]/20"}`}
       >
-        <div className={`flex items-center justify-center ${compact ? "w-11 h-11" : "w-9 h-9"} rounded-full bg-[#011F5B] border-2 border-[#D4AF37]/50 text-white text-sm font-semibold flex-shrink-0 overflow-hidden`}>
+        <div
+          className={`flex items-center justify-center ${compact ? "w-11 h-11" : "w-9 h-9"} rounded-full bg-[#011F5B] border-2 border-[#D4AF37]/50 text-white text-sm font-semibold flex-shrink-0 overflow-hidden`}
+        >
           {profileImage ? (
-            <img src={profileImage} alt={adminName} className="w-full h-full object-cover" />
+            <img
+              src={profileImage}
+              alt={adminName}
+              className="w-full h-full object-cover"
+            />
           ) : (
             <span>{initials}</span>
           )}

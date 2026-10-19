@@ -4,16 +4,26 @@ import { Link } from "react-router-dom";
 import useProductStore from "../store/productStore";
 import Loader from "../components/loader";
 import EmptyState from "../components/EmptyState";
+import { apiRequest } from "../utils/api";
 
 export default function AdminProducts() {
   const productsList = useProductStore((state) => state.products);
   const isLoading = useProductStore((state) => state.isLoading);
-  const removeProduct = useProductStore((state) => state.removeProduct);
+  const fetchProducts = useProductStore((state) => state.fetchProducts);
 
-  const handleDeleteProduct = (productId) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      removeProduct(productId);
-      toast.success("Product deleted successfully!");
+  const handleDeleteProduct = async (productId) => {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this product? This action cannot be undone.",
+      )
+    ) {
+      try {
+        await apiRequest(`/products/${productId}`, { method: "DELETE" });
+        await fetchProducts(); // Fetch the live catalog again
+        toast.success("Product deleted successfully!");
+      } catch (error) {
+        toast.error(error.message || "Failed to delete product");
+      }
     }
   };
 
@@ -63,7 +73,7 @@ export default function AdminProducts() {
                         <img
                           src={
                             product.variations?.[0]?.image ||
-                            product.image ||
+                            product.image?.[0] || // Fix: Map first image correctly if array
                             "https://via.placeholder.com/150"
                           }
                           alt={product.name}
@@ -123,7 +133,7 @@ export default function AdminProducts() {
                       <img
                         src={
                           product.variations?.[0]?.image ||
-                          product.image ||
+                          product.image?.[0] ||
                           "https://via.placeholder.com/150"
                         }
                         alt={product.name}

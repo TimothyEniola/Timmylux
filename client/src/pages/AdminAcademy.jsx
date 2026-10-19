@@ -20,10 +20,42 @@ export default function AdminAcademy() {
   const [editingLocationId, setEditingLocationId] = useState(null);
   const [content, setContent] = useState(loadAcademyContent);
 
+  // const handleSave = () => {
+  //   localStorage.setItem('academyContent', JSON.stringify(content));
+  //   setIsEditing(false);
+  //   toast.success('Academy content saved successfully!');
+  // };
+
   const handleSave = () => {
-    localStorage.setItem('academyContent', JSON.stringify(content));
-    setIsEditing(false);
-    toast.success('Academy content saved successfully!');
+    toast.info("Feature coming soon! Content updates will be enabled shortly.");
+  };
+
+  const updateApplicationStatus = (appId, newStatus) => {
+    toast.info("Feature coming soon! Application workflows will be enabled shortly.");
+  };
+
+  const deleteApplication = (appId) => {
+    if (confirm('Are you sure you want to delete this application?')) {
+      toast.info("Feature coming soon!");
+    }
+  };
+
+  const toggleAcademyStatus = () => {
+    toast.info("Feature coming soon! The academy status toggle will be enabled shortly.");
+  };
+
+  const addToGraduation = (appId) => {
+    toast.info("Feature coming soon! Graduation pipelines will be enabled shortly.");
+  };
+
+  const saveLocation = () => {
+    toast.info("Feature coming soon! Advanced location routing will be enabled shortly.");
+    cancelEditLocation();
+  };
+
+  const deleteLocation = (id) => {
+    if (!confirm('Delete this location?')) return;
+    toast.info("Feature coming soon!");
   };
 
   const updateContent = (field, value) => {
@@ -97,49 +129,49 @@ export default function AdminAcademy() {
   };
 
   // Application Management Functions
-  const updateApplicationStatus = (appId, newStatus) => {
-    const updatedApps = applications.map(app =>
-      app.id === appId ? { ...app, status: newStatus } : app
-    );
-    setApplications(updatedApps);
-    localStorage.setItem('academyApplications', JSON.stringify(updatedApps));
-  };
+  // const updateApplicationStatus = (appId, newStatus) => {
+  //   const updatedApps = applications.map(app =>
+  //     app.id === appId ? { ...app, status: newStatus } : app
+  //   );
+  //   setApplications(updatedApps);
+  //   localStorage.setItem('academyApplications', JSON.stringify(updatedApps));
+  // };
 
-  const deleteApplication = (appId) => {
-    if (confirm('Are you sure you want to delete this application?')) {
-      const updatedApps = applications.filter(app => app.id !== appId);
-      setApplications(updatedApps);
-      localStorage.setItem('academyApplications', JSON.stringify(updatedApps));
-      setSelectedApp(null);
-    }
-  };
+  // const deleteApplication = (appId) => {
+  //   if (confirm('Are you sure you want to delete this application?')) {
+  //     const updatedApps = applications.filter(app => app.id !== appId);
+  //     setApplications(updatedApps);
+  //     localStorage.setItem('academyApplications', JSON.stringify(updatedApps));
+  //     setSelectedApp(null);
+  //   }
+  // };
 
   // Academy Status Management
-  const toggleAcademyStatus = () => {
-    const newStatus = academyStatus === "opened" ? "closed" : "opened";
-    setAcademyStatus(newStatus);
-    localStorage.setItem('academyStatus', newStatus);
-    toast.success(`Academy is now ${newStatus === "opened" ? "Open" : "Closed"}`);
-    addNotification({
-      title: newStatus === "opened" ? "🎓 Academy is Now Open!" : "🔒 Academy is Now Closed",
-      message:
-        newStatus === "opened"
-          ? "TimmyLux Academy is now accepting applications. Visit the Academy page to apply today."
-          : "TimmyLux Academy has closed applications. We will notify you when they reopen.",
-      category: "update",
-    });
-  };
+  // const toggleAcademyStatus = () => {
+  //   const newStatus = academyStatus === "opened" ? "closed" : "opened";
+  //   setAcademyStatus(newStatus);
+  //   localStorage.setItem('academyStatus', newStatus);
+  //   toast.success(`Academy is now ${newStatus === "opened" ? "Open" : "Closed"}`);
+  //   addNotification({
+  //     title: newStatus === "opened" ? "🎓 Academy is Now Open!" : "🔒 Academy is Now Closed",
+  //     message:
+  //       newStatus === "opened"
+  //         ? "TimmyLux Academy is now accepting applications. Visit the Academy page to apply today."
+  //         : "TimmyLux Academy has closed applications. We will notify you when they reopen.",
+  //     category: "update",
+  //   });
+  // };
 
   // Graduation Management
-  const addToGraduation = (appId) => {
-    const app = applications.find(a => a.id === appId);
-    if (app) {
-      const newGraduates = [...graduationStudents, { ...app, graduationDate: new Date().toISOString() }];
-      setGraduationStudents(newGraduates);
-      localStorage.setItem('graduationStudents', JSON.stringify(newGraduates));
-      toast.success(`${app.fullName} added to graduation list`);
-    }
-  };
+  // const addToGraduation = (appId) => {
+  //   const app = applications.find(a => a.id === appId);
+  //   if (app) {
+  //     const newGraduates = [...graduationStudents, { ...app, graduationDate: new Date().toISOString() }];
+  //     setGraduationStudents(newGraduates);
+  //     localStorage.setItem('graduationStudents', JSON.stringify(newGraduates));
+  //     toast.success(`${app.fullName} added to graduation list`);
+  //   }
+  // };
 
   const removeFromGraduation = (appId) => {
     const newGraduates = graduationStudents.filter(g => g.id !== appId);
@@ -148,31 +180,31 @@ export default function AdminAcademy() {
   };
 
   // ── Location Management ──
-  const saveLocation = () => {
-    if (!locationForm.name.trim() || !locationForm.address.trim() || !locationForm.city.trim()) {
-      toast.error("Please fill in Location Name, Address, and City.");
-      return;
-    }
-    let updated;
-    if (editingLocationId) {
-      updated = locations.map(l =>
-        l.id === editingLocationId ? { ...locationForm, id: editingLocationId } : l
-      );
-    } else {
-      updated = [...locations, { ...locationForm, id: Date.now().toString() }];
-    }
-    setLocations(updated);
-    localStorage.setItem('academyLocations', JSON.stringify(updated));
-    setLocationForm(emptyLocationForm);
-    setEditingLocationId(null);
-  };
+  // const saveLocation = () => {
+  //   if (!locationForm.name.trim() || !locationForm.address.trim() || !locationForm.city.trim()) {
+  //     toast.error("Please fill in Location Name, Address, and City.");
+  //     return;
+  //   }
+  //   let updated;
+  //   if (editingLocationId) {
+  //     updated = locations.map(l =>
+  //       l.id === editingLocationId ? { ...locationForm, id: editingLocationId } : l
+  //     );
+  //   } else {
+  //     updated = [...locations, { ...locationForm, id: Date.now().toString() }];
+  //   }
+  //   setLocations(updated);
+  //   localStorage.setItem('academyLocations', JSON.stringify(updated));
+  //   setLocationForm(emptyLocationForm);
+  //   setEditingLocationId(null);
+  // };
 
-  const deleteLocation = (id) => {
-    if (!confirm('Delete this location?')) return;
-    const updated = locations.filter(l => l.id !== id);
-    setLocations(updated);
-    localStorage.setItem('academyLocations', JSON.stringify(updated));
-  };
+  // const deleteLocation = (id) => {
+  //   if (!confirm('Delete this location?')) return;
+  //   const updated = locations.filter(l => l.id !== id);
+  //   setLocations(updated);
+  //   localStorage.setItem('academyLocations', JSON.stringify(updated));
+  // };
 
   const startEditLocation = (loc) => {
     setEditingLocationId(loc.id);

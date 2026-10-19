@@ -1,24 +1,30 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Save, Plus, Trash2 } from "lucide-react";
+import { Save, Plus, Trash2, ImagePlus } from "lucide-react";
 import { toast } from "react-toastify";
 import PromotionFields from "../components/PromotionFields";
 import useNotificationStore from "../store/notificationStore";
 import useProductStore from "../store/productStore";
-import { toIsoDateTime } from "../utils/productPromotions";
+import { apiRequest } from "../utils/api";
 
 export default function AdminAddProduct() {
   const navigate = useNavigate();
   const { addNotification } = useNotificationStore();
-  const addProduct = useProductStore((state) => state.addProduct);
-  const [promotion, setPromotion] = useState({ discountValue: "", startsAt: "", endsAt: "" });
+  const fetchProducts = useProductStore((state) => state.fetchProducts);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [promotion, setPromotion] = useState({
+    discountValue: "",
+    startsAt: "",
+    endsAt: "",
+  });
   const [formData, setFormData] = useState({
     name: "",
     category: "",
     collection: "",
     price: "",
     originalPrice: "",
-    image: "",
     description: "",
     featured: false,
     available: true,
@@ -45,7 +51,7 @@ export default function AdminAddProduct() {
       variations: [
         ...prev.variations,
         {
-          id: `variation-${Date.now()}`,
+          id: `var-${Date.now()}`,
           name: "",
           price: "",
           color: "",
@@ -62,48 +68,82 @@ export default function AdminAddProduct() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const hasPromotion = Object.values(promotion).some(Boolean);
-    let savedPromotion = null;
-    if (hasPromotion) {
-      const discountValue = Number(promotion.discountValue);
-      const startsAt = toIsoDateTime(promotion.startsAt);
-      const endsAt = toIsoDateTime(promotion.endsAt);
-      if (!Number.isFinite(discountValue) || discountValue <= 0 || discountValue > 100 || !startsAt || !endsAt || Date.parse(endsAt) <= Date.parse(startsAt)) {
-        toast.error("Enter a discount from 1–100% and a valid end time after the start time.");
-        return;
-      }
-      savedPromotion = { discountType: "percentage", discountValue, startsAt, endsAt };
+    if (!imageFile) {
+      toast.error("Please upload a main product image.");
+      return;
     }
 
-    const savedProduct = {
-      ...formData,
-      id: Date.now(),
-      price: Number(formData.price),
-      originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined,
-      variations: formData.variations.map((variation) => ({
-        ...variation,
-        price: variation.price ? Number(variation.price) : Number(formData.price),
-      })),
-      promotion: savedPromotion,
-    };
-    addProduct(savedProduct);
-    addNotification({
-      title: `🛋️ New Product: ${formData.name}`,
-      message: `A new product "${formData.name}" has been added to the ${formData.category || "store"} collection. Check it out now!`,
-      category: "product",
-    });
-    toast.success(`"${formData.name}" added successfully!`);
-    navigate("/admin/products");
+    setIsSubmitting(true);
+
+    try {
+      const submitData = new FormData();
+      submitData.append("name", formData.name);
+      submitData.append("category", formData.category);
+      submitData.append("price", formData.price);
+      submitData.append("available", formData.available);
+      submitData.append("featured", formData.featured);
+      submitData.append("images", imageFile); // Cloudinary hook
+
+      if (formData.collection)
+        submitData.append("collection", formData.collection);
+      if (formData.description)
+        submitData.append("description", formData.description);
+      if (formData.originalPrice)
+        submitData.append("originalPrice", formData.originalPrice);
+
+      // Map Promotion Expiry directly into the database if featured
+      const hasPromotion = Object.values(promotion).some(Boolean);
+      if (formData.featured && hasPromotion && promotion.endsAt) {
+        submitData.append(
+          "featuredExpiry",
+          new Date(promotion.endsAt).toISOString(),
+        );
+      }
+
+      // Backend expects variations as stringified JSON
+      if (formData.variations.length > 0) {
+        submitData.append(
+          "variations",
+          JSON.stringify(
+            formData.variations.map((v) => ({
+              name: v.name,
+              price: Number(v.price) || Number(formData.price),
+              color: v.color,
+              material: v.material,
+            })),
+          ),
+        );
+      }
+
+      await apiRequest("/products", {
+        method: "POST",
+        body: submitData,
+      });
+
+      // Fetch the newly updated database list
+      await fetchProducts();
+
+      addNotification({
+        title: `🛋️ New Product: ${formData.name}`,
+        message: `A new product "${formData.name}" has been added to the ${formData.category || "store"} collection.`,
+        category: "product",
+      });
+
+      toast.success(`"${formData.name}" added successfully!`);
+      navigate("/admin/products");
+    } catch (error) {
+      toast.error(error.message || "Failed to add product");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#011F5B]/5 via-white to-[#D4AF37]/5 py-10 px-4">
       <div className="max-w-5xl mx-auto">
-
-        {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-[#011F5B] to-[#D4AF37] bg-clip-text text-transparent">
             Add New Product
@@ -117,7 +157,6 @@ export default function AdminAddProduct() {
           onSubmit={handleSubmit}
           className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8 space-y-10"
         >
-          {/* BASIC INFO */}
           <Section title="Basic Information">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input label="Product Name *">
@@ -179,14 +218,20 @@ export default function AdminAddProduct() {
                 />
               </Input>
 
-              <Input label="Main Image URL">
-                <input
-                  type="url"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleChange}
-                  className="input-premium"
-                />
+              <Input label="Main Image Upload *">
+                <label className="flex items-center gap-2 px-4 py-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-[#D4AF37] transition-all text-sm font-medium text-gray-600 bg-gray-50">
+                  <ImagePlus size={18} className="text-[#011F5B]" />
+                  <span className="truncate flex-1">
+                    {imageFile ? imageFile.name : "Choose an image file..."}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files[0])}
+                    className="hidden"
+                    required
+                  />
+                </label>
               </Input>
             </div>
 
@@ -220,7 +265,6 @@ export default function AdminAddProduct() {
 
           <PromotionFields value={promotion} onChange={setPromotion} />
 
-          {/* VARIATIONS */}
           <Section title="Product Variations">
             <div className="flex justify-between items-center mb-6">
               <p className="text-gray-500 text-sm">
@@ -238,7 +282,7 @@ export default function AdminAddProduct() {
             {formData.variations.map((variation, index) => (
               <div
                 key={variation.id}
-                className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm hover:shadow-md transition"
+                className="bg-gradient-to-r from-gray-50 to-white border border-gray-200 rounded-xl p-6 mb-6 shadow-sm"
               >
                 <div className="flex justify-between items-center mb-4">
                   <h4 className="font-semibold text-[#011F5B]">
@@ -252,25 +296,16 @@ export default function AdminAddProduct() {
                     <Trash2 size={16} />
                   </button>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <input
                     type="text"
-                    placeholder="Variation Name"
+                    placeholder="Variation Name *"
                     value={variation.name}
                     onChange={(e) =>
                       handleVariationChange(index, "name", e.target.value)
                     }
                     className="input-premium"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Price"
-                    value={variation.price}
-                    onChange={(e) =>
-                      handleVariationChange(index, "price", e.target.value)
-                    }
-                    className="input-premium"
+                    required
                   />
                   <input
                     type="text"
@@ -282,18 +317,28 @@ export default function AdminAddProduct() {
                     className="input-premium"
                   />
                   <input
-                    type="text"
-                    placeholder="Material"
-                    value={variation.material}
+                    type="number"
+                    placeholder="Override Price (₦)"
+                    value={variation.price}
                     onChange={(e) =>
-                      handleVariationChange(index, "material", e.target.value)
+                      handleVariationChange(index, "price", e.target.value)
                     }
                     className="input-premium"
                   />
+                  <div className="md:col-span-3">
+                    <input
+                      type="text"
+                      placeholder="Material"
+                      value={variation.material}
+                      onChange={(e) =>
+                        handleVariationChange(index, "material", e.target.value)
+                      }
+                      className="input-premium"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
-
             {formData.variations.length === 0 && (
               <div className="text-center py-10 text-gray-400 border-2 border-dashed rounded-xl">
                 No variations added yet.
@@ -301,13 +346,14 @@ export default function AdminAddProduct() {
             )}
           </Section>
 
-          {/* SUBMIT */}
           <div className="flex justify-end">
             <button
               type="submit"
-              className="bg-[#D4AF37] text-white px-10 py-3 rounded-xl font-semibold flex items-center gap-2 shadow-lg hover:bg-[#b8942a] hover:shadow-xl transition-all"
+              disabled={isSubmitting}
+              className="bg-[#D4AF37] text-white px-10 py-3 rounded-xl font-semibold flex items-center gap-2 shadow-lg hover:bg-[#b8942a] hover:shadow-xl transition-all disabled:opacity-70"
             >
-              <Save size={18} /> Add Product
+              <Save size={18} />{" "}
+              {isSubmitting ? "Uploading Product..." : "Add Product"}
             </button>
           </div>
         </form>
@@ -315,8 +361,6 @@ export default function AdminAddProduct() {
     </div>
   );
 }
-
-/* ---------- Reusable Components ---------- */
 
 function Section({ title, children }) {
   return (
@@ -328,7 +372,6 @@ function Section({ title, children }) {
     </div>
   );
 }
-
 function Input({ label, children }) {
   return (
     <div>
@@ -339,7 +382,6 @@ function Input({ label, children }) {
     </div>
   );
 }
-
 function Checkbox({ label, ...props }) {
   return (
     <label className="flex items-center gap-3 cursor-pointer">
